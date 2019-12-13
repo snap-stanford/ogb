@@ -3,7 +3,7 @@
 
 ### `ogbg-mol`: Prediction of chemical properties of molecules
 #### - *Dataset description*
-A set of molecular prediction datasets are adopted from MoleculeNet [1]. All the molecules are pre-processed using RDKit [2].
+A set of molecular prediction datasets adopted from MoleculeNet [1]. All the molecules are pre-processed using RDKit [2].
 Each graph represents a molecule, where nodes are atoms and edges are chemical bonds.
 Input node features are 9-dimensional, containing atomic number, chirality, formal charge, etc. Input edge features are 3-dimensional, containing bond type, bond stereo, etc.
 For further details, please refer to [code](../utils/features.py). 
@@ -95,7 +95,7 @@ result_dict = evaluator.eval(input_dict)
 ```
 
 ## Reference
-[1] Wu, Z., Ramsundar, B., Feinberg, E. N., Gomes, J., Geniesse, C., Pappu, A. S., ... & Pande, V. (2018). MoleculeNet: a benchmark for molecular machine learning. Chemical science, 9(2), 513-530. 
+[1] Wu, Z., Ramsundar, B., Feinberg, E. N., Gomes, J., Geniesse, C., Pappu, A. S., Leswing, K. & Pande, V. (2018). MoleculeNet: a benchmark for molecular machine learning. Chemical science, 9(2), 513-530. 
 
 [2] Landrum, G. (2006). RDKit: Open-source cheminformatics.
 

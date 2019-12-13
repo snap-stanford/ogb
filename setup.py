@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 package_data_list = ['ogb/graphproppred/master.csv', 'ogb/nodeproppred/master.csv', 'ogb/linkproppred/master.csv']
 
 setup(name='ogb',
-      version='0.1.3',
+      version='0.1.0',
       description='Open Graph Benchmark',
       url='https://github.com/snap-stanford/ogb',
       author='Weihua Hu',

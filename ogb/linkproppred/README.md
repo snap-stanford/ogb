@@ -42,9 +42,6 @@ valid_edge, valid_edge_label = splitted_edge["valid_edge"], splitted_edge["valid
 test_edge, test_edge_label = splitted_edge["test_edge"], splitted_edge["test_edge_label"]
 graph = dataset[0] # pyg graph object containing only training edges
 ```
-`{train,valid,edge}_edge` are torch tensors of size `(num_edge,2)`, where each row represents a directed edge, and the first/second column represents the source/sink node indices. 
-An undirected graph should include bidirectional edges for each pair of nodes that are connected by an edge. We include the bidirectional edges in the graph object so that messages in GNNs flow in both directions. Note that we did not duplicate edges in `{train,valid,edge}_edge` to keep low-memory footprint.
-`{train,valid,edge}_edge_label` are torch tensors of length `num_edge`, where the specific shape depends on the dataset at hand. The $i$-th entry of `{train,valid,edge}_edge_label` corresponds to that of `{train,valid,edge}_edge`, representing some label(s) assigned to $i$-th edge.
 
 #### - DGL
 ```python
@@ -58,7 +55,9 @@ valid_edge, valid_edge_label = splitted_edge["valid_edge"], splitted_edge["valid
 test_edge, test_edge_label = splitted_edge["test_edge"], splitted_edge["test_edge_label"]
 graph = dataset[0] # dgl graph object containing only training edges
 ```
-The interface is quite similar to Pytorch Geometric. Please refer to the above Pytorch Geometric section for the description.
+`{train,valid,edge}_edge` are torch tensors of size `(num_edge,2)`, where each row represents a directed edge, and the first/second column represents the source/sink node indices. 
+An undirected graph should include bidirectional edges for each pair of nodes that are connected by an edge. We include the bidirectional edges in the graph object so that messages in GNNs flow in both directions. To keep a low-memory footprint, we did not duplicate edges in `{train,valid,edge}_edge`.
+`{train,valid,edge}_edge_label` are torch tensors of length `num_edge`, where the specific shape depends on the dataset at hand. The $i$-th entry of `{train,valid,edge}_edge_label` corresponds to that of `{train,valid,edge}_edge`, representing some label(s) assigned to the $i$-th edge.
 
 ### Evaluator
 Evaluators are customized for each dataset.

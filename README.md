@@ -1,11 +1,11 @@
 # Open Graph Benchmark (OGB)
 
-A collection of benchmark datasets for graph machine learning, together with data loaders and evaluators in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
+A collection of benchmark datasets, data-loaders and evaluators for graph machine learning in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
 The goal is to have an easily-accessible standardized large-scale benchmark datasets to drive research in graph machine learning.
 
 
 ### Datasets available
-Benchmark datasets are broadly classified into three categories. Datasets that are currerntly available are also listed (more to come soon).
+Benchmark datasets are broadly classified into three categories. Datasets that are currently available are also listed (more to come soon).
 - [**Node property prediction**](ogb/nodeproppred/README.md) : Prediction on single nodes.
     - Prediction of protein functionality in a protein-protein association network.
 
@@ -33,8 +33,8 @@ source venv/bin/activate
  - urllib3>=1.24.0
  - scikit-learn>=0.20.0
 
-#### Using pip
-Recommended way to install OGB is:
+#### Pip install
+The recommended way to install OGB is using Python's package manager pip:
 ```bash
 pip install ogb
 ```
@@ -50,8 +50,8 @@ python setup.py install
 ## Example
 We highlight two key features of OGB, namely, (1) easy-to-use data loaders, and (2) standardized evaluators.
 #### (1) Data loaders
-We prepare easy-to-use Pytorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized splitting of datasets.
-Below, on Pytorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
+We prepare easy-to-use PyTorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized dataset splitting.
+Below, on PyTorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
 ```python
 from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
@@ -64,7 +64,7 @@ valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=32, shuffle
 test_loader = DataLoader(dataset[splitted_idx["test"]], batch_size=32, shuffle=False)
 ```
 
-#### (2) Evaluator
+#### (2) Evaluators
 We also prepare standardized evaluators for easy evaluation and comparison of different methods. The evaluator takes `input_dict` (a dictionary whose format is specified in `evaluator.expected_input_format`) as input, and returns a dictionary storing the performance metric appropriate for the given dataset.
 The standardized evaluation protocol allows researchers to reliably compare their methods.
 ```python

@@ -31,8 +31,6 @@ splitted_idx = dataset.get_idx_split()
 train_idx, valid_idx, test_idx = splitted_idx["train"], splitted_idx["valid"], splitted_idx["test"]
 graph = dataset[0] # pyg graph object
 ```
-`{train,valid,test}_idx` are torch tensors of shape `(num_nodes,)`, representing the node indices assigned to training/validation/test sets.
-Prediction target can be accessed by `graph.y`, which is a torch tensor of shape `(num_nodes, num_tasks)`, where the $i$-th row represents the target labels of $i$-th node.
 
 #### - DGL
 ```python
@@ -45,6 +43,8 @@ splitted_idx = dataset.get_idx_split()
 train_idx, valid_idx, test_idx = splitted_idx["train"], splitted_idx["valid"], splitted_idx["test"]
 graph, label = dataset[0] # graph: dgl graph object, label: torch tensor of shape (num_nodes, num_tasks)
 ```
+`{train,valid,test}_idx` are torch tensors of shape `(num_nodes,)`, representing the node indices assigned to training/validation/test sets.
+Prediction target can be accessed by `graph.y`, which is a torch tensor of shape `(num_nodes, num_tasks)`, where the $i$-th row represents the target labels of $i$-th node.
 
 ### Evaluator
 Evaluators are customized for each dataset.
