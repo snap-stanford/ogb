@@ -1,0 +1,86 @@
+from torch_geometric.data import InMemoryDataset
+import pandas as pd
+import shutil, os
+import os.path as osp
+import torch
+import numpy as np
+from ogb.utils.url import decide_download, download_url, extract_zip
+
+
+class PygGraphPropPredDataset(InMemoryDataset):
+    def __init__(self, name, root = "dataset", transform=None):
+        self.name = name ## original name, e.g., ogbg-mol-tox21
+        self.dir_name = "_".join(name.split("-")) + "_pyg" ## replace hyphen with underline, e.g., ogbg_mol_tox21_pyg
+
+        self.original_root = root
+        self.root = osp.join(root, self.dir_name)
+
+        self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
+        if not self.name in self.meta_info:
+            print(self.name)
+            error_mssg = "Invalid dataset name {}.\n".format(self.name)
+            error_mssg += "Available datasets are as follows:\n"
+            error_mssg += "\n".join(self.meta_info.keys())
+            raise ValueError(error_mssg)
+
+        self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
+
+        self.num_tasks = int(self.meta_info[self.name]["num tasks"])
+        self.task_type = self.meta_info[self.name]["task type"]
+
+        super(PygGraphPropPredDataset, self).__init__(self.root, transform)
+        self.data, self.slices = torch.load(self.processed_paths[0])
+
+    def get_idx_split(self):
+        split_type = self.meta_info[self.name]["split"]
+        path = osp.join(self.root, "split", split_type)
+
+        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
+        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
+        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+
+        return {"train": torch.tensor(train_idx, dtype = torch.long), "valid": torch.tensor(valid_idx, dtype = torch.long), "test": torch.tensor(test_idx, dtype = torch.long)}
+
+    @property
+    def raw_file_names(self):
+        return self.download_name + ".csv.gz"
+
+    @property
+    def processed_file_names(self):
+        return "geometric_data_processed.pt"
+
+    def download(self):
+        url = self.meta_info[self.name]["pyg url"]
+        if decide_download(url):
+            path = download_url(url, self.original_root)
+            extract_zip(path, self.original_root)
+            os.unlink(path)
+            shutil.rmtree(self.root)
+            shutil.move(osp.join(self.original_root, self.download_name), self.root)
+
+        else:
+            print("Stop downloading.")
+            shutil.rmtree(self.root)
+            exit(-1)
+
+    def process(self):
+        url = self.meta_info[self.name]["pyg url"]
+        if decide_download(url):
+            path = download_url(url, self.original_root)
+            extract_zip(path, self.original_root)
+            os.unlink(path)
+            shutil.rmtree(self.root)
+            shutil.move(osp.join(self.original_root, self.download_name), self.root)
+        else:
+            print("Stop download.")
+            shutil.rmtree(self.root)
+            exit(-1)
+        
+
+if __name__ == "__main__":
+    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-mol-lipo")
+    splitted_index = pyg_dataset.get_idx_split()
+    print(pyg_dataset)
+    print(pyg_dataset[splitted_index["train"]])
+    print(pyg_dataset[splitted_index["valid"]])
+    print(pyg_dataset[splitted_index["test"]])
