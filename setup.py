@@ -6,14 +6,14 @@ from io import open
 
 here = path.abspath(path.dirname(__file__))
 
-sys.path.insert(0, path.join(here, 'ogb'))
-
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+package_data_list = ['ogb/graphproppred/master.csv', 'ogb/nodeproppred/master.csv', 'ogb/linkproppred/master.csv']
+
 setup(name='ogb',
-      version='0.1.0',
+      version='0.1.3',
       description='Open Graph Benchmark',
       url='https://github.com/snap-stanford/ogb',
       author='Weihua Hu',
@@ -32,6 +32,8 @@ setup(name='ogb',
       ],
       license='MIT',
       packages=find_packages(exclude=['dataset', 'examples', 'docs']),
+      package_data={'ogb': package_data_list},
+      include_package_data=True,
       classifiers=[
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Intended Audience :: Science/Research',
