@@ -31,7 +31,7 @@ setup(name='ogb',
         'urllib3>=1.24.0'
       ],
       license='MIT',
-      packages=find_packages(exclude=['dataset', 'examples', 'docs'])
+      packages=find_packages(exclude=['dataset', 'examples', 'docs']),
       classifiers=[
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Intended Audience :: Science/Research',
