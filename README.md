@@ -1,6 +1,6 @@
 # Open Graph Benchmark (OGB)
 
-A collection of benchmark datasets for graph machine learning, together with data loaders and evaluators in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
+a collection of benchmark datasets, data-loaders and evaluators for graph machine learning in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
 The goal is to have an easily-accessible standardized large-scale benchmark datasets to drive research in graph machine learning.
 
 
