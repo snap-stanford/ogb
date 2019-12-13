@@ -26,6 +26,7 @@ Benchmark datasets are broadly classified into three categories. Datasets that a
  - urllib3>=1.24.0
  - scikit-learn>=0.20.0
 
+#### Pip install
 The recommended way to install OGB is using Python's package manager pip:
 ```bash
 pip install ogb
