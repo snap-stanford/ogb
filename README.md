@@ -16,7 +16,6 @@ Benchmark datasets are broadly classified into three categories. Datasets that a
     - Prediction of chemical properties of molecules (12 kinds of datasets available).
 
 ### Installation
-You can install OGB using Python's package manager pip. 
 
 #### Requirements
  - Python 3.7
@@ -27,8 +26,7 @@ You can install OGB using Python's package manager pip.
  - urllib3>=1.24.0
  - scikit-learn>=0.20.0
 
-#### Using pip
-Recommended way to install OGB is:
+The recommended way to install OGB is using Python's package manager pip:
 ```bash
 pip install ogb
 ```
