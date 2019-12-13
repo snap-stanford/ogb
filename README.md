@@ -35,8 +35,8 @@ pip install ogb
 ## Example
 We highlight two key features of OGB, namely, (1) easy-to-use data loaders, and (2) standardized evaluators.
 #### (1) Data loaders
-We prepare easy-to-use Pytorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized splitting of datasets.
-Below, on Pytorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
+We prepare easy-to-use PyTorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized dataset splitting.
+Below, on PyTorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
 ```python
 from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
