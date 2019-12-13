@@ -5,7 +5,7 @@ The goal is to have an easily-accessible standardized large-scale benchmark data
 
 
 ### Datasets available
-Benchmark datasets are broadly classified into three categories. Datasets that are currerntly available are also listed (more to come soon).
+Benchmark datasets are broadly classified into three categories. Datasets that are currently available are also listed (more to come soon).
 - [**Node property prediction**](ogb/nodeproppred/README.md) : Prediction on single nodes.
     - Prediction of protein functionality in a protein-protein association network.
 
