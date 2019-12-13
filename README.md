@@ -49,7 +49,7 @@ valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=32, shuffle
 test_loader = DataLoader(dataset[splitted_idx["test"]], batch_size=32, shuffle=False)
 ```
 
-#### (2) Evaluator
+#### (2) Evaluators
 We also prepare standardized evaluators for easy evaluation and comparison of different methods. The evaluator takes `input_dict` (a dictionary whose format is specified in `evaluator.expected_input_format`) as input, and returns a dictionary storing the performance metric appropriate for the given dataset.
 The standardized evaluation protocol allows researchers to reliably compare their methods.
 ```python
