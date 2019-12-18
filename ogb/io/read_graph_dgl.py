@@ -3,39 +3,30 @@ import torch
 import os.path as osp
 import numpy as np
 import dgl
+from ogb.io.read_graph_raw import read_csv_graph_raw
 
-def read_csv_graph_dgl(raw_dir, raw_file_names, add_inverse_edge):
-    g = dgl.DGLGraph()
+def read_csv_graph_dgl(raw_dir, add_inverse_edge = False):
 
-    print("edge.csv.gz")
-    ### add nodes and edges
-    edge_mat = pd.read_csv(osp.join(raw_dir, "edge.csv.gz"), compression="gzip", header = None).values # (num_edges, 2) numpy array
-    num_nodes = np.max(edge_mat) + 1
+    graph_list = read_csv_graph_raw(raw_dir, add_inverse_edge)
+    dgl_graph_list = []
 
-    g.add_nodes(num_nodes)
-    g.add_edges(edge_mat[:,0], edge_mat[:,1])
+    for graph in graph_list:
+        g = dgl.DGLGraph()
+        g.add_nodes(graph["num_nodes"])
+        g.add_edges(graph["edge_index"][0], graph["edge_index"][1])
 
-    if add_inverse_edge:
-        g.add_edges(edge_mat[:,1], edge_mat[:,0])
+        if graph["edge_feat"] is not None:
+            g.edata["feat"] = torch.tensor(graph["edge_feat"])
 
+        if graph["node_feat"] is not None:
+            g.ndata["feat"] = torch.tensor(graph["node_feat"])
 
-    for raw_file_name in raw_file_names:
-        ### skip edge.csv.gz
-        if raw_file_name == "edge.csv.gz":
-            continue
+        dgl_graph_list.append(g)
 
-        print(raw_file_name)
-        mat = pd.read_csv(osp.join(raw_dir, raw_file_name), compression="gzip", header = None).values
+    return dgl_graph_list
 
-        if raw_file_name == 'edge-feat.csv.gz':
-            if add_inverse_edge:
-                bidirectional_edge_attr = np.concatenate((mat, mat), axis = 0)
-                g.edata['feat'] = torch.tensor(bidirectional_edge_attr, dtype = torch.float)
-            else:
-                g.edata['feat'] = torch.tensor(mat, dtype = torch.float)
-        elif raw_file_name == 'node-feat.csv.gz':
-            g.ndata['feat'] = torch.tensor(mat, dtype = torch.float)
-        else:
-            raise ValueError("Unknown data file called " + raw_file_name)
+if __name__ == "__main__":
+    # graph_list = read_csv_graph_dgl('dataset/proteinfunc_v2/raw', add_inverse_edge = True)
+    graph_list = read_csv_graph_dgl('dataset/tox21/raw', add_inverse_edge = True)
 
-    return g
+    print(graph_list)
