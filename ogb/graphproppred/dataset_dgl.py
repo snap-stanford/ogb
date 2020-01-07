@@ -3,9 +3,10 @@ import shutil, os
 import os.path as osp
 import torch
 import numpy as np
-from dgl.data.utils import load_graphs, Subset
+from dgl.data.utils import load_graphs, save_graphs, Subset
 import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
+from ogb.io.read_graph_dgl import read_csv_graph_dgl
 
 class DglGraphPropPredDataset(object):
     """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
@@ -34,16 +35,17 @@ class DglGraphPropPredDataset(object):
         self.pre_process()
 
     def pre_process(self):
-        processed_dir = os.path.join(self.root, 'processed')
-        pre_processed_file_path = os.path.join(processed_dir, 'dgl_data_processed')
+        processed_dir = osp.join(self.root, 'processed')
+        raw_dir = osp.join(self.root, 'raw')
+        pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
         if os.path.exists(pre_processed_file_path):
             self.graphs, label_dict = load_graphs(pre_processed_file_path)
             self.labels = label_dict['labels']
-            self.ids = label_dict['ids']
 
         else:
-            url = self.meta_info[self.name]["dgl url"]
+            ### download
+            url = self.meta_info[self.name]["url"]
             if decide_download(url):
                 path = download_url(url, self.original_root)
                 extract_zip(path, self.original_root)
@@ -58,9 +60,15 @@ class DglGraphPropPredDataset(object):
                 print("Stop download.")
                 exit(-1)
 
+            ### preprocess
+            graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"])
+            labels = torch.tensor(pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values)
+
+            save_graphs(pre_processed_file_path, graphs, labels={'labels': labels})
+
+            ### load preprocessed files
             self.graphs, label_dict = load_graphs(pre_processed_file_path)
             self.labels = label_dict['labels']
-            self.ids = label_dict['ids']
 
 
     def get_idx_split(self):
@@ -95,7 +103,7 @@ class DglGraphPropPredDataset(object):
         int
             Length of Dataset
         """
-        return len(self.ids)
+        return len(self.graphs)
 
     def __repr__(self):  # pragma: no cover
         return '{}({})'.format(self.__class__.__name__, len(self))
@@ -105,12 +113,12 @@ def collate_dgl(samples):
     graphs, labels = map(list, zip(*samples))
     batched_graph = dgl.batch(graphs)
     return batched_graph, torch.stack(labels)
-        
 
 if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-mol-lipo")
+    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-mol-tox21")
     splitted_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
+    print(dgl_dataset[0])
     print(dgl_dataset[splitted_index["train"]])
     print(dgl_dataset[splitted_index["valid"]])
     print(dgl_dataset[splitted_index["test"]])

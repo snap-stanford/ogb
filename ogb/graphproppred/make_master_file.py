@@ -25,6 +25,8 @@ for nme in mol_dataset_list:
     download_folder_name = dataset_dict[nme]["download_name"]
     dataset_dict[nme]["pyg url"] = "https://ogb.stanford.edu/data/graphproppred/pyg_mol_download/" + download_folder_name + ".zip"
     dataset_dict[nme]["dgl url"] = "https://ogb.stanford.edu/data/graphproppred/dgl_mol_download/" + download_folder_name + ".zip"
+    dataset_dict[nme]["url"] = "https://ogb.stanford.edu/data/graphproppred/csv_mol_download/" + download_folder_name + ".zip"
+    dataset_dict[nme]["add_inverse_edge"] = True
     dataset_dict[nme]["data type"] = "mol"
     dataset_dict[nme]["split"] = "scaffold"
 

@@ -5,6 +5,7 @@ import os.path as osp
 import torch
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
+from ogb.io.read_graph_pyg import read_csv_graph_pyg
 
 
 class PygGraphPropPredDataset(InMemoryDataset):
@@ -50,7 +51,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
         return "geometric_data_processed.pt"
 
     def download(self):
-        url = self.meta_info[self.name]["pyg url"]
+        url = self.meta_info[self.name]["url"]
         if decide_download(url):
             path = download_url(url, self.original_root)
             extract_zip(path, self.original_root)
@@ -64,23 +65,24 @@ class PygGraphPropPredDataset(InMemoryDataset):
             exit(-1)
 
     def process(self):
-        url = self.meta_info[self.name]["pyg url"]
-        if decide_download(url):
-            path = download_url(url, self.original_root)
-            extract_zip(path, self.original_root)
-            os.unlink(path)
-            shutil.rmtree(self.root)
-            shutil.move(osp.join(self.original_root, self.download_name), self.root)
-        else:
-            print("Stop download.")
-            shutil.rmtree(self.root)
-            exit(-1)
+        ### read pyg graph list
+        data_list = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"])
+        
+        graph_label = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+
+        ### add target labels
+        for i, g in enumerate(data_list):
+            g.y = torch.tensor(graph_label[i]).view(1,-1)
+
+        data, slices = self.collate(data_list)
+        torch.save((data, slices), self.processed_paths[0])
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-mol-lipo")
+    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-mol-tox21")
     splitted_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
+    print(pyg_dataset[0])
     print(pyg_dataset[splitted_index["train"]])
     print(pyg_dataset[splitted_index["valid"]])
     print(pyg_dataset[splitted_index["test"]])
