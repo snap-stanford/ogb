@@ -66,7 +66,8 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
     def process(self):
         ### read pyg graph list
-        data_list = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"])
+        add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
+        data_list = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge)
         
         graph_label = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
 
@@ -83,6 +84,7 @@ if __name__ == "__main__":
     splitted_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
     print(pyg_dataset[0])
+    print(pyg_dataset[0].edge_index)
     print(pyg_dataset[splitted_index["train"]])
     print(pyg_dataset[splitted_index["valid"]])
     print(pyg_dataset[splitted_index["test"]])
