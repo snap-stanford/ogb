@@ -60,16 +60,9 @@ class DglLinkPropPredDataset(object):
 
             raw_dir = osp.join(self.root, "raw")
 
-            file_names = ["edge"]
-            if self.meta_info[self.name]["has_node_attr"] == "True":
-                file_names.append("node-feat")
-            if self.meta_info[self.name]["has_edge_attr"] == "True":
-                file_names.append("edge-feat")
-            raw_file_names = [file_name + ".csv.gz" for file_name in file_names]
-
             ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graph = read_csv_graph_dgl(raw_dir, raw_file_names, add_inverse_edge = add_inverse_edge)
+            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)[0]
 
             save_graphs(pre_processed_file_path, graph, {})
 

@@ -71,7 +71,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
 
     def process(self):
         add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-        data = read_csv_graph_pyg(self.raw_dir, self.raw_file_names, add_inverse_edge = add_inverse_edge)
+        data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge)[0]
 
         data = data if self.pre_transform is None else self.pre_transform(data)
         torch.save(self.collate([data]), self.processed_paths[0])
