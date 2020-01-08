@@ -70,7 +70,7 @@ class PygNodePropPredDataset(InMemoryDataset):
 
     def process(self):
         add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-        data = read_csv_graph_pyg(self.raw_dir, self.raw_file_names, add_inverse_edge = add_inverse_edge)
+        data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge)[0]
 
         ### adding prediction target
         node_label = pd.read_csv(osp.join(self.raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values

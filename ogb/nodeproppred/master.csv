@@ -1,10 +1,10 @@
 ,ogbn-proteins
 add_inverse_edge,True
-download_name,proteinfunc
+download_name,proteinfunc_v2
 has_edge_attr,True
 has_node_attr,False
 num nodes,132534
 num tasks,112
 split,species
 task type,binary classification
-url,https://ogb.stanford.edu/data/nodeproppred/proteinfunc.zip
+url,https://ogb.stanford.edu/data/nodeproppred/proteinfunc_v2.zip
