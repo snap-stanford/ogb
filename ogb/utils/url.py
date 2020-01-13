@@ -1,15 +1,13 @@
-import urllib.request as ur
 import zipfile
 import os
 import os.path as osp
-from six.moves import urllib
 import errno
+import requests
 
 def decide_download(url):
-    d = ur.urlopen(url)
+    size_byte = int(requests.get(url).headers["content-length"])
     GBFACTOR = float(1 << 30)
-    size = int(d.info()["Content-Length"])/GBFACTOR
-    
+    size = size_byte/GBFACTOR
     ### confirm if larger than 1GB
     if size > 1:
         return input("This will download %.2fGB. Will you proceed? (y/N)\n" % (size)).lower() == "y"
@@ -34,6 +32,7 @@ def download_url(url, folder, log=True):
 
     filename = url.rpartition('/')[2]
     path = osp.join(folder, filename)
+    tmp_download_path = osp.join(folder, "_" + filename)
 
     if osp.exists(path):  # pragma: no cover
         if log:
@@ -44,11 +43,24 @@ def download_url(url, folder, log=True):
         print('Downloading', url)
 
     makedirs(folder)
-    data = urllib.request.urlopen(url)
 
-    with open(path, 'wb') as f:
-        f.write(data.read())
+    if osp.exists(tmp_download_path):
+        resume_header = {'Range': 'bytes=%d-' % osp.getsize(tmp_download_path)}
+        mode = "ab"
+    else:
+        resume_header = {}
+        mode = "wb"
 
+    with requests.get(url,
+                      headers=resume_header,
+                      stream=True,
+                      verify=False,
+                      allow_redirects=True) as r:
+        with open(tmp_download_path, mode) as f:
+            for chunk in r.iter_content(chunk_size=512 * 1024):
+                if chunk:
+                    f.write(chunk)
+    os.rename(tmp_download_path, path)
     return path
 
 def maybe_log(path, log=True):
