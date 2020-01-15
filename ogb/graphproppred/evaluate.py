@@ -72,11 +72,18 @@ class Evaluator:
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.task_type == "binary classification" or self.task_type == "regression":
+        if self.task_type == "binary classification":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy.ndarray of shape (num_graph, num_task)\n"
             desc += "- y_pred: numpy ndarray of shape (num_graph, num_task)\n"
-            desc += "where num_task is {} and ".format(self.num_tasks)
+            desc += "where y_pred stores score values (for computing ROC-AUC and Average Precision),\n"
+            desc += "num_task is {}, and ".format(self.num_tasks)
+            desc += "each row corresponds to one graph.\n"
+        elif self.task_type == "regression":
+            desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
+            desc += "- y_true: numpy.ndarray of shape (num_graph, num_task)\n"
+            desc += "- y_pred: numpy ndarray of shape (num_graph, num_task)\n"
+            desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))

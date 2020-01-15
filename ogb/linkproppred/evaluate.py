@@ -72,6 +72,7 @@ class Evaluator:
             desc += "each row corresponds to one edge.\n"
             desc += "y_true is either 0 or 1, indicating whether edges are present or not.\n"
             desc += "y_true should be valid_edge_label or test_edge_label.\n"
+            desc += "y_pred should store score values (for computing ROC-AUC).\n"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
