@@ -1,10 +1,10 @@
-,ogbn-proteins
-add_inverse_edge,True
-download_name,proteinfunc_v2
-has_edge_attr,True
-has_node_attr,False
-num nodes,132534
-num tasks,112
-split,species
-task type,binary classification
-url,https://ogb.stanford.edu/data/nodeproppred/proteinfunc_v2.zip
+,ogbn-proteins,ogbn-products
+add_inverse_edge,True,True
+download_name,proteinfunc_v2,products
+has_edge_attr,True,False
+has_node_attr,False,True
+num nodes,132534,2449029
+num tasks,112,1
+split,species,sales_ranking
+task type,binary classification,multiclass classification
+url,https://ogb.stanford.edu/data/nodeproppred/proteinfunc_v2.zip,https://ogb.stanford.edu/data/nodeproppred/products.zip

@@ -22,7 +22,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "binary classification":
+        if self.task_type == "binary classification" or "multiclass classification":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -63,6 +63,9 @@ class Evaluator:
         if self.task_type == "binary classification":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_bincls(y_true, y_pred)
+        elif self.task_type == "multiclass classification":
+            y_true, y_pred = self._parse_and_check_input(input_dict)
+            return self._eval_multicls(y_true, y_pred)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -73,7 +76,15 @@ class Evaluator:
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy.ndarray of shape (num_node, num_task)\n"
             desc += "- y_pred: numpy ndarray of shape (num_node, num_task)\n"
-            desc += "where num_task is {} and ".format(self.num_tasks)
+            desc += "where y_pred stores score values (for computing ROC-AUC),\n"
+            desc += "num_task is {}, and ".format(self.num_tasks)
+            desc += "each row corresponds to one node.\n"
+        elif self.task_type == "multiclass classification":
+            desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
+            desc += "- y_true: numpy.ndarray of shape (num_node, num_task)\n"
+            desc += "- y_pred: numpy ndarray of shape (num_node, num_task)\n"
+            desc += "where y_pred stores predicted class label (integer),\n"
+            desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one node.\n"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
@@ -86,10 +97,11 @@ class Evaluator:
         if self.task_type == "binary classification":
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
+        elif self.task_type == "multiclass classification":
+            desc += "{\"acc\": racc}\n"
+            desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
-
-
 
         return desc
 
@@ -112,6 +124,16 @@ class Evaluator:
 
         return {"rocauc": sum(rocauc_list)/len(rocauc_list)}
 
+    def _eval_multicls(self, y_true, y_pred):
+        acc_list = []
+
+        for i in range(y_true.shape[1]):
+            is_valid = y_true[:,i] == y_true[:,i]
+            correct = y_true[is_valid,i] == y_pred[is_valid,i]
+            acc_list.append(float(np.sum(correct))/len(correct))
+
+        return {"acc": sum(acc_list)/len(acc_list)}
+
 if __name__ == "__main__":
     ### binary classification case
     evaluator = Evaluator("ogbn-proteins")
@@ -119,6 +141,16 @@ if __name__ == "__main__":
     print(evaluator.expected_output_format)
     y_true = np.random.randint(2, size = (100,112))
     y_pred = np.random.randn(100,112)
+    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
+    ### multiclass classification case
+    evaluator = Evaluator("ogbn-products")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_true = np.random.randint(5, size = (100,1))
+    y_pred = np.random.randint(5, size = (100,1))
     input_dict = {"y_true": y_true, "y_pred": y_pred}
     result = evaluator.eval(input_dict)
     print(result)
