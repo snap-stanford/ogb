@@ -1,9 +1,9 @@
-,ogbl-ppa
-add_inverse_edge,True
-download_name,ppassoc_v2
-has_edge_attr,False
-has_node_attr,False
-num nodes,576289
-split,throughput
-task type,link prediction
-url,https://ogb.stanford.edu/data/linkproppred/ppassoc_v2.zip
+,ogbl-ppa,ogbl-reviews
+add_inverse_edge,True,True
+download_name,ppassoc_v2,reviews
+has_edge_attr,False,False
+has_node_attr,False,True
+num nodes,576289,2560437
+split,throughput,time
+task type,link prediction,link regression
+url,https://ogb.stanford.edu/data/linkproppred/ppassoc_v2.zip,https://ogb.stanford.edu/data/linkproppred/reviews.zip

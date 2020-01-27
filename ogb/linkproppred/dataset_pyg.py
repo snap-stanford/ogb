@@ -39,9 +39,14 @@ class PygLinkPropPredDataset(InMemoryDataset):
         valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values
         test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values
 
-        return {"train_edge": torch.tensor(train_idx[:,:2], dtype = torch.long), "train_edge_label": torch.tensor(train_idx[:,2], dtype = torch.long),
-                    "valid_edge": torch.tensor(valid_idx[:,:2], dtype = torch.long), "valid_edge_label": torch.tensor(valid_idx[:,2], dtype = torch.long), 
-                        "test_edge": torch.tensor(test_idx[:,:2], dtype = torch.long), "test_edge_label": torch.tensor(test_idx[:,2], dtype = torch.long)}
+        if self.task_type == "link prediction":
+            target_type = torch.long
+        else:
+            target_type = torch.float
+
+        return {"train_edge": torch.tensor(train_idx[:,:2], dtype = torch.long), "train_edge_label": torch.tensor(train_idx[:,2], dtype = target_type),
+                    "valid_edge": torch.tensor(valid_idx[:,:2], dtype = torch.long), "valid_edge_label": torch.tensor(valid_idx[:,2], dtype = target_type), 
+                        "test_edge": torch.tensor(test_idx[:,:2], dtype = torch.long), "test_edge_label": torch.tensor(test_idx[:,2], dtype = target_type)}
 
     @property
     def raw_file_names(self):
@@ -81,7 +86,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-ppa")
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-reviews")
     splitted_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
     print(splitted_edge)

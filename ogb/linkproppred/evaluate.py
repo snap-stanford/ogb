@@ -21,7 +21,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "link prediction":
+        if self.task_type == "link prediction" or self.task_type == "link regression":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -59,6 +59,9 @@ class Evaluator:
         if self.task_type == "link prediction":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_linkpred(y_true, y_pred)
+        elif self.task_type == "link regression":
+            y_true, y_pred = self._parse_and_check_input(input_dict)
+            return self._eval_linkregression(y_true, y_pred)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -71,8 +74,16 @@ class Evaluator:
             desc += "- y_pred: numpy darray of shape (num_edge, )\n"
             desc += "each row corresponds to one edge.\n"
             desc += "y_true is either 0 or 1, indicating whether edges are present or not.\n"
-            desc += "y_true should be valid_edge_label or test_edge_label.\n"
+            desc += "y_true should directly take valid_edge_label or test_edge_label as input.\n"
             desc += "y_pred should store score values (for computing ROC-AUC).\n"
+        elif self.task_type == "link regression":
+            desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
+            desc += "- y_true: numpy.darray of shape (num_edge, )\n"
+            desc += "- y_pred: numpy darray of shape (num_edge, )\n"
+            desc += "each row corresponds to one edge.\n"
+            desc += "y_true is the target value to be predicted.\n"
+            desc += "y_true should directly take valid_edge_label or test_edge_label as input.\n"
+            desc += "y_pred should store the predicted target value.\n"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -84,6 +95,10 @@ class Evaluator:
         if self.task_type == "link prediction":
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score\n"
+        elif self.task_type == "link regression":
+            desc += "{\"mae\": mae, \"rmse\": rmse}\n"
+            desc += "- mae (float): mean absolute error\n"
+            desc += "- rmse (float): root mean squared error"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -93,7 +108,7 @@ class Evaluator:
 
     def _eval_linkpred(self, y_true, y_pred):
         """
-            compute ROC-AUC and AP score averaged across tasks
+            compute ROC-AUC and AP score
         """
         
         rocauc = []
@@ -106,6 +121,15 @@ class Evaluator:
 
         return {"rocauc": rocauc}
 
+    def _eval_linkregression(self, y_true, y_pred):
+        """
+            compute MAE and RMSE score
+        """
+        mae = np.abs(y_true - y_pred).mean()
+        rmse = np.sqrt(((y_true - y_pred)**2).mean())
+
+        return {"mae": mae, "rmse": rmse}
+
 
 if __name__ == "__main__":
     ### link prediction case
@@ -113,6 +137,15 @@ if __name__ == "__main__":
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     y_true = np.random.randint(2, size = (100,))
+    y_pred = np.random.randn(100,)
+    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
+    evaluator = Evaluator(name = "ogbl-reviews")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_true = np.random.randn(100,)
     y_pred = np.random.randn(100,)
     input_dict = {"y_true": y_true, "y_pred": y_pred}
     result = evaluator.eval(input_dict)

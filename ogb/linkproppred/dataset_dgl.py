@@ -76,9 +76,14 @@ class DglLinkPropPredDataset(object):
         valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values
         test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values
 
-        return {"train_edge": torch.tensor(train_idx[:,:2], dtype = torch.long), "train_edge_label": torch.tensor(train_idx[:,2], dtype = torch.long),
-                    "valid_edge": torch.tensor(valid_idx[:,:2], dtype = torch.long), "valid_edge_label": torch.tensor(valid_idx[:,2], dtype = torch.long), 
-                        "test_edge": torch.tensor(test_idx[:,:2], dtype = torch.long), "test_edge_label": torch.tensor(test_idx[:,2], dtype = torch.long)}
+        if self.task_type == "link prediction":
+            target_type = torch.long
+        else:
+            target_type = torch.float
+
+        return {"train_edge": torch.tensor(train_idx[:,:2], dtype = torch.long), "train_edge_label": torch.tensor(train_idx[:,2], dtype = target_type),
+                    "valid_edge": torch.tensor(valid_idx[:,:2], dtype = torch.long), "valid_edge_label": torch.tensor(valid_idx[:,2], dtype = target_type), 
+                        "test_edge": torch.tensor(test_idx[:,:2], dtype = torch.long), "test_edge_label": torch.tensor(test_idx[:,2], dtype = target_type)}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"
@@ -91,7 +96,7 @@ class DglLinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-ppa")
+    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-reviews")
     splitted_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
     print(splitted_edge)
