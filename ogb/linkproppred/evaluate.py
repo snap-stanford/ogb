@@ -1,5 +1,4 @@
 from sklearn.metrics import roc_auc_score
-import torch.nn as nn
 import pandas as pd
 import os
 import numpy as np
@@ -110,7 +109,7 @@ class Evaluator:
         """
             compute ROC-AUC and AP score
         """
-        
+
         rocauc = []
 
         if np.sum(y_true == 1) > 0 and np.sum(y_true == 0) > 0:
