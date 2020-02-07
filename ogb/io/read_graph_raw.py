@@ -9,7 +9,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     '''
     raw_dir: path to the raw directory
     add_inverse_edge (bool): whether to add inverse edge or not
-    
+
     return: graph_list, which is a list of graphs.
     Each graph is a dictionary, containing edge_index, edge_feat, node_feat, and num_nodes
     edge_feat and node_feat are optional: if a graph does not contain it, we will have None.
@@ -28,7 +28,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     try:
         node_feat = pd.read_csv(osp.join(raw_dir, "node-feat.csv.gz"), compression="gzip", header = None).values
     except:
-        node_feat = None 
+        node_feat = None
 
     try:
         edge_feat = pd.read_csv(osp.join(raw_dir, "edge-feat.csv.gz"), compression="gzip", header = None).values
@@ -45,10 +45,10 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
         ### handling edge
         if add_inverse_edge:
             ### duplicate edge
-            duplicated_edge = np.repeat(edge[:,num_edge_accum:num_edge_accum+num_edge], 2, axis = 1)
+            duplicated_edge = np.repeat(edge[:, num_edge_accum:num_edge_accum+num_edge], 2, axis = 1)
             duplicated_edge[0, 1::2] = duplicated_edge[1,0::2]
             duplicated_edge[1, 1::2] = duplicated_edge[0,0::2]
-            
+
             graph["edge_index"] = duplicated_edge
 
             if edge_feat is not None:
@@ -57,7 +57,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
                 graph["edge_feat"] = None
 
         else:
-            graph["edge_index"] = edge[num_edge_accum:num_edge_accum+num_edge]
+            graph["edge_index"] = edge[:, num_edge_accum:num_edge_accum+num_edge]
 
             if edge_feat is not None:
                 graph["edge_feat"] = edge_feat[num_edge_accum:num_edge_accum+num_edge]
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #     extract_zip(path, 'dataset')
     #     os.unlink(path)
 
-    #graph_list = read_csv_graph_raw('dataset/ppassoc_v2/raw', add_inverse_edge = True) 
+    #graph_list = read_csv_graph_raw('dataset/ppassoc_v2/raw', add_inverse_edge = True)
 
     print(len(graph_list))
     print(graph_list[0])
