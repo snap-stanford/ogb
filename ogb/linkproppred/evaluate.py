@@ -95,8 +95,6 @@ class Evaluator:
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score\n"
         elif self.task_type == "link regression":
-            desc += "{\"mae\": mae, \"rmse\": rmse}\n"
-            desc += "- mae (float): mean absolute error\n"
             desc += "- rmse (float): root mean squared error"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
@@ -122,12 +120,11 @@ class Evaluator:
 
     def _eval_linkregression(self, y_true, y_pred):
         """
-            compute MAE and RMSE score
+            compute RMSE score
         """
-        mae = np.abs(y_true - y_pred).mean()
         rmse = np.sqrt(((y_true - y_pred)**2).mean())
 
-        return {"mae": mae, "rmse": rmse}
+        return {"rmse": rmse}
 
 
 if __name__ == "__main__":

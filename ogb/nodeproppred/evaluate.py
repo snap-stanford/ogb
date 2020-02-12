@@ -97,7 +97,7 @@ class Evaluator:
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.task_type == "multiclass classification":
-            desc += "{\"acc\": racc}\n"
+            desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
@@ -110,7 +110,6 @@ class Evaluator:
         """
 
         rocauc_list = []
-        ap_list = []
 
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.

@@ -9,7 +9,7 @@ def decide_download(url):
     d = ur.urlopen(url)
     GBFACTOR = float(1 << 30)
     size = int(d.info()["Content-Length"])/GBFACTOR
-    
+
     ### confirm if larger than 1GB
     if size > 1:
         return input("This will download %.2fGB. Will you proceed? (y/N)\n" % (size)).lower() == "y"
@@ -35,7 +35,7 @@ def download_url(url, folder, log=True):
     filename = url.rpartition('/')[2]
     path = osp.join(folder, filename)
 
-    if osp.exists(path):  # pragma: no cover
+    if osp.exists(path) and osp.getsize(path) > 0:  # pragma: no cover
         if log:
             print('Using exist file', filename)
         return path
@@ -71,4 +71,3 @@ if __name__ == "__main__":
     url = "https://ogb.stanford.edu/data/pyg_mol_download/tox21.zip"
     ans = decide_download(url)
     print(ans)
-
