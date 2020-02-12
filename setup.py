@@ -5,6 +5,10 @@ import sys
 from io import open
 
 here = path.abspath(path.dirname(__file__))
+sys.path.insert(0, path.join(here, 'ogb'))
+from version import __version__
+
+print(__version__)
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -13,7 +17,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 package_data_list = ['ogb/graphproppred/master.csv', 'ogb/nodeproppred/master.csv', 'ogb/linkproppred/master.csv']
 
 setup(name='ogb',
-      version='0.1.0',
+      version=__version__,
       description='Open Graph Benchmark',
       url='https://github.com/snap-stanford/ogb',
       author='OGB Team',
