@@ -1,4 +1,4 @@
-from sklearn.metrics import roc_auc_score, average_precision_score
+from sklearn.metrics import roc_auc_score
 import pandas as pd
 import os
 import numpy as np
@@ -95,10 +95,8 @@ class Evaluator:
         if self.task_type == "binary classification":
             desc += "{\"rocauc\": rocauc, \"ap\": ap}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
-            desc += "- ap (float): Average Precision score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.task_type == "regression":
-            desc += "{\"mae\": mae, \"rmse\": rmse}\n"
-            desc += "- mae (float): mean absolute error averaged across {} task(s)\n".format(self.num_tasks)
+            desc += "{\"rmse\": rmse}\n"
             desc += "- rmse (float): root mean squared error averaged across {} task(s)\n".format(self.num_tasks)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
@@ -113,33 +111,29 @@ class Evaluator:
         """
 
         rocauc_list = []
-        ap_list = []
 
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.
             if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
                 is_valid = y_true[:,i] == y_true[:,i]
                 rocauc_list.append(roc_auc_score(y_true[is_valid,i], y_pred[is_valid,i]))
-                ap_list.append(average_precision_score(y_true[is_valid,i], y_pred[is_valid,i]))
 
         if len(rocauc_list) == 0:
             raise RuntimeError("No positively labeled data available. Cannot compute ROC-AUC.")
 
-        return {"rocauc": sum(rocauc_list)/len(rocauc_list), "ap": sum(ap_list)/len(ap_list)}
+        return {"rocauc": sum(rocauc_list)/len(rocauc_list)}
 
     def _eval_regression(self, y_true, y_pred):
         """
-            compute MAE and RMSE score averaged across tasks
+            compute RMSE score averaged across tasks
         """
-        mae_list = []
         rmse_list = []
 
         for i in range(y_true.shape[1]):
             is_valid = y_true[:,i] == y_true[:,i]
-            mae_list.append(np.abs(y_true[is_valid] - y_pred[is_valid]).mean())
             rmse_list.append(np.sqrt(((y_true[is_valid] - y_pred[is_valid])**2).mean()))
 
-        return {"mae": sum(mae_list)/len(mae_list), "rmse": sum(rmse_list)/len(rmse_list)}
+        return {"rmse": sum(rmse_list)/len(rmse_list)}
 
 if __name__ == "__main__":
     ### binary classification case
