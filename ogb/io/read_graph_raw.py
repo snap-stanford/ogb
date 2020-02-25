@@ -25,14 +25,32 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
 
     try:
         node_feat = pd.read_csv(osp.join(raw_dir, "node-feat.csv.gz"), compression="gzip", header = None).values
+        if 'int' in str(node_feat.dtype):
+            node_feat = node_feat.astype(np.int64)
+        else:
+            # float
+            node_feat = node_feat.astype(np.float32)
     except:
         node_feat = None
 
     try:
         edge_feat = pd.read_csv(osp.join(raw_dir, "edge-feat.csv.gz"), compression="gzip", header = None).values
+        if 'int' in str(edge_feat.dtype):
+            edge_feat = edge_feat.astype(np.int64)
+        else:
+            #float
+            edge_feat = edge_feat.astype(np.float32)
 
     except:
         edge_feat = None
+
+    if node_feat is not None:
+        print('node feat type')
+        print(node_feat.dtype)
+    
+    if edge_feat is not None:
+        print('edge feat type')
+        print(edge_feat.dtype)
 
     graph_list = []
     num_node_accum = 0
@@ -81,34 +99,6 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
 
 
 if __name__ == "__main__":
-    ## example code
-    # if not osp.exists('dataset/tox21'):
-    #     url = 'https://ogb.stanford.edu/data/graphproppred/csv_mol_download/tox21.zip'
-    #     path = download_url(url, 'dataset')
-    #     extract_zip(path, 'dataset')
-    #     os.unlink(path)
-
-    # graph_list = read_csv_graph_raw('dataset/tox21/raw', add_inverse_edge = True)
-
-    if not osp.exists('dataset/proteinfunc_v2'):
-        url = 'https://ogb.stanford.edu/data/nodeproppred/proteinfunc_v2.zip'
-        path = download_url(url, 'dataset')
-        extract_zip(path, 'dataset')
-        os.unlink(path)
-
-    graph_list = read_csv_graph_raw('dataset/proteinfunc_v2/raw', add_inverse_edge = True)
-
-    # if not osp.exists('dataset/ppassoc_v2'):
-    #     url = 'https://ogb.stanford.edu/data/linkproppred/ppassoc_v2.zip'
-    #     path = download_url(url, 'dataset')
-    #     extract_zip(path, 'dataset')
-    #     os.unlink(path)
-
-    #graph_list = read_csv_graph_raw('dataset/ppassoc_v2/raw', add_inverse_edge = True)
-
-    print(len(graph_list))
-    print(graph_list[0])
-    #print(graph_list[0]['edge_feat'].shape)
-    #print(graph_list[0]['edge_index'].shape)
+    pass
 
 
