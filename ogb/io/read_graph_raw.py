@@ -15,13 +15,11 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     edge_feat and node_feat are optional: if a graph does not contain it, we will have None.
     '''
 
-
-
     # loading necessary files
     try:
-        edge = pd.read_csv(osp.join(raw_dir, "edge.csv.gz"), compression="gzip", header = None).values.T # (2, num_edge) numpy array
-        num_node_list = pd.read_csv(osp.join(raw_dir, "num-node-list.csv.gz"), compression="gzip", header = None).values.T[0] # (num_graph, ) numpy array
-        num_edge_list = pd.read_csv(osp.join(raw_dir, "num-edge-list.csv.gz"), compression="gzip", header = None).values.T[0] # (num_edge, )
+        edge = pd.read_csv(osp.join(raw_dir, "edge.csv.gz"), compression="gzip", header = None).values.T.astype(np.int64) # (2, num_edge) numpy array
+        num_node_list = pd.read_csv(osp.join(raw_dir, "num-node-list.csv.gz"), compression="gzip", header = None).values.T[0].astype(np.int64).tolist() # (num_graph, ) python list
+        num_edge_list = pd.read_csv(osp.join(raw_dir, "num-edge-list.csv.gz"), compression="gzip", header = None).values.T[0].astype(np.int64).tolist() # (num_edge, ) python list
     except:
         raise RuntimeError("No necessary file")
 
@@ -40,6 +38,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     num_node_accum = 0
     num_edge_accum = 0
     for num_node, num_edge in zip(num_node_list, num_edge_list):
+
         graph = dict()
 
         ### handling edge
