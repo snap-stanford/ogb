@@ -44,14 +44,6 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     except:
         edge_feat = None
 
-    if node_feat is not None:
-        print('node feat type')
-        print(node_feat.dtype)
-    
-    if edge_feat is not None:
-        print('edge feat type')
-        print(edge_feat.dtype)
-
     graph_list = []
     num_node_accum = 0
     num_edge_accum = 0
