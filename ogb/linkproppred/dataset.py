@@ -4,6 +4,7 @@ import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw
 import pickle
+import numpy as np
 
 class LinkPropPredDataset(object):
     def __init__(self, name, root = "dataset"):
@@ -72,9 +73,14 @@ class LinkPropPredDataset(object):
         valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values
         test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values
 
-        return {"train_edge": train_idx[:,:2], "train_edge_label": train_idx[:,2],
-                    "valid_edge": valid_idx[:,:2], "valid_edge_label": valid_idx[:,2], 
-                        "test_edge": test_idx[:,:2], "test_edge_label": test_idx[:,2]}
+        if self.task_type == "link prediction":
+            target_type = np.int64
+        else:
+            target_type = np.float32
+
+        return {"train_edge": train_idx[:,:2].astype(np.int64), "train_edge_label": train_idx[:,2].astype(target_type),
+                    "valid_edge": valid_idx[:,:2].astype(np.int64), "valid_edge_label": valid_idx[:,2].astype(target_type), 
+                        "test_edge": test_idx[:,:2].astype(np.int64), "test_edge_label": test_idx[:,2].astype(target_type)}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"
