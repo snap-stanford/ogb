@@ -3,6 +3,11 @@ import pandas as pd
 import os
 import numpy as np
 
+try:
+    import torch
+except ImportError:
+    torch = None
+
 ### Evaluator for graph classification
 class Evaluator:
     def __init__(self, name):
@@ -30,9 +35,18 @@ class Evaluator:
             y_true, y_pred = input_dict["y_true"], input_dict["y_pred"]
 
             """
-                y_true: numpy ndarray of shape (num_node, num_tasks)
-                y_pred: numpy ndarray of shape (num_node, num_tasks)
+                y_true: numpy ndarray or torch tensor of shape (num_node, num_tasks)
+                y_pred: numpy ndarray or torch tensor of shape (num_node, num_tasks)
             """
+
+            # converting to torch.Tensor to numpy on cpu
+            if torch is not None and isinstance(y_true, torch.Tensor):
+                y_true = y_true.detach().cpu().numpy()
+
+            if torch is not None and isinstance(y_pred, torch.Tensor):
+                y_pred = y_pred.detach().cpu().numpy()
+
+
             ## check type
             if not (isinstance(y_true, np.ndarray) and isinstance(y_true, np.ndarray)):
                 raise RuntimeError("Arguments to Evaluator need to be numpy ndarray")
@@ -54,8 +68,8 @@ class Evaluator:
 
     def eval(self, input_dict):
         """
-            y_true: numpy ndarray of shape (num_data, num_tasks)
-            y_pred: numpy ndarray of shape (num_data, num_tasks)
+            y_true: numpy ndarray or torch tensor of shape (num_data, num_tasks)
+            y_pred: numpy ndarray or torch tensor of shape (num_data, num_tasks)
 
         """
 
@@ -73,15 +87,15 @@ class Evaluator:
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
         if self.task_type == "binary classification":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
-            desc += "- y_true: numpy.ndarray of shape (num_graph, num_task)\n"
-            desc += "- y_pred: numpy ndarray of shape (num_graph, num_task)\n"
+            desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
+            desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "where y_pred stores score values (for computing ROC-AUC and Average Precision),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
         elif self.task_type == "regression":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
-            desc += "- y_true: numpy.ndarray of shape (num_graph, num_task)\n"
-            desc += "- y_pred: numpy ndarray of shape (num_graph, num_task)\n"
+            desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
+            desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
         else:
@@ -140,8 +154,8 @@ if __name__ == "__main__":
     evaluator = Evaluator("ogbg-mol-tox21")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    y_true = np.random.randint(2, size = (100,12))
-    y_pred = np.random.randn(100,12)
+    y_true = torch.tensor(np.random.randint(2, size = (100,12)))
+    y_pred = torch.tensor(np.random.randn(100,12))
     input_dict = {"y_true": y_true, "y_pred": y_pred}
     result = evaluator.eval(input_dict)
     print(result)
