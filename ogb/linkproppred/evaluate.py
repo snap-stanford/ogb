@@ -108,6 +108,8 @@ class Evaluator:
             compute ROC-AUC and AP score
         """
 
+        # TODO: We should replace this with Hits@1.
+
         rocauc = []
 
         if np.sum(y_true == 1) > 0 and np.sum(y_true == 0) > 0:
