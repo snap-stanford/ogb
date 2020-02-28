@@ -108,7 +108,7 @@ class Evaluator:
             compute ROC-AUC and AP score
         """
 
-        # TODO: We should replace this with Hits@1.
+        # TODO: We should replace this with Hits@K.
 
         rocauc = []
 
