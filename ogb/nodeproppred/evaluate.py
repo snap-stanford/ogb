@@ -54,7 +54,7 @@ class Evaluator:
                 raise RuntimeError("Shape of y_true and y_pred must be the same")
 
             if not y_true.ndim == 2:
-                raise RuntimeError("y_true and y_pred mush to 2-dim arrray, {}-dim array given".format(y_true.ndim))
+                raise RuntimeError("y_true and y_pred must to 2-dim arrray, {}-dim array given".format(y_true.ndim))
 
             if not y_true.shape[1] == self.num_tasks:
                 raise RuntimeError("Number of tasks for {} should be {} but {} given".format(self.name, self.num_tasks, y_true.shape[1]))
@@ -66,11 +66,6 @@ class Evaluator:
 
 
     def eval(self, input_dict):
-        """
-            y_true: numpy ndarray or torch tensor of shape (num_data, num_tasks)
-            y_pred: numpy ndarray or torch tensor of shape (num_data, num_tasks)
-
-        """
 
         if self.task_type == "binary classification":
             y_true, y_pred = self._parse_and_check_input(input_dict)

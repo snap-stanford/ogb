@@ -35,8 +35,8 @@ class Evaluator:
             y_true, y_pred = input_dict["y_true"], input_dict["y_pred"]
 
             """
-                y_true: numpy ndarray or torch tensor of shape (num_node, num_tasks)
-                y_pred: numpy ndarray or torch tensor of shape (num_node, num_tasks)
+                y_true: numpy ndarray or torch tensor of shape (num_graph, num_tasks)
+                y_pred: numpy ndarray or torch tensor of shape (num_graph, num_tasks)
             """
 
             # converting to torch.Tensor to numpy on cpu
@@ -49,7 +49,7 @@ class Evaluator:
 
             ## check type
             if not (isinstance(y_true, np.ndarray) and isinstance(y_true, np.ndarray)):
-                raise RuntimeError("Arguments to Evaluator need to be numpy ndarray")
+                raise RuntimeError("Arguments to Evaluator need to be either numpy ndarray or torch tensor")
 
             if not y_true.shape == y_pred.shape:
                 raise RuntimeError("Shape of y_true and y_pred must be the same")
@@ -67,11 +67,6 @@ class Evaluator:
 
 
     def eval(self, input_dict):
-        """
-            y_true: numpy ndarray or torch tensor of shape (num_data, num_tasks)
-            y_pred: numpy ndarray or torch tensor of shape (num_data, num_tasks)
-
-        """
 
         if self.task_type == "binary classification":
             y_true, y_pred = self._parse_and_check_input(input_dict)
