@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 from ogb.nodeproppred import Evaluator
-from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
+from ogb.nodeproppred.dataset_dgl import DglNodePropPredDataset
 from torch.optim import Adam
 
 class GINConv(nn.Module):
@@ -150,7 +150,7 @@ def main():
     device = torch.device("cpu")
 
     # Data loading and splitting
-    dataset = PygNodePropPredDataset(name=args.dataset)
+    dataset = DglNodePropPredDataset(name=args.dataset)
     print(dataset.meta_info[args.dataset])
     splitted_idx = dataset.get_idx_split()
 
