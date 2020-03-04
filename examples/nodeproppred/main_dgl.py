@@ -156,11 +156,11 @@ def main():
 
     # Change the dtype and device of tensors
     graph = dataset.graph[0]
-    graph.ndata['labels'] = dataset.labels.float().to(args.device)
+    graph.ndata['labels'] = dataset.labels.float().to(device)
     if args.node_feats:
-        graph.ndata['feat'] = graph.ndata['feat'].float().to(args.device)
+        graph.ndata['feat'] = graph.ndata['feat'].float().to(device)
     if args.edge_feats:
-        graph.edata['feat'] = graph.edata['feat'].float().to(args.device)
+        graph.edata['feat'] = graph.edata['feat'].float().to(device)
 
     model = GIN(has_node_feats=args.node_feats,
                 has_edge_feats=args.edge_feats,
