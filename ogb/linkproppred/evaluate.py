@@ -1,9 +1,13 @@
-from sklearn.metrics import roc_auc_score
 import pandas as pd
 import os
 import numpy as np
 
-### Evaluator for graph classification
+try:
+    import torch
+except ImportError:
+    torch = None
+
+### Evaluator for link property prediction
 class Evaluator:
     def __init__(self, name):
         self.name = name
@@ -18,9 +22,66 @@ class Evaluator:
 
         self.task_type = meta_info[self.name]["task type"]
 
+        if self.task_type == "link prediction":
+            ### Hit@K
+            self.K = 3
+
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "link prediction" or self.task_type == "link regression":
+        if self.task_type == "link prediction":
+            if not "y_pred_pos" in input_dict:
+                RuntimeError("Missing key of y_pred_pos")
+            if not "y_pred_neg" in input_dict:
+                RuntimeError("Missing key of y_pred_neg")
+
+            y_pred_pos, y_pred_neg = input_dict["y_pred_pos"], input_dict["y_pred_neg"]
+
+            """
+                y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )
+                y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )
+            """
+
+            # convert y_pred_pos, y_pred_neg into either torch tensor or both numpy array
+            # type_info stores information whether torch or numpy is used
+
+            type_info = None
+
+            # check the raw tyep of y_pred_pos
+            if not (isinstance(y_pred_pos, np.ndarray) or (torch is not None and isinstance(y_pred_pos, torch.Tensor))):
+                raise ValueError("y_pred_pos needs to be either numpy ndarray or torch tensor")
+
+            # check the raw type of y_pred_neg
+            if not (isinstance(y_pred_neg, np.ndarray) or (torch is not None and isinstance(y_pred_neg, torch.Tensor))):
+                raise ValueError("y_pred_neg needs to be either numpy ndarray or torch tensor")
+
+            # if either y_pred_pos or y_pred_neg is torch tensor, use torch tensor
+            if torch is not None and (isinstance(y_pred_pos, torch.Tensor) or isinstance(y_pred_neg, torch.Tensor)):
+                # converting to torch.Tensor to numpy on cpu
+                if isinstance(y_pred_pos, np.ndarray):
+                    y_pred_pos = torch.from_numpy(y_pred_pos)
+
+                if isinstance(y_pred_neg, np.ndarray):
+                    y_pred_neg = torch.from_numpy(y_pred_neg)
+
+                # put both y_pred_pos and y_pred_neg on the same device
+                y_pred_pos = y_pred_pos.to(y_pred_neg.device)
+
+                type_info = 'torch'
+
+            else:
+                # both y_pred_pos and y_pred_neg are numpy ndarray
+
+                type_info = 'numpy'
+
+            if not y_pred_pos.ndim == 1:
+                raise RuntimeError("y_pred_pos must to 1-dim arrray, {}-dim array given".format(y_pred_pos.ndim))
+
+            if not y_pred_neg.ndim == 1:
+                raise RuntimeError("y_pred_neg must to 1-dim arrray, {}-dim array given".format(y_pred_neg.ndim))
+
+            return y_pred_pos, y_pred_neg, type_info
+
+        elif self.task_type == "link regression":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -29,9 +90,17 @@ class Evaluator:
             y_true, y_pred = input_dict["y_true"], input_dict["y_pred"]
 
             """
-                y_true: numpy ndarray of shape (num_node, num_tasks)
-                y_pred: numpy ndarray of shape (num_node, num_tasks)
+                y_true: numpy ndarray or torch tensor of shape (num_edge, )
+                y_pred: numpy ndarray or torch tensor of shape (num_edge, )
             """
+
+            # converting to torch.Tensor to numpy on cpu
+            if torch is not None and isinstance(y_true, torch.Tensor):
+                y_true = y_true.detach().cpu().numpy()
+
+            if torch is not None and isinstance(y_pred, torch.Tensor):
+                y_pred = y_pred.detach().cpu().numpy()
+
             ## check type
             if not (isinstance(y_true, np.ndarray) and isinstance(y_true, np.ndarray)):
                 raise RuntimeError("Arguments to Evaluator need to be numpy ndarray")
@@ -49,15 +118,10 @@ class Evaluator:
 
 
     def eval(self, input_dict):
-        """
-            y_true: numpy ndarray of shape (num_data, num_tasks)
-            y_pred: numpy ndarray of shape (num_data, num_tasks)
-
-        """
 
         if self.task_type == "link prediction":
-            y_true, y_pred = self._parse_and_check_input(input_dict)
-            return self._eval_linkpred(y_true, y_pred)
+            y_pred_pos, y_pred_neg, type_info = self._parse_and_check_input(input_dict)
+            return self._eval_linkpred(y_pred_pos, y_pred_neg, type_info)
         elif self.task_type == "link regression":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_linkregression(y_true, y_pred)
@@ -68,17 +132,17 @@ class Evaluator:
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
         if self.task_type == "link prediction":
-            desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
-            desc += "- y_true: numpy.darray of shape (num_edge, )\n"
-            desc += "- y_pred: numpy darray of shape (num_edge, )\n"
-            desc += "each row corresponds to one edge.\n"
-            desc += "y_true is either 0 or 1, indicating whether edges are present or not.\n"
-            desc += "y_true should directly take valid_edge_label or test_edge_label as input.\n"
-            desc += "y_pred should store score values (for computing ROC-AUC).\n"
+            desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
+            desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )\n"
+            desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )\n"
+            desc += "y_pred_pos is the predicted scores for positive edges.\n"
+            desc += "y_pred_neg is the predicted scores for negative edges.\n"
+            desc += "y_pred_neg needs to include the scores predicted on ALL the negative edges in the test or validation set.\n"
+            desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different from different edges in general."
         elif self.task_type == "link regression":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
-            desc += "- y_true: numpy.darray of shape (num_edge, )\n"
-            desc += "- y_pred: numpy darray of shape (num_edge, )\n"
+            desc += "- y_true: numpy ndarray or torch tensor of shape (num_edge, )\n"
+            desc += "- y_pred: numpy ndarray or torch tensor of shape (num_edge, )\n"
             desc += "each row corresponds to one edge.\n"
             desc += "y_true is the target value to be predicted.\n"
             desc += "y_true should directly take valid_edge_label or test_edge_label as input.\n"
@@ -92,31 +156,33 @@ class Evaluator:
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
         if self.task_type == "link prediction":
-            desc += "{\"rocauc\": rocauc}\n"
-            desc += "- rocauc (float): ROC-AUC score\n"
+            desc += "{" + "hit@{}\": hit@{}".format(self.K, self.K) + "}\n"
+            desc += "- hit@{} (float): Hit@{} score\n".format(self.K, self.K)
         elif self.task_type == "link regression":
             desc += "- rmse (float): root mean squared error"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
-
-
         return desc
 
-    def _eval_linkpred(self, y_true, y_pred):
+    def _eval_linkpred(self, y_pred_pos, y_pred_neg, type_info):
         """
-            compute ROC-AUC and AP score
+            compute Hit@K
         """
 
-        rocauc = []
+        if len(y_pred_neg) <= self.K:
+            raise ValueError('Length of y_pred_neg is smaller than {}. Unable to evaluate Hit@{}.'.format(self.K, self.K))
 
-        if np.sum(y_true == 1) > 0 and np.sum(y_true == 0) > 0:
-            rocauc = roc_auc_score(y_true, y_pred)
+        if type_info == 'torch':
+            kth_score_in_negative_edges = torch.topk(y_pred_neg, self.K)[0][-1]
+            hitK = float(torch.sum(y_pred_pos > kth_score_in_negative_edges).cpu()) / len(y_pred_pos)
 
+        # type_info is numpy
         else:
-            raise RuntimeError("No positively labeled link available. Cannot compute ROC-AUC.")
+            kth_score_in_negative_edges = np.sort(y_pred_neg)[-self.K]
+            hitK = float(np.sum(y_pred_pos > kth_score_in_negative_edges)) / len(y_pred_pos)
 
-        return {"rocauc": rocauc}
+        return {"hit@{}".format(self.K): hitK}
 
     def _eval_linkregression(self, y_true, y_pred):
         """
@@ -132,9 +198,10 @@ if __name__ == "__main__":
     evaluator = Evaluator(name = "ogbl-ppa")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    y_true = np.random.randint(2, size = (100,))
-    y_pred = np.random.randn(100,)
-    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    # y_true = np.random.randint(2, size = (100,))
+    y_pred_pos = np.random.randn(100,)
+    y_pred_neg = np.random.randn(1000,)
+    input_dict = {"y_pred_pos": y_pred_pos, "y_pred_neg": y_pred_neg}
     result = evaluator.eval(input_dict)
     print(result)
 
