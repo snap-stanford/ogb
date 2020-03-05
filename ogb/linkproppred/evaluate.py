@@ -156,7 +156,7 @@ class Evaluator:
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
         if self.task_type == "link prediction":
-            desc += "{" + "hits@{}\": hit@{}".format(self.K, self.K) + "}\n"
+            desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         elif self.task_type == "link regression":
             desc += "- rmse (float): root mean squared error"
@@ -171,7 +171,7 @@ class Evaluator:
         """
 
         if len(y_pred_neg) <= self.K:
-            raise ValueError('Length of y_pred_neg is smaller than {}. Unable to evaluate Hit@{}.'.format(self.K, self.K))
+            raise ValueError('Length of y_pred_neg is smaller than {}. Unable to evaluate Hits@{}.'.format(self.K, self.K))
 
         if type_info == 'torch':
             kth_score_in_negative_edges = torch.topk(y_pred_neg, self.K)[0][-1]
