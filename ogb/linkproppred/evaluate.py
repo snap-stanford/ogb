@@ -23,8 +23,8 @@ class Evaluator:
         self.task_type = meta_info[self.name]["task type"]
 
         if self.task_type == "link prediction":
-            ### Hit@K
-            self.K = 3
+            ### Hits@K
+            self.K = 100
 
 
     def _parse_and_check_input(self, input_dict):
@@ -156,8 +156,8 @@ class Evaluator:
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
         if self.task_type == "link prediction":
-            desc += "{" + "hit@{}\": hit@{}".format(self.K, self.K) + "}\n"
-            desc += "- hit@{} (float): Hit@{} score\n".format(self.K, self.K)
+            desc += "{" + "hits@{}\": hit@{}".format(self.K, self.K) + "}\n"
+            desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         elif self.task_type == "link regression":
             desc += "- rmse (float): root mean squared error"
         else:
@@ -167,7 +167,7 @@ class Evaluator:
 
     def _eval_linkpred(self, y_pred_pos, y_pred_neg, type_info):
         """
-            compute Hit@K
+            compute Hits@K
         """
 
         if len(y_pred_neg) <= self.K:
@@ -175,14 +175,14 @@ class Evaluator:
 
         if type_info == 'torch':
             kth_score_in_negative_edges = torch.topk(y_pred_neg, self.K)[0][-1]
-            hitK = float(torch.sum(y_pred_pos > kth_score_in_negative_edges).cpu()) / len(y_pred_pos)
+            hitsK = float(torch.sum(y_pred_pos > kth_score_in_negative_edges).cpu()) / len(y_pred_pos)
 
         # type_info is numpy
         else:
             kth_score_in_negative_edges = np.sort(y_pred_neg)[-self.K]
-            hitK = float(np.sum(y_pred_pos > kth_score_in_negative_edges)) / len(y_pred_pos)
+            hitsK = float(np.sum(y_pred_pos > kth_score_in_negative_edges)) / len(y_pred_pos)
 
-        return {"hit@{}".format(self.K): hitK}
+        return {"hits@{}".format(self.K): hitsK}
 
     def _eval_linkregression(self, y_true, y_pred):
         """
@@ -199,8 +199,8 @@ if __name__ == "__main__":
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     # y_true = np.random.randint(2, size = (100,))
-    y_pred_pos = np.random.randn(100,)
-    y_pred_neg = np.random.randn(1000,)
+    y_pred_pos = torch.tensor(np.random.randn(100,))
+    y_pred_neg = torch.tensor(np.random.randn(1000,))
     input_dict = {"y_pred_pos": y_pred_pos, "y_pred_neg": y_pred_neg}
     result = evaluator.eval(input_dict)
     print(result)
