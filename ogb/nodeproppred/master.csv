@@ -7,4 +7,4 @@ num nodes,132534,2449029
 num tasks,112,1
 split,species,sales_ranking
 task type,binary classification,multiclass classification
-url,https://ogb.stanford.edu/data/nodeproppred/proteinfunc_v3.zip,https://ogb.stanford.edu/data/nodeproppred/products.zip
+url,https://snap.stanford.edu/ogb/data/nodeproppred/proteinfunc_v3.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip

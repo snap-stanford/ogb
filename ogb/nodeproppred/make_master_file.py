@@ -9,7 +9,7 @@ dataset_list = []
 name = "ogbn-proteins"
 dataset_dict[name] = {"num tasks": 112, "task type": "binary classification"}
 dataset_dict[name]["download_name"] = "proteinfunc_v3"
-dataset_dict[name]["url"] = "https://ogb.stanford.edu/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
 dataset_dict[name]["has_node_attr"] = True
@@ -21,7 +21,7 @@ dataset_dict[name]["num nodes"] = 132534
 name = "ogbn-products"
 dataset_dict[name] = {"num tasks": 1, "task type": "multiclass classification"}
 dataset_dict[name]["download_name"] = "products"
-dataset_dict[name]["url"] = "https://ogb.stanford.edu/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
 dataset_dict[name]["has_node_attr"] = True
