@@ -1,11 +1,36 @@
-# Open Graph Benchmark (OGB)
+<p align="center">
+  <img width="40%" src="https://snap-stanford.github.io/ogb-web/assets/img/OGB_rectangle.png" />
+</p>
+
+--------------------------------------------------------------------------------
+
 [![PyPI](https://img.shields.io/pypi/v/ogb)](https://pypi.org/project/ogb/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snap-stanford/ogb/blob/master/LICENSE)
 
-A collection of benchmark datasets, data-loaders and evaluators for graph machine learning in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
+## Overview
+
+The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data-loaders and evaluators for graph machine learning in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
 The goal is to have an easily-accessible standardized large-scale benchmark datasets to drive research in graph machine learning.
 
-### Installation
+<p align="center">
+  <img width="80%" src="https://snap-stanford.github.io/ogb-web/assets/img/ogb_overview.png" />
+</p>
+
+OGB aims to provide graph datasets that cover important graph machine learning tasks, diverse dataset scale, and rich domains.
+
+**Graph ML Tasks:** We cover three fundamental graph machine learning tasks: prediction at the level of nodes, links, and graphs.
+
+**Diverse scale:** Small-scale graph datasets can be processed within a single GPU, while medium- and large-scale graphs might require multiple GPUs or clever sampling/partition techniques. 
+
+**Rich domains:** Graph datasets come from diverse domains ranging from scientific ones to social/information networks, and also include heterogeneous knowledge graphs. 
+
+<p align="center">
+  <img width="70%" src="https://snap-stanford.github.io/ogb-web/assets/img/dataset_overview.png" />
+</p>
+
+OGB is an on-going effort, and we are planning to increase our coverage in the future.
+
+## Installation
 You can install OGB using Python's package manager pip. 
 
 #### Requirements
