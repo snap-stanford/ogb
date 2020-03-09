@@ -86,7 +86,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-reviews")
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-reviews-book")
     splitted_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
     print(splitted_edge)
