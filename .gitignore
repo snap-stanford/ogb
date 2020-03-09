@@ -5,3 +5,4 @@ dist/
 dataset/
 *.swp
 *.vscode
+*.DS_Store

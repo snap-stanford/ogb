@@ -1,30 +1,37 @@
-# Open Graph Benchmark (OGB)
+<p align="center">
+  <img width="40%" src="https://snap-stanford.github.io/ogb-web/assets/img/OGB_rectangle.png" />
+</p>
+
+--------------------------------------------------------------------------------
+
 [![PyPI](https://img.shields.io/pypi/v/ogb)](https://pypi.org/project/ogb/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snap-stanford/ogb/blob/master/LICENSE)
 
-A collection of benchmark datasets, data-loaders and evaluators for graph machine learning in [PyTorch](https://pytorch.org/). Data loaders are fully compatible with [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/).
-The goal is to have an easily-accessible standardized large-scale benchmark datasets to drive research in graph machine learning.
+## Overview
 
+The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data loaders, and evaluators for graph machine learning. Datasets cover a variety of graph machine learning tasks and real-world applications.
+The OGB data loaders are fully compatible with popular graph deep learning frameworks, including [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/). They provide automatic dataset downloading, standardized dataset splits, and unified performance evaluation. 
 
-### Datasets available
-Benchmark datasets are broadly classified into three categories. Datasets that are currently available are also listed (more to come soon).
-- [**Node property prediction**](ogb/nodeproppred/README.md) : Prediction on single nodes.
-    - Prediction of protein functionality in a protein-protein association network.
+<p align="center">
+  <img width="80%" src="https://snap-stanford.github.io/ogb-web/assets/img/ogb_overview.png" />
+</p>
 
-- [**Link property prediction**](ogb/linkproppred/README.md) : Prediction on pairs of nodes.
-    - Prediction of protein-protein association and type in a protein-protein association network.
+OGB aims to provide graph datasets that cover important graph machine learning tasks, diverse dataset scale, and rich domains.
 
-- [**Graph property prediction**](ogb/graphproppred/README.md) : Prediction on an entire graph/subgraph.
-    - Prediction of chemical properties of molecules (12 kinds of datasets available).
+**Graph ML Tasks:** We cover three fundamental graph machine learning tasks: prediction at the level of nodes, links, and graphs.
 
-### Installation
-You can install OGB using Python's package manager pip. To avoid any conflict with your existing Python setup, it is suggested to work in a virtual environment with [`virtualenv`](https://docs.python-guide.org/dev/virtualenvs/). To install `virtualenv`:
+**Diverse scale:** Small-scale graph datasets can be processed within a single GPU, while medium- and large-scale graphs might require multiple GPUs or clever sampling/partition techniques. 
 
-```bash
-pip install --upgrade virtualenv
-virtualenv venv
-source venv/bin/activate
-```
+**Rich domains:** Graph datasets come from diverse domains ranging from scientific ones to social/information networks, and also include heterogeneous knowledge graphs. 
+
+<p align="center">
+  <img width="70%" src="https://snap-stanford.github.io/ogb-web/assets/img/dataset_overview.png" />
+</p>
+
+OGB is an on-going effort, and we are planning to increase our coverage in the future.
+
+## Installation
+You can install OGB using Python's package manager pip. 
 
 #### Requirements
  - Python 3.7
@@ -58,9 +65,9 @@ Below, on PyTorch Geometric, we see that a few lines of code is sufficient to pr
 from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
-dataset = PygGraphPropPredDataset(name = "ogbg-mol-tox21") 
+dataset = PygGraphPropPredDataset(name = "ogbg-mol-tox21")
+ 
 splitted_idx = dataset.get_idx_split() 
-
 train_loader = DataLoader(dataset[splitted_idx["train"]], batch_size=32, shuffle=True)
 valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=32, shuffle=False)
 test_loader = DataLoader(dataset[splitted_idx["test"]], batch_size=32, shuffle=False)
@@ -73,11 +80,11 @@ The standardized evaluation protocol allows researchers to reliably compare thei
 from ogb.graphproppred import Evaluator
 
 evaluator = Evaluator(name = "ogbg-mol-tox21")
-# We can learn the input and output format specification of the evaluator as follows.
+# You can learn the input and output format specification of the evaluator as follows.
 # print(evaluator.expected_input_format) 
 # print(evaluator.expected_output_format) 
 input_dict = {"y_true": y_true, "y_pred": y_pred}
-result_dict = evaluator.eval(input_dict) # E.g., {"ap": 0.3421, "rocauc": 0.7321}
+result_dict = evaluator.eval(input_dict) # E.g., {"rocauc": 0.7321}
 ```
 
 ## Citing OGB
