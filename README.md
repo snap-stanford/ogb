@@ -36,7 +36,7 @@ You can install OGB using Python's package manager pip.
 **Important:** The details of OGB are subject to change until the version 1.0.0 is released. We plan to release it by the end of March 2020. Thanks for your patience.
 
 #### Requirements
- - Python 3.*
+ - Python>=3.5
  - PyTorch>=1.2
  - DGL>=0.4.1 or torch-geometric>=1.3.1
  - Numpy>=1.16.0
