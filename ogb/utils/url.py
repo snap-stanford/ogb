@@ -4,10 +4,12 @@ import os
 import os.path as osp
 from six.moves import urllib
 import errno
+from tqdm import tqdm
+
+GBFACTOR = float(1 << 30)
 
 def decide_download(url):
     d = ur.urlopen(url)
-    GBFACTOR = float(1 << 30)
     size = int(d.info()["Content-Length"])/GBFACTOR
 
     ### confirm if larger than 1GB
@@ -44,10 +46,28 @@ def download_url(url, folder, log=True):
         print('Downloading', url)
 
     makedirs(folder)
-    data = urllib.request.urlopen(url)
+    data = ur.urlopen(url)
 
-    with open(path, 'wb') as f:
-        f.write(data.read())
+    size = int(data.info()["Content-Length"])
+
+    chunk_size = 1024*1024
+    num_iter = int(size/chunk_size) + 2
+
+    downloaded_size = 0
+
+    try:
+        with open(path, 'wb') as f:
+            pbar = tqdm(range(num_iter))
+            for i in pbar:
+                chunk = data.read(chunk_size)
+                downloaded_size += len(chunk)
+                pbar.set_description("Downloaded {:.2f} GB".format(float(downloaded_size)/GBFACTOR))
+                f.write(chunk)
+    except:
+        if os.path.exists(path):
+             os.remove(path)
+        raise RuntimeError('Stopped downloading due to interruption.')
+
 
     return path
 
@@ -68,6 +88,4 @@ def extract_zip(path, folder, log=True):
         f.extractall(folder)
 
 if __name__ == "__main__":
-    url = "https://ogb.stanford.edu/data/pyg_mol_download/tox21.zip"
-    ans = decide_download(url)
-    print(ans)
+    pass
