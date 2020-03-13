@@ -1,6 +1,7 @@
 import argparse
 
-import torch import torch.nn.functional as F
+import torch
+import torch.nn.functional as F
 
 from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
 from ogb.nodeproppred import Evaluator
@@ -125,9 +126,6 @@ def main():
 
         logger.print_statistics(run)
     logger.print_statistics()
-
-    if args.out_file is not None:
-        logger.save(args.out_file)
 
 
 if __name__ == "__main__":

@@ -211,9 +211,6 @@ def main():
         logger.print_statistics(run)
     logger.print_statistics()
 
-    if args.out_file is not None:
-        logger.save(args.out_file)
-
 
 if __name__ == "__main__":
     main()
