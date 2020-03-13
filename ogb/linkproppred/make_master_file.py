@@ -20,7 +20,7 @@ dataset_dict[name]["num nodes"] = 576289
 ### add meta-information about amazon review rating prediction task
 name = "ogbl-reviews-book"
 dataset_dict[name] = {"task type": "link regression"}
-dataset_dict[name]["download_name"] = "reviews_book"
+dataset_dict[name]["download_name"] = "reviews_book_v2"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
@@ -31,7 +31,7 @@ dataset_dict[name]["num nodes"] = 2560437
 
 name = "ogbl-reviews-groc"
 dataset_dict[name] = {"task type": "link regression"}
-dataset_dict[name]["download_name"] = "reviews_grocery"
+dataset_dict[name]["download_name"] = "reviews_grocery_v2"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
