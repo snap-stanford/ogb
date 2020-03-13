@@ -65,6 +65,7 @@ class DglGraphPropPredDataset(object):
             graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)
             labels = torch.tensor(pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values)
 
+            print('Saving...')
             save_graphs(pre_processed_file_path, graphs, labels={'labels': labels})
 
             ### load preprocessed files

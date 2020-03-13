@@ -3,6 +3,7 @@ import os.path as osp
 import os
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
+from tqdm import tqdm
 
 ### reading raw files from a directory.
 def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
@@ -15,6 +16,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     edge_feat and node_feat are optional: if a graph does not contain it, we will have None.
     '''
 
+    print('Loading necessary files...')
     # loading necessary files
     try:
         edge = pd.read_csv(osp.join(raw_dir, "edge.csv.gz"), compression="gzip", header = None).values.T.astype(np.int64) # (2, num_edge) numpy array
@@ -47,7 +49,9 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     graph_list = []
     num_node_accum = 0
     num_edge_accum = 0
-    for num_node, num_edge in zip(num_node_list, num_edge_list):
+
+    print('Processing graphs...')
+    for num_node, num_edge in tqdm(zip(num_node_list, num_edge_list), total=len(num_node_list)):
 
         graph = dict()
 

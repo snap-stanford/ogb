@@ -74,6 +74,7 @@ class DglNodePropPredDataset(object):
 
             label_dict = {"labels": node_label}
 
+            print('Saving...')
             save_graphs(pre_processed_file_path, graph, label_dict)
 
             self.graph, label_dict = load_graphs(pre_processed_file_path)

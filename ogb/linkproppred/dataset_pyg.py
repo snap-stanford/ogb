@@ -79,6 +79,8 @@ class PygLinkPropPredDataset(InMemoryDataset):
         data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge)[0]
 
         data = data if self.pre_transform is None else self.pre_transform(data)
+
+        print('Saving...')
         torch.save(self.collate([data]), self.processed_paths[0])
 
     def __repr__(self):
@@ -86,7 +88,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-reviews-book")
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-reviews-groc")
     splitted_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
     print(splitted_edge)

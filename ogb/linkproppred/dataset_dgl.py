@@ -64,6 +64,7 @@ class DglLinkPropPredDataset(object):
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
             graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)[0]
 
+            print('Saving...')
             save_graphs(pre_processed_file_path, graph, {})
 
             self.graph, _ = load_graphs(pre_processed_file_path)

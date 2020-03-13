@@ -4,13 +4,15 @@ from torch_geometric.data import Data
 import os.path as osp
 import numpy as np
 from ogb.io.read_graph_raw import read_csv_graph_raw
+from tqdm import tqdm
 
 def read_csv_graph_pyg(raw_dir, add_inverse_edge = False):
 
     graph_list = read_csv_graph_raw(raw_dir, add_inverse_edge)
     pyg_graph_list = []
 
-    for graph in graph_list:
+    print('Converting graphs into PyG objects...')
+    for graph in tqdm(graph_list):
         g = Data()
         g.__num_nodes__ = graph["num_nodes"]
         g.edge_index = torch.tensor(graph["edge_index"])
