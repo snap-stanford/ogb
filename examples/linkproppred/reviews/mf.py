@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from torch_geometric.nn.inits import glorot
-from torch_scatter import scatter_mean
 
 from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
 from ogb.linkproppred import Evaluator
@@ -14,12 +13,10 @@ from logger import Logger
 
 
 class LinkPredictor(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers,
-                 dropout):
+    def __init__(self, in_channels, out_channels, dropout):
         super(LinkPredictor, self).__init__()
 
         self.lin = torch.nn.Linear(in_channels, out_channels)
-
         self.dropout = dropout
 
     def reset_parameters(self):
@@ -36,20 +33,23 @@ class LinkPredictor(torch.nn.Module):
         return x.squeeze()
 
 
-def train(predictor, product_emb, user_emb, product_x, splitted_edge, optimizer, batch_size):
+def train(predictor, product_emb, user_emb, product_x, splitted_edge,
+          optimizer, batch_size):
     predictor.train()
 
     train_edge = splitted_edge['train_edge']
     train_label = splitted_edge['train_edge_label']
 
     total_loss = total_examples = 0
-    for i, perm in enumerate(DataLoader(range(train_edge.size(1)), batch_size, shuffle=True)):
+    for i, perm in enumerate(
+            DataLoader(range(train_edge.size(1)), batch_size, shuffle=True)):
         optimizer.zero_grad()
         if product_x is not None:
             product_h = product_x[train_edge[0][perm]]
         else:
             product_h = None
-        out = predictor(product_emb[train_edge[0][perm]], user_emb[train_edge[1][perm]], product_h)
+        out = predictor(product_emb[train_edge[0][perm]],
+                        user_emb[train_edge[1][perm]], product_h)
         loss = F.mse_loss(out, train_label[perm].to(out.device))
         loss.backward()
         optimizer.step()
@@ -58,14 +58,15 @@ def train(predictor, product_emb, user_emb, product_x, splitted_edge, optimizer,
         total_loss += loss.item() * num_examples
         total_examples += num_examples
 
-        if i > 4:
+        if i > 4:  # Exit after 4 steps for intermediate evaluations.
             continue
 
     return total_loss / total_examples
 
 
 @torch.no_grad()
-def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator, batch_size):
+def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator,
+         batch_size):
     predictor.eval()
 
     train_y_preds = []
@@ -75,9 +76,10 @@ def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator, 
             product_h = product_x[train_edge[0][perm]]
         else:
             product_h = None
-        pred = predictor(product_emb[train_edge[0][perm]], user_emb[train_edge[1][perm]], product_h)
+        pred = predictor(product_emb[train_edge[0][perm]],
+                         user_emb[train_edge[1][perm]], product_h)
         train_y_preds += [pred.clamp_(1, 5).cpu()]
-    
+
     valid_y_preds = []
     valid_edge = splitted_edge['valid_edge']
     for perm in DataLoader(range(valid_edge.size(1)), batch_size):
@@ -85,7 +87,8 @@ def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator, 
             product_h = product_x[valid_edge[0][perm]]
         else:
             product_h = None
-        pred = predictor(product_emb[valid_edge[0][perm]], user_emb[valid_edge[1][perm]], product_h)
+        pred = predictor(product_emb[valid_edge[0][perm]],
+                         user_emb[valid_edge[1][perm]], product_h)
         valid_y_preds += [pred.clamp_(1, 5).cpu()]
 
     test_y_preds = []
@@ -95,7 +98,8 @@ def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator, 
             product_h = product_x[test_edge[0][perm]]
         else:
             product_h = None
-        pred = predictor(product_emb[test_edge[0][perm]], user_emb[test_edge[1][perm]], product_h)
+        pred = predictor(product_emb[test_edge[0][perm]],
+                         user_emb[test_edge[1][perm]], product_h)
         test_y_preds += [pred.clamp_(1, 5).cpu()]
 
     train_y_pred = torch.cat(train_y_preds, dim=0)
@@ -104,7 +108,7 @@ def test(predictor, product_emb, user_emb, product_x, splitted_edge, evaluator, 
 
     train_rmse = evaluator.eval({
         'y_true': splitted_edge['train_edge_label'],
-         'y_pred': train_y_pred,
+        'y_pred': train_y_pred,
     })['rmse']
     valid_rmse = evaluator.eval({
         'y_true': splitted_edge['valid_edge_label'],
@@ -123,9 +127,7 @@ def main():
     parser.add_argument('--suffix', type=str, default='groc')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--use_node_features', action='store_true')
-    parser.add_argument('--num_layers', type=int, default=1)
     parser.add_argument('--hidden_channels', type=int, default=64)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
@@ -161,13 +163,9 @@ def main():
         edge[1] -= product_emb.size(0)
         splitted_edge[f'{split}_edge'] = edge
 
-    train_products = splitted_edge['train_edge'][1]
-    all_products = torch.cat([splitted_edge['train_edge'][1], splitted_edge['valid_edge'][1], splitted_edge['test_edge'][1]], 0)
-
-
     predictor = LinkPredictor(
-        args.hidden_channels + (300 if product_x is not None else 0), args.hidden_channels, 1,
-        args.num_layers, args.dropout).to(device)
+        args.hidden_channels + (300 if product_x is not None else 0), 1,
+        args.dropout).to(device)
 
     evaluator = Evaluator(name=f'ogbl-reviews-{args.suffix}')
     logger = Logger(args.runs, args)
@@ -177,14 +175,14 @@ def main():
         glorot(user_emb)
         glorot(product_emb)
 
-        optimizer = torch.optim.Adam([user_emb, product_emb] + list(predictor.parameters()),
-                                     lr=args.lr)
+        optimizer = torch.optim.Adam([user_emb, product_emb] +
+                                     list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, product_emb, user_emb, product_x, splitted_edge,
-                         optimizer, args.batch_size)
-            result = test(predictor, product_emb, user_emb, product_x, splitted_edge,
-                          evaluator, args.batch_size)
+            loss = train(predictor, product_emb, user_emb, product_x,
+                         splitted_edge, optimizer, args.batch_size)
+            result = test(predictor, product_emb, user_emb, product_x,
+                          splitted_edge, evaluator, args.batch_size)
             logger.add_result(run, result)
 
             if epoch % args.log_steps == 0:
@@ -198,9 +196,6 @@ def main():
 
         logger.print_statistics(run)
     logger.print_statistics()
-
-    if args.out_file is not None:
-        logger.save(args.out_file)
 
 
 if __name__ == "__main__":
