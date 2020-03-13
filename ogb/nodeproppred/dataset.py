@@ -3,7 +3,7 @@ import shutil, os
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw
-import pickle
+import torch
 
 class NodePropPredDataset(object):
     def __init__(self, name, root = "dataset"):
@@ -35,7 +35,7 @@ class NodePropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            loaded_dict = pickle.load(open(pre_processed_file_path, 'rb'))
+            loaded_dict = torch.load(pre_processed_file_path)
             self.graph, self.labels = loaded_dict['graph'], loaded_dict['labels']
 
         else:
@@ -60,16 +60,14 @@ class NodePropPredDataset(object):
 
             ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)[0] # only a single graph
+            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)[0] # only a single graph
 
             ### adding prediction target
-            node_label = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
+            self.labels = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
 
-            pickle.dump({'graph': graph, 'labels': node_label}, open(pre_processed_file_path, 'wb'), protocol=4)
+            print('Saving...')
+            torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path)
 
-            ### load preprocessed files
-            loaded_dict = pickle.load(open(pre_processed_file_path, 'rb'))
-            self.graph, self.labels = loaded_dict['graph'], loaded_dict['labels']
 
     def get_idx_split(self):
         split_type = self.meta_info[self.name]["split"]

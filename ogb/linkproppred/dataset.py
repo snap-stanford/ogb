@@ -3,7 +3,7 @@ import shutil, os
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw
-import pickle
+import torch
 import numpy as np
 
 class LinkPropPredDataset(object):
@@ -35,7 +35,7 @@ class LinkPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            self.graph = pickle.load(open(pre_processed_file_path, 'rb'))
+            self.graph = torch.load(pre_processed_file_path, 'rb')
 
         else:
             ### check download
@@ -59,11 +59,10 @@ class LinkPropPredDataset(object):
 
             ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)[0] # only a single graph
+            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)[0] # only a single graph
 
-            pickle.dump(graph, open(pre_processed_file_path, 'wb'), protocol=4)
-
-            self.graph = pickle.load(open(pre_processed_file_path, 'rb'))
+            print('Saving...')
+            torch.save(self.graph, pre_processed_file_path)
 
     def get_edge_split(self):
         split_type = self.meta_info[self.name]["split"]
@@ -93,7 +92,7 @@ class LinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dataset = LinkPropPredDataset(name = "ogbl-reviews")
+    dataset = LinkPropPredDataset(name = "ogbl-reviews-groc")
     splitted_edge = dataset.get_edge_split()
     print(dataset[0])
     print(splitted_edge)

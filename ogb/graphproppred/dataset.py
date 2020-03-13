@@ -3,7 +3,7 @@ import shutil, os
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw
-import pickle
+import torch
 
 class GraphPropPredDataset(object):
     def __init__(self, name, root = "dataset"):
@@ -36,7 +36,7 @@ class GraphPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if os.path.exists(pre_processed_file_path):
-            loaded_dict = pickle.load(open(pre_processed_file_path, 'rb'))
+            loaded_dict = torch.load(pre_processed_file_path, 'rb')
             self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
 
         else:
@@ -58,14 +58,11 @@ class GraphPropPredDataset(object):
 
             ### preprocess
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)
-            labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+            self.graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)
+            self.labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
 
-            pickle.dump({'graphs': graphs, 'labels': labels}, open(pre_processed_file_path, 'wb'), protocol=4)
-
-            ### load preprocessed files
-            loaded_dict = pickle.load(open(pre_processed_file_path, 'rb'))
-            self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
+            print('Saving...')
+            torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path)
 
 
     def get_idx_split(self):
