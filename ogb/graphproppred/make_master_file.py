@@ -27,10 +27,26 @@ for nme in mol_dataset_list:
     dataset_dict[nme]["add_inverse_edge"] = True
     dataset_dict[nme]["data type"] = "mol"
     dataset_dict[nme]["split"] = "scaffold"
+    dataset_dict[nme]["has_node_attr"] = True
+    dataset_dict[nme]["has_edge_attr"] = True
 
 dataset_list.extend(mol_dataset_list)
 
 ### end molecule dataset
+
+### add ppi dataset (medium)
+name = "ogbg-ppi"
+dataset_dict[name] = {"task type": "multiclass classification"}
+dataset_dict[name]["download_name"] = "ogbg_ppi_medium"
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/ogbg_ppi_medium.zip"
+## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
+dataset_dict[name]["add_inverse_edge"] = True 
+dataset_dict[name]["split"] = "species"
+dataset_dict[name]["num tasks"] = 1
+dataset_dict[name]["has_node_attr"] = False
+dataset_dict[name]["has_edge_attr"] = True
+
+
 
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 

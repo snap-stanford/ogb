@@ -26,7 +26,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "binary classification" or self.task_type == "regression":
+        if self.task_type == "binary classification" or self.task_type == "regression" or self.task_type == "multiclass classification":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -74,6 +74,9 @@ class Evaluator:
         elif self.task_type == "regression":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_regression(y_true, y_pred)
+        elif self.task_type == "multiclass classification":
+            y_true, y_pred = self._parse_and_check_input(input_dict)
+            return self._eval_multicls(y_true, y_pred)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -93,6 +96,13 @@ class Evaluator:
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
+        elif self.task_type == "multiclass classification":
+            desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
+            desc += "- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
+            desc += "- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
+            desc += "where y_pred stores predicted class label (integer),\n"
+            desc += "num_task is {}, and ".format(self.num_tasks)
+            desc += "each row corresponds to one graph.\n"
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
 
@@ -107,10 +117,11 @@ class Evaluator:
         elif self.task_type == "regression":
             desc += "{\"rmse\": rmse}\n"
             desc += "- rmse (float): root mean squared error averaged across {} task(s)\n".format(self.num_tasks)
+        elif self.task_type == "multiclass classification":
+            desc += "{\"acc\": acc}\n"
+            desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
             raise ValueError("Undefined task type %s" (self.task_type))
-
-
 
         return desc
 
@@ -144,6 +155,16 @@ class Evaluator:
 
         return {"rmse": sum(rmse_list)/len(rmse_list)}
 
+    def _eval_multicls(self, y_true, y_pred):
+        acc_list = []
+
+        for i in range(y_true.shape[1]):
+            is_valid = y_true[:,i] == y_true[:,i]
+            correct = y_true[is_valid,i] == y_pred[is_valid,i]
+            acc_list.append(float(np.sum(correct))/len(correct))
+
+        return {"acc": sum(acc_list)/len(acc_list)}
+
 if __name__ == "__main__":
     ### binary classification case
     evaluator = Evaluator("ogbg-mol-tox21")
@@ -161,6 +182,16 @@ if __name__ == "__main__":
     print(evaluator.expected_output_format)
     y_true = np.random.randn(100,1)
     y_pred = np.random.randn(100,1)
+    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
+    ### multiclass classification
+    evaluator = Evaluator("ogbg-ppi")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_true = np.random.randint(5, size = (100,1))
+    y_pred = np.random.randint(5, size = (100,1))
     input_dict = {"y_true": y_true, "y_pred": y_pred}
     result = evaluator.eval(input_dict)
     print(result)
