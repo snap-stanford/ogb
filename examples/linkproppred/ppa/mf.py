@@ -129,7 +129,7 @@ def test(x, predictor, splitted_edge, evaluator, batch_size):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-PPA (MLP)')
+    parser = argparse.ArgumentParser(description='OGBL-PPA (MF)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--num_layers', type=int, default=3)
