@@ -148,7 +148,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Proteins (Full-Batch)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--use_sage', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
@@ -190,13 +189,13 @@ def main():
 
     model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
                 args.dropout).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
         model.reset_parameters()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, x, adj, y_true, train_idx, optimizer)
 
@@ -215,9 +214,6 @@ def main():
 
         logger.print_statistics(run)
     logger.print_statistics()
-
-    if args.out_file is not None:
-        logger.save(args.out_file)
 
 
 if __name__ == "__main__":

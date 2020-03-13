@@ -133,7 +133,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Proteins (Cluster-GCN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--use_node_features', action='store_true')
     parser.add_argument('--num_partitions', type=int, default=700)
     parser.add_argument('--num_workers', type=int, default=6)
@@ -173,7 +172,8 @@ def main():
                            shuffle=True, num_workers=args.num_workers)
 
     model = GIN(cluster_data.data.x.size(-1), data.edge_attr.size(-1),
-                args.hidden_channels, 112, args.num_layers, args.dropout).to(device)
+                args.hidden_channels, 112, args.num_layers,
+                args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
@@ -199,9 +199,6 @@ def main():
 
         logger.print_statistics(run)
     logger.print_statistics()
-
-    if args.out_file is not None:
-        logger.save(args.out_file)
 
 
 if __name__ == "__main__":

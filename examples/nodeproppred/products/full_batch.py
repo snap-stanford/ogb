@@ -148,7 +148,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (Full-Batch)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--use_sage', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
@@ -187,13 +186,12 @@ def main():
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
         model.reset_parameters()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, x, adj, y_true, train_idx, optimizer)
             result = test(model, x, adj, y_true, splitted_idx, evaluator)

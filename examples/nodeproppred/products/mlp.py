@@ -74,7 +74,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
@@ -103,13 +102,13 @@ def main():
 
     model = MLP(x.size(-1), args.hidden_channels, 47, args.num_layers,
                 args.dropout).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
         model.reset_parameters()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, x, y_true, train_idx, optimizer)
             result = test(model, x, y_true, splitted_idx, evaluator)

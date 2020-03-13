@@ -74,7 +74,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Proteins (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--out_file', type=str, default=None)
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -98,13 +97,13 @@ def main():
 
     model = MLP(x.size(-1), args.hidden_channels, 112, args.num_layers,
                 args.dropout).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
         model.reset_parameters()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, x, y_true, train_idx, optimizer)
 
@@ -123,9 +122,6 @@ def main():
 
         logger.print_statistics(run)
     logger.print_statistics()
-
-    if args.out_file is not None:
-        logger.save(args.out_file)
 
 
 if __name__ == "__main__":

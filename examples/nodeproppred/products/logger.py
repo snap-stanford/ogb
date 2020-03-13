@@ -42,13 +42,3 @@ class Logger(object):
             print(f'  Final Train: {r.mean():.2f} ± {r.std():.2f}')
             r = best_result[:, 3]
             print(f'   Final Test: {r.mean():.2f} ± {r.std():.2f}')
-
-    def save(self, path):
-        torch.save((self.info, torch.tensor(self.results)), path)
-
-    @staticmethod
-    def load(self, path):
-        info, result = torch.load(path)
-        logger = Logger(result.size(0), info)
-        logger.results = result.tolist()
-        return logger
