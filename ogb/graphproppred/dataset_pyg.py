@@ -44,7 +44,12 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        return self.download_name + ".csv.gz"
+        file_names = ["edge"]
+        if self.meta_info[self.name]["has_node_attr"] == "True":
+            file_names.append("node-feat")
+        if self.meta_info[self.name]["has_edge_attr"] == "True":
+            file_names.append("edge-feat")
+        return [file_name + ".csv.gz" for file_name in file_names]
 
     @property
     def processed_file_names(self):
@@ -76,6 +81,8 @@ class PygGraphPropPredDataset(InMemoryDataset):
             g.y = torch.tensor(graph_label[i]).view(1,-1)
 
         data, slices = self.collate(data_list)
+
+        print('Saving...')
         torch.save((data, slices), self.processed_paths[0])
         
 
