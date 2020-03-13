@@ -38,7 +38,8 @@ class GCNConv(torch.nn.Module):
 
 
 class GCN(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers, dropout):
+    def __init__(self, in_channels, hidden_channels, out_channels, num_layers,
+                 dropout):
         super(GCN, self).__init__()
 
         self.convs = torch.nn.ModuleList()
@@ -113,7 +114,8 @@ class SAGE(torch.nn.Module):
 
 
 class LinkPredictor(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers, dropout):
+    def __init__(self, in_channels, hidden_channels, out_channels, num_layers,
+                 dropout):
         super(LinkPredictor, self).__init__()
 
         self.lins = torch.nn.ModuleList()
@@ -138,7 +140,6 @@ class LinkPredictor(torch.nn.Module):
         return torch.sigmoid(x)
 
 
-
 def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
     model.train()
     predictor.train()
@@ -146,7 +147,8 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
     pos_train_edge = splitted_edge['train_edge'].to(x.device)
 
     total_loss = total_examples = 0
-    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size, shuffle=True):
+    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
+                           shuffle=True):
 
         optimizer.zero_grad()
 
@@ -157,8 +159,8 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        edge = torch.randint(0, x.size(0), edge.size(),
-                             dtype=torch.long, device=x.device)
+        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
+                             device=x.device)
 
         neg_out = predictor(h[edge[0]], h[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
@@ -266,11 +268,11 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(x.size(-1), args.hidden_channels, args.hidden_channels, args.num_layers,
-                     args.dropout).to(device)
+        model = SAGE(x.size(-1), args.hidden_channels, args.hidden_channels,
+                     args.num_layers, args.dropout).to(device)
     else:
-        model = GCN(x.size(-1), args.hidden_channels, args.hidden_channels, args.num_layers,
-                    args.dropout).to(device)
+        model = GCN(x.size(-1), args.hidden_channels, args.hidden_channels,
+                    args.num_layers, args.dropout).to(device)
 
         # Pre-compute GCN normalization.
         adj = adj.set_diag()
@@ -279,23 +281,26 @@ def main():
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
 
-    predictor = LinkPredictor(args.hidden_channels, args.hidden_channels,
-                              1, args.num_layers, args.dropout).to(device)
+    predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
+                              args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbl-ppa')
     loggers = {
-            'Hits@10': Logger(args.runs, args),
-            'Hits@50': Logger(args.runs, args),
-            'Hits@100': Logger(args.runs, args),
-            }
+        'Hits@10': Logger(args.runs, args),
+        'Hits@50': Logger(args.runs, args),
+        'Hits@100': Logger(args.runs, args),
+    }
 
     for run in range(args.runs):
-        optimizer = torch.optim.Adam(list(model.parameters()) + list(predictor.parameters()), lr=args.lr)
         model.reset_parameters()
         predictor.reset_parameters()
+        optimizer = torch.optim.Adam(
+            list(model.parameters()) + list(predictor.parameters()),
+            lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(model, predictor, x, adj, splitted_edge, optimizer, args.batch_size)
+            loss = train(model, predictor, x, adj, splitted_edge, optimizer,
+                         args.batch_size)
 
             if epoch % args.eval_steps == 0:
                 results = test(model, predictor, x, adj, splitted_edge,

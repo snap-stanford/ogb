@@ -4,9 +4,6 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from torch_geometric.nn.inits import glorot
-from torch_scatter import scatter_mean
-
 from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
 from ogb.linkproppred import Evaluator
 
@@ -60,14 +57,12 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        neg_per_pos = 2
-        edge = torch.randint(0, x.weight.size(0), (2, neg_per_pos * edge.size(1)),
-                                       dtype=torch.long, device=x.weight.device)
+        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
+                             device=x.device)
         neg_out = predictor(x(edge[0]), x(edge[1]))
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
         loss = pos_loss + neg_loss
-        print(loss.item())
         loss.backward()
         optimizer.step()
 
@@ -157,27 +152,29 @@ def main():
 
     x = torch.nn.Embedding(data.num_nodes, args.hidden_channels).to(device)
 
-    predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1, args.num_layers,
-                             args.dropout).to(device)
+    predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
+                              args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbl-ppa')
     loggers = {
-            'Hits@10': Logger(args.runs, args),
-            'Hits@50': Logger(args.runs, args),
-            'Hits@100': Logger(args.runs, args),
-            }
+        'Hits@10': Logger(args.runs, args),
+        'Hits@50': Logger(args.runs, args),
+        'Hits@100': Logger(args.runs, args),
+    }
 
     for run in range(args.runs):
         x.reset_parameters()
         predictor.reset_parameters()
-        optimizer = torch.optim.Adam(list(x.parameters()) + list(predictor.parameters()), lr=args.lr)
+        optimizer = torch.optim.Adam(
+            list(x.parameters()) + list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(x, predictor, splitted_edge, optimizer, args.batch_size)
-            print("DONE")
+            loss = train(x, predictor, splitted_edge, optimizer,
+                         args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                results = test(x, predictor, splitted_edge, evaluator, args.batch_size)
+                results = test(x, predictor, splitted_edge, evaluator,
+                               args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)
 

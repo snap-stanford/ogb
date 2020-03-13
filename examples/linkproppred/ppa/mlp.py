@@ -1,12 +1,8 @@
 import argparse
 
 import torch
-from torch.nn import Parameter
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-
-from torch_sparse import SparseTensor
-from torch_geometric.nn.inits import glorot, zeros
 
 from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
 from ogb.linkproppred import Evaluator
@@ -57,8 +53,8 @@ def train(predictor, x, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        edge = torch.randint(0, x.size(0), edge.size(),
-                                       dtype=torch.long, device=x.device)
+        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
+                             device=x.device)
         neg_out = predictor(x[edge[0]], x[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
@@ -150,7 +146,8 @@ def main():
     splitted_edge = dataset.get_edge_split()
     data = dataset[0]
 
-    x = torch.cat([data.x.to(torch.float), torch.load('embedding.pt')], dim=-1).to(device)
+    x = torch.cat([data.x.to(torch.float),
+                   torch.load('embedding.pt')], dim=-1).to(device)
 
     predictor = LinkPredictor(x.size(-1), args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
@@ -159,10 +156,10 @@ def main():
 
     evaluator = Evaluator(name='ogbl-ppa')
     loggers = {
-            'Hits@10': Logger(args.runs, args),
-            'Hits@50': Logger(args.runs, args),
-            'Hits@100': Logger(args.runs, args),
-            }
+        'Hits@10': Logger(args.runs, args),
+        'Hits@50': Logger(args.runs, args),
+        'Hits@100': Logger(args.runs, args),
+    }
 
     for run in range(args.runs):
         predictor.reset_parameters()
@@ -173,7 +170,7 @@ def main():
 
             if epoch % args.eval_steps == 0:
                 results = test(predictor, x, splitted_edge, evaluator,
-                              args.batch_size)
+                               args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)
 
