@@ -12,7 +12,7 @@ def read_csv_graph_dgl(raw_dir, add_inverse_edge = False):
     dgl_graph_list = []
 
     print('Converting graphs into DGL objects...')
-    for graph in graph_list:
+    for graph in tqdm(graph_list):
         g = dgl.DGLGraph()
         g.add_nodes(graph["num_nodes"])
         g.add_edges(graph["edge_index"][0], graph["edge_index"][1])

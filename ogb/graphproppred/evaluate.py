@@ -112,7 +112,7 @@ class Evaluator:
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
         if self.task_type == "binary classification":
-            desc += "{\"rocauc\": rocauc, \"ap\": ap}\n"
+            desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.task_type == "regression":
             desc += "{\"rmse\": rmse}\n"

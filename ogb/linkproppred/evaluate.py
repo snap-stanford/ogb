@@ -138,7 +138,7 @@ class Evaluator:
             desc += "y_pred_pos is the predicted scores for positive edges.\n"
             desc += "y_pred_neg is the predicted scores for negative edges.\n"
             desc += "y_pred_neg needs to include the scores predicted on ALL the negative edges in the test or validation set.\n"
-            desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different from different edges in general."
+            desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
         elif self.task_type == "link regression":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_edge, )\n"
