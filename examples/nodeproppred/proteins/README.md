@@ -9,8 +9,11 @@ This repository includes the following example scripts:
 ## Training & Evaluation
 
 ```
-# Run with default config
+# Run with default config 
 python cluster_gin.py
+
+# With node features (adding dropout improves performance)
+python cluster_gin.py --dropout 0.5 --use_node_features
 
 # Run with custom config
 python cluster_gin.py --hidden_channels=64
