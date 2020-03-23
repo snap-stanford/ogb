@@ -10,8 +10,6 @@ import time
 import numpy as np
 
 ### importing OGB
-
-### for loading dataset and evaluator
 from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
