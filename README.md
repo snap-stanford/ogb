@@ -33,8 +33,6 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 ## Installation
 You can install OGB using Python's package manager `pip`.
 
-**Important:** The details of OGB are subject to change until the version 1.0.0 is released. We plan to release it by the end of March 2020. Thanks for your patience.
-
 #### Requirements
  - Python>=3.5
  - PyTorch>=1.2
