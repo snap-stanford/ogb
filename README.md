@@ -10,7 +10,7 @@
 ## Overview
 
 The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data loaders, and evaluators for graph machine learning. Datasets cover a variety of graph machine learning tasks and real-world applications.
-The OGB data loaders are fully compatible with popular graph deep learning frameworks, including [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/). They provide automatic dataset downloading, standardized dataset splits, and unified performance evaluation. 
+The OGB data loaders are fully compatible with popular graph deep learning frameworks, including [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/). They provide automatic dataset downloading, standardized dataset splits, and unified performance evaluation.
 
 <p align="center">
   <img width="80%" src="https://snap-stanford.github.io/ogb-web/assets/img/ogb_overview.png" />
@@ -20,7 +20,7 @@ OGB aims to provide graph datasets that cover important graph machine learning t
 
 **Graph ML Tasks:** We cover three fundamental graph machine learning tasks: prediction at the level of nodes, links, and graphs.
 
-**Diverse scale:** Small-scale graph datasets can be processed within a single GPU, while medium- and large-scale graphs might require multiple GPUs or clever sampling/partition techniques. 
+**Diverse scale:** Small-scale graph datasets can be processed within a single GPU, while medium- and large-scale graphs might require multiple GPUs or clever sampling/partition techniques.
 
 **Rich domains:** Graph datasets come from diverse domains ranging from scientific ones to social/information networks, and also include heterogeneous knowledge graphs. 
 
@@ -31,7 +31,7 @@ OGB aims to provide graph datasets that cover important graph machine learning t
 OGB is an on-going effort, and we are planning to increase our coverage in the future.
 
 ## Installation
-You can install OGB using Python's package manager pip. 
+You can install OGB using Python's package manager `pip`.
 
 **Important:** The details of OGB are subject to change until the version 1.0.0 is released. We plan to release it by the end of March 2020. Thanks for your patience.
 
@@ -64,11 +64,11 @@ We highlight two key features of OGB, namely, (1) easy-to-use data loaders, and 
 We prepare easy-to-use PyTorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized dataset splitting.
 Below, on PyTorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
 ```python
-from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
+from ogb.graphproppred import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
 dataset = PygGraphPropPredDataset(name = "ogbg-mol-hiv")
- 
+
 splitted_idx = dataset.get_idx_split() 
 train_loader = DataLoader(dataset[splitted_idx["train"]], batch_size=32, shuffle=True)
 valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=32, shuffle=False)
