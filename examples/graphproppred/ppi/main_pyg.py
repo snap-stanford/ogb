@@ -11,10 +11,8 @@ import numpy as np
 
 ### importing OGB
 
-### for loading dataset
-from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
-### for evaluation
-from ogb.graphproppred import Evaluator
+### for loading dataset and evaluator
+from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
 
 multicls_criterion = torch.nn.CrossEntropyLoss()
 

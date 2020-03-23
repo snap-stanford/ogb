@@ -11,10 +11,8 @@ import numpy as np
 
 ### importing OGB
 
-### for loading dataset
-from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
-### for evaluation
-from ogb.graphproppred import Evaluator
+### for loading dataset and evaluator
+from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
 reg_criterion = torch.nn.MSELoss()
@@ -82,8 +80,8 @@ def main():
                         help='number of epochs to train (default: 100)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
-    parser.add_argument('--dataset', type=str, default="ogbg-mol-tox21",
-                        help='dataset name (default: ogbg-mol-tox21)')
+    parser.add_argument('--dataset', type=str, default="ogbg-mol-hiv",
+                        help='dataset name (default: ogbg-mol-hiv)')
 
     parser.add_argument('--feature', type=str, default="full",
                         help='full feature or simple feature')
