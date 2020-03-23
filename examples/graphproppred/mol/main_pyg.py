@@ -11,10 +11,7 @@ import numpy as np
 
 ### importing OGB
 
-### for loading dataset
-from ogb.graphproppred.dataset_pyg import PygGraphPropPredDataset
-### for evaluation
-from ogb.graphproppred import Evaluator
+from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
 reg_criterion = torch.nn.MSELoss()
