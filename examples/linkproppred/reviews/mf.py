@@ -6,8 +6,7 @@ from torch.utils.data import DataLoader
 
 from torch_geometric.nn.inits import glorot
 
-from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
-from ogb.linkproppred import Evaluator
+from ogb.linkproppred import PygLinkPropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -175,8 +174,8 @@ def main():
         glorot(user_emb)
         glorot(product_emb)
 
-        optimizer = torch.optim.Adam([user_emb, product_emb] +
-                                     list(predictor.parameters()), lr=args.lr)
+        optimizer = torch.optim.Adam(
+            [user_emb, product_emb] + list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
             loss = train(predictor, product_emb, user_emb, product_x,

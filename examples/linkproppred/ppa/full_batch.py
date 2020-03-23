@@ -9,8 +9,7 @@ from torch.utils.data import DataLoader
 from torch_sparse import SparseTensor
 from torch_geometric.nn.inits import glorot, zeros
 
-from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
-from ogb.linkproppred import Evaluator
+from ogb.linkproppred import PygLinkPropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -147,8 +146,8 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
     pos_train_edge = splitted_edge['train_edge'].to(x.device)
 
     total_loss = total_examples = 0
-    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
-                           shuffle=True):
+    for perm in DataLoader(
+            range(pos_train_edge.size(0)), batch_size, shuffle=True):
 
         optimizer.zero_grad()
 
@@ -159,8 +158,8 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
-                             device=x.device)
+        edge = torch.randint(
+            0, x.size(0), edge.size(), dtype=torch.long, device=x.device)
 
         neg_out = predictor(h[edge[0]], h[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
@@ -187,8 +186,8 @@ def test(model, predictor, x, adj, splitted_edge, evaluator, batch_size):
     pos_train_edge = splitted_edge['train_edge'].to(x.device)
 
     pos_train_preds = []
-    for perm in DataLoader(range(pos_train_edge.size(0)),
-                           batch_size=batch_size):
+    for perm in DataLoader(
+            range(pos_train_edge.size(0)), batch_size=batch_size):
         edge = pos_train_edge[perm].t()
         pos_train_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
 
@@ -268,11 +267,13 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(x.size(-1), args.hidden_channels, args.hidden_channels,
-                     args.num_layers, args.dropout).to(device)
+        model = SAGE(
+            x.size(-1), args.hidden_channels, args.hidden_channels,
+            args.num_layers, args.dropout).to(device)
     else:
-        model = GCN(x.size(-1), args.hidden_channels, args.hidden_channels,
-                    args.num_layers, args.dropout).to(device)
+        model = GCN(
+            x.size(-1), args.hidden_channels, args.hidden_channels,
+            args.num_layers, args.dropout).to(device)
 
         # Pre-compute GCN normalization.
         adj = adj.set_diag()

@@ -3,8 +3,7 @@ import argparse
 import torch
 import torch.nn.functional as F
 
-from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
-from ogb.nodeproppred import Evaluator
+from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -100,8 +99,9 @@ def main():
     y_true = data.y.to(device)
     train_idx = splitted_idx['train'].to(device)
 
-    model = MLP(x.size(-1), args.hidden_channels, 47, args.num_layers,
-                args.dropout).to(device)
+    model = MLP(
+        x.size(-1), args.hidden_channels, 47, args.num_layers,
+        args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)

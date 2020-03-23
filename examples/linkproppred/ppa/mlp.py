@@ -4,8 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from ogb.linkproppred.dataset_pyg import PygLinkPropPredDataset
-from ogb.linkproppred import Evaluator
+from ogb.linkproppred import PygLinkPropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -43,8 +42,8 @@ def train(predictor, x, splitted_edge, optimizer, batch_size):
     pos_train_edge = splitted_edge['train_edge'].to(x.device)
 
     total_loss = total_examples = 0
-    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
-                           shuffle=True):
+    for perm in DataLoader(
+            range(pos_train_edge.size(0)), batch_size, shuffle=True):
         optimizer.zero_grad()
 
         edge = pos_train_edge[perm].t()
@@ -53,8 +52,8 @@ def train(predictor, x, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
-                             device=x.device)
+        edge = torch.randint(
+            0, x.size(0), edge.size(), dtype=torch.long, device=x.device)
         neg_out = predictor(x[edge[0]], x[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
@@ -78,8 +77,8 @@ def test(predictor, x, splitted_edge, evaluator, batch_size):
     pos_train_edge = splitted_edge['train_edge'].to(x.device)
 
     pos_train_preds = []
-    for perm in DataLoader(range(pos_train_edge.size(0)),
-                           batch_size=batch_size):
+    for perm in DataLoader(
+            range(pos_train_edge.size(0)), batch_size=batch_size):
         edge = pos_train_edge[perm].t()
         pos_train_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
 
@@ -149,8 +148,9 @@ def main():
     x = torch.cat([data.x.to(torch.float),
                    torch.load('embedding.pt')], dim=-1).to(device)
 
-    predictor = LinkPredictor(x.size(-1), args.hidden_channels, 1,
-                              args.num_layers, args.dropout).to(device)
+    predictor = LinkPredictor(
+        x.size(-1), args.hidden_channels, 1, args.num_layers,
+        args.dropout).to(device)
 
     optimizer = torch.optim.Adam(predictor.parameters(), lr=args.lr)
 

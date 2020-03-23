@@ -2,13 +2,11 @@ import argparse
 
 import torch
 import torch.nn.functional as F
-from torch.nn import Sequential as Seq, Linear as Lin, ReLU, BatchNorm1d as BN
-
+from torch.nn import Sequential as Seq, Linear as Lin, ReLU
 from torch_geometric.data import ClusterData, ClusterLoader
 from torch_geometric.nn import MessagePassing
 
-from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
-from ogb.nodeproppred import Evaluator
+from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -17,8 +15,9 @@ class GINConv(MessagePassing):
     def __init__(self, hidden_channels):
         super(GINConv, self).__init__(aggr='mean')
 
-        self.mlp = Seq(Lin(hidden_channels, 2 * hidden_channels), ReLU(),
-                       Lin(2 * hidden_channels, hidden_channels))
+        self.mlp = Seq(
+            Lin(hidden_channels, 2 * hidden_channels), ReLU(),
+            Lin(2 * hidden_channels, hidden_channels))
         self.eps = torch.nn.Parameter(torch.Tensor([0.]))
 
     def reset_parameters(self):
@@ -27,8 +26,8 @@ class GINConv(MessagePassing):
         self.eps.data.fill_(0)
 
     def forward(self, x, edge_index, edge_attr):
-        h = (1 + self.eps) * x + self.propagate(edge_index, x=x,
-                                                edge_attr=edge_attr)
+        h = (1 + self.eps) * x + self.propagate(
+            edge_index, x=x, edge_attr=edge_attr)
         return self.mlp(h)
 
     def message(self, x_j, edge_attr):
@@ -160,20 +159,26 @@ def main():
         mask[idx] = True
         data[f'{key}_mask'] = mask
 
-    cluster_data = ClusterData(data, num_parts=args.num_partitions,
-                               recursive=False, save_dir=dataset.processed_dir)
+    cluster_data = ClusterData(
+        data,
+        num_parts=args.num_partitions,
+        recursive=False,
+        save_dir=dataset.processed_dir)
 
     if not args.use_node_features:
         cluster_data.data.x = torch.ones(cluster_data.data.num_nodes, 1)
     else:
         cluster_data.data.x = cluster_data.data.x.to(torch.float)
 
-    loader = ClusterLoader(cluster_data, batch_size=args.batch_size,
-                           shuffle=True, num_workers=args.num_workers)
+    loader = ClusterLoader(
+        cluster_data,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers)
 
-    model = GIN(cluster_data.data.x.size(-1), data.edge_attr.size(-1),
-                args.hidden_channels, 112, args.num_layers,
-                args.dropout).to(device)
+    model = GIN(
+        cluster_data.data.x.size(-1), data.edge_attr.size(-1),
+        args.hidden_channels, 112, args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)

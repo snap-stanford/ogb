@@ -7,8 +7,7 @@ import torch.nn.functional as F
 from torch_sparse import SparseTensor
 from torch_geometric.nn.inits import glorot, zeros
 
-from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
-from ogb.nodeproppred import Evaluator
+from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
 
@@ -174,11 +173,13 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(x.size(-1), args.hidden_channels, 47, args.num_layers,
-                     args.dropout).to(device)
+        model = SAGE(
+            x.size(-1), args.hidden_channels, 47, args.num_layers,
+            args.dropout).to(device)
     else:
-        model = GCN(x.size(-1), args.hidden_channels, 47, args.num_layers,
-                    args.dropout).to(device)
+        model = GCN(
+            x.size(-1), args.hidden_channels, 47, args.num_layers,
+            args.dropout).to(device)
 
         # Pre-compute GCN normalization.
         adj = adj.set_diag()
@@ -187,8 +188,9 @@ def main():
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
 
-    model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
-                args.dropout).to(device)
+    model = GCN(
+        x.size(-1), args.hidden_channels, 112, args.num_layers,
+        args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)

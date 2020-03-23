@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from torch_geometric.nn import Node2Vec
 
-from ogb.nodeproppred.dataset_pyg import PygNodePropPredDataset
+from ogb.nodeproppred import PygNodePropPredDataset
 
 
 @torch.no_grad()
@@ -43,8 +43,8 @@ def main():
                      args.context_size, args.walks_per_node).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    loader = DataLoader(torch.arange(data.num_nodes),
-                        batch_size=args.batch_size, shuffle=True)
+    loader = DataLoader(
+        torch.arange(data.num_nodes), batch_size=args.batch_size, shuffle=True)
 
     model.train()
     for epoch in range(1, args.epochs + 1):
