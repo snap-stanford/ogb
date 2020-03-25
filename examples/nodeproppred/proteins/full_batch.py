@@ -78,7 +78,7 @@ class SAGEConv(torch.nn.Module):
         zeros(self.bias)
 
     def forward(self, x, adj):
-        out = adj.matmul(x, reduce='mean') @ self.weight
+        out = adj @ self.weight
         out = out + x @ self.root_weight + self.bias
         return out
 
@@ -178,6 +178,9 @@ def main():
     if args.use_sage:
         model = SAGE(x.size(-1), args.hidden_channels, 47, args.num_layers,
                      args.dropout).to(device)
+        deg = adj.sum(dim=1).to(torch.float)
+        deg_inv = deg.pow(-1)
+        adj = deg_inv.view(-1, 1) * adj
     else:
         model = GCN(x.size(-1), args.hidden_channels, 47, args.num_layers,
                     args.dropout).to(device)
