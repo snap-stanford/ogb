@@ -33,6 +33,9 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 ## Installation
 You can install OGB using Python's package manager `pip`.
 
+#### Important 
+The currently-available OGB datasets are subject to change. Datasets might be deleted/modified/added. The datasets will be fixed *after* the OGB paper is released (expected by to be around mid April). Thank you for your patience.
+
 #### Requirements
  - Python>=3.5
  - PyTorch>=1.2
