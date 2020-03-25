@@ -5,6 +5,7 @@ from torch.nn import Parameter
 import torch.nn.functional as F
 
 from torch_sparse import SparseTensor
+from torch_scatter import scatter
 from torch_geometric.nn.inits import glorot, zeros
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
@@ -152,7 +153,7 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--eval_steps', type=int, default=5)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
@@ -165,7 +166,9 @@ def main():
     splitted_idx = dataset.get_idx_split()
     data = dataset[0]
 
-    x = data.x.to(torch.float).to(device)
+    x = scatter(data.edge_attr, data.edge_index[0], dim=0,
+                dim_size=data.num_nodes, reduce='mean').to(device)
+
     y_true = data.y.to(device)
     train_idx = splitted_idx['train'].to(device)
 
@@ -173,13 +176,11 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(
-            x.size(-1), args.hidden_channels, 47, args.num_layers,
-            args.dropout).to(device)
+        model = SAGE(x.size(-1), args.hidden_channels, 47, args.num_layers,
+                     args.dropout).to(device)
     else:
-        model = GCN(
-            x.size(-1), args.hidden_channels, 47, args.num_layers,
-            args.dropout).to(device)
+        model = GCN(x.size(-1), args.hidden_channels, 47, args.num_layers,
+                    args.dropout).to(device)
 
         # Pre-compute GCN normalization.
         adj = adj.set_diag()
@@ -188,9 +189,8 @@ def main():
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
 
-    model = GCN(
-        x.size(-1), args.hidden_channels, 112, args.num_layers,
-        args.dropout).to(device)
+    model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
+                args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
