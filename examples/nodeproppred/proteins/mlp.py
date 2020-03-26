@@ -79,7 +79,7 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--eval_steps', type=int, default=5)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
@@ -92,11 +92,12 @@ def main():
     splitted_idx = dataset.get_idx_split()
     data = dataset[0]
 
+    x = scatter(data.edge_attr, data.edge_index[0], dim=0,
+                dim_size=data.num_nodes, reduce='mean').to(device)
+
     if args.use_node_embedding:
-        x = torch.load('embedding.pt', map_location='cpu')
-    else:
-        x = scatter(data.edge_attr, data.edge_index[0], dim=0,
-                    dim_size=data.num_nodes, reduce='mean').to(device)
+        embedding = torch.load('embedding.pt', map_location='cpu')
+        x = torch.cat([x, embedding], dim=-1)
 
     x = x.to(device)
     y_true = data.y.to(device)
