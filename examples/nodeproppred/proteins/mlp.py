@@ -2,6 +2,7 @@ import argparse
 
 import torch
 import torch.nn.functional as F
+from torch_scatter import scatter
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
@@ -73,6 +74,7 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Proteins (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
+    parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -90,13 +92,18 @@ def main():
     splitted_idx = dataset.get_idx_split()
     data = dataset[0]
 
-    x = torch.load('embedding.pt', map_location='cpu').to(device)
+    if args.use_node_embedding:
+        x = torch.load('embedding.pt', map_location='cpu')
+    else:
+        x = scatter(data.edge_attr, data.edge_index[0], dim=0,
+                    dim_size=data.num_nodes, reduce='mean').to(device)
+
+    x = x.to(device)
     y_true = data.y.to(device)
     train_idx = splitted_idx['train'].to(device)
 
-    model = MLP(
-        x.size(-1), args.hidden_channels, 112, args.num_layers,
-        args.dropout).to(device)
+    model = MLP(x.size(-1), args.hidden_channels, 112, args.num_layers,
+                args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
