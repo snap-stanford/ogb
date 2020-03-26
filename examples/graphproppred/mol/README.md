@@ -1,6 +1,6 @@
 # ogbg-mol
 
-This repository includes the scripts for GNN baselines for `ogbg-mol-*` dataset.
+This repository includes the scripts for GNN baselines for `ogbg-mol*` dataset.
 
 ## Training & Evaluation
 
@@ -12,22 +12,22 @@ python main_pyg.py --dataset $DATASET --gnn $GNN_TYPE --filename $FILENAME
 
 ### `$DATASET`
 `$DATASET` specified the name of the molecule dataset. It should be one of the followings:
-- `ogbg-mol-hiv`
-- `ogbg-mol-pcba`
+- `ogbg-molhiv`
+- `ogbg-molpcba`
 
 Additionally we provide the smaller molecule datasets from MoleculeNet [1].
-- `ogbg-mol-bace`
-- `ogbg-mol-bbbp`
-- `ogbg-mol-clintox`
-- `ogbg-mol-muv`
-- `ogbg-mol-sider`
-- `ogbg-mol-tox21`
-- `ogbg-mol-toxcast`
-- `ogbg-mol-esol`
-- `ogbg-mol-freesolv`
-- `ogbg-mol-lipo`
+- `ogbg-molbace`
+- `ogbg-molbbbp`
+- `ogbg-molclintox`
+- `ogbg-molmuv`
+- `ogbg-molsider`
+- `ogbg-moltox21`
+- `ogbg-moltoxcast`
+- `ogbg-molesol`
+- `ogbg-molfreesolv`
+- `ogbg-mollipo`
 
-The last three datasets (`ogbg-mol-esol`, `ogbg-mol-freesolv`, `ogbg-mol-lipo`) are for regression, and the rest are for binary classification.
+The last three datasets (`ogbg-molesol`, `ogbg-molfreesolv`, `ogbg-mollipo`) are for regression, and the rest are for binary classification.
 
 ### `$GNN_TYPE`
 `$GNN_TYPE` specified the GNN architecture. It should be one of the followings:

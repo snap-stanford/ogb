@@ -61,7 +61,7 @@ def eval(model, device, loader, evaluator):
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-mol data with Pytorch Geometrics')
+    parser = argparse.ArgumentParser(description='GNN baselines on ogbgmol* data with Pytorch Geometrics')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
     parser.add_argument('--gnn', type=str, default='gin-virtual',
@@ -78,8 +78,8 @@ def main():
                         help='number of epochs to train (default: 100)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
-    parser.add_argument('--dataset', type=str, default="ogbg-mol-hiv",
-                        help='dataset name (default: ogbg-mol-hiv)')
+    parser.add_argument('--dataset', type=str, default="ogbg-molhiv",
+                        help='dataset name (default: ogbg-molhiv)')
 
     parser.add_argument('--feature', type=str, default="full",
                         help='full feature or simple feature')
