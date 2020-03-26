@@ -78,7 +78,7 @@ class SAGEConv(torch.nn.Module):
         zeros(self.bias)
 
     def forward(self, x, adj):
-        out = adj @ self.weight
+        out = adj.matmul(x, reduce="mean") @ self.weight
         out = out + x @ self.root_weight + self.bias
         return out
 
@@ -176,13 +176,13 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(x.size(-1), args.hidden_channels, 47, args.num_layers,
+        model = SAGE(x.size(-1), args.hidden_channels, 112, args.num_layers,
                      args.dropout).to(device)
         deg = adj.sum(dim=1).to(torch.float)
         deg_inv = deg.pow(-1)
         adj = deg_inv.view(-1, 1) * adj
     else:
-        model = GCN(x.size(-1), args.hidden_channels, 47, args.num_layers,
+        model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
                     args.dropout).to(device)
 
         # Pre-compute GCN normalization.
@@ -191,9 +191,6 @@ def main():
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
-
-    model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
-                args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
