@@ -97,7 +97,7 @@ class DglLinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-reviews")
+    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-ppa")
     splitted_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
     print(splitted_edge)

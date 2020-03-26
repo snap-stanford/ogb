@@ -1,9 +1,9 @@
-,ogbl-ppa,ogbl-reviews-book,ogbl-reviews-groc
-add_inverse_edge,True,True,True
-download_name,ppassoc_v4,reviews_book_v2,reviews_grocery_v2
-has_edge_attr,False,False,False
-has_node_attr,True,True,True
-num nodes,576289,2560437,168816
-split,throughput,time,time
-task type,link prediction,link regression,link regression
-url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc_v4.zip,https://snap.stanford.edu/ogb/data/linkproppred/reviews_book_v2.zip,https://snap.stanford.edu/ogb/data/linkproppred/reviews_grocery_v2.zip
+,ogbl-ppa
+add_inverse_edge,True
+download_name,ppassoc_v4
+has_edge_attr,False
+has_node_attr,True
+num nodes,576289
+split,throughput
+task type,link prediction
+url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc_v4.zip
