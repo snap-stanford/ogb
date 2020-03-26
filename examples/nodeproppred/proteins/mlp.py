@@ -93,7 +93,7 @@ def main():
     data = dataset[0]
 
     x = scatter(data.edge_attr, data.edge_index[0], dim=0,
-                dim_size=data.num_nodes, reduce='mean').to(device)
+                dim_size=data.num_nodes, reduce='mean').to('cpu')
 
     if args.use_node_embedding:
         embedding = torch.load('embedding.pt', map_location='cpu')
