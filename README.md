@@ -68,7 +68,7 @@ Below, on PyTorch Geometric, we see that a few lines of code is sufficient to pr
 from ogb.graphproppred import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
-dataset = PygGraphPropPredDataset(name = "ogbg-mol-hiv")
+dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
 
 splitted_idx = dataset.get_idx_split() 
 train_loader = DataLoader(dataset[splitted_idx["train"]], batch_size=32, shuffle=True)
@@ -82,7 +82,7 @@ The standardized evaluation protocol allows researchers to reliably compare thei
 ```python
 from ogb.graphproppred import Evaluator
 
-evaluator = Evaluator(name = "ogbg-mol-hiv")
+evaluator = Evaluator(name = "ogbg-molhiv")
 # You can learn the input and output format specification of the evaluator as follows.
 # print(evaluator.expected_input_format) 
 # print(evaluator.expected_output_format) 

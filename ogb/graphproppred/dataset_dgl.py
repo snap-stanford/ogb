@@ -117,7 +117,7 @@ def collate_dgl(samples):
     return batched_graph, torch.stack(labels)
 
 if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-mol-tox21")
+    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
     splitted_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
     print(dgl_dataset[0])

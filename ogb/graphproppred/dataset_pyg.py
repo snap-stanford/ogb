@@ -87,7 +87,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-mol-tox21")
+    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
     splitted_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
     print(pyg_dataset[0])

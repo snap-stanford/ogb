@@ -1,4 +1,4 @@
-,ogbg-mol-bace,ogbg-mol-bbbp,ogbg-mol-clintox,ogbg-mol-muv,ogbg-mol-pcba,ogbg-mol-sider,ogbg-mol-tox21,ogbg-mol-toxcast,ogbg-mol-hiv,ogbg-mol-esol,ogbg-mol-freesolv,ogbg-mol-lipo,ogbg-ppi
+,ogbg-molbace,ogbg-molbbbp,ogbg-molclintox,ogbg-molmuv,ogbg-molpcba,ogbg-molsider,ogbg-moltox21,ogbg-moltoxcast,ogbg-molhiv,ogbg-molesol,ogbg-molfreesolv,ogbg-mollipo,ogbg-ppi
 add_inverse_edge,True,True,True,True,True,True,True,True,True,True,True,True,True
 data type,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,
 download_name,bace,bbbp,clintox,muv,pcba,sider,tox21,toxcast,hiv,esol,freesolv,lipophilicity,ogbg_ppi_medium

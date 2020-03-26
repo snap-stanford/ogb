@@ -98,7 +98,7 @@ class GraphPropPredDataset(object):
 
 
 if __name__ == "__main__":
-    dataset = GraphPropPredDataset(name = "ogbg-mol-tox21")
+    dataset = GraphPropPredDataset(name = "ogbg-molhiv")
     splitted_index = dataset.get_idx_split()
     print(dataset)
     print(dataset[0])
