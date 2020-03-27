@@ -152,26 +152,18 @@ def main():
         mask[idx] = True
         data[f'{key}_mask'] = mask
 
-    cluster_data = ClusterData(
-        data,
-        num_parts=args.num_partitions,
-        recursive=False,
-        save_dir=dataset.processed_dir)
+    cluster_data = ClusterData(data, num_parts=args.num_partitions,
+                               recursive=False, save_dir=dataset.processed_dir)
 
-    loader = ClusterLoader(
-        cluster_data,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.num_workers)
+    loader = ClusterLoader(cluster_data, batch_size=args.batch_size,
+                           shuffle=True, num_workers=args.num_workers)
 
     if args.use_sage:
-        model = SAGE(
-            data.x.size(-1), args.hidden_channels, 47, args.num_layers,
-            args.dropout).to(device)
+        model = SAGE(data.x.size(-1), args.hidden_channels, 47,
+                     args.num_layers, args.dropout).to(device)
     else:
-        model = GCN(
-            data.x.size(-1), args.hidden_channels, 47, args.num_layers,
-            args.dropout).to(device)
+        model = GCN(data.x.size(-1), args.hidden_channels, 47, args.num_layers,
+                    args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
