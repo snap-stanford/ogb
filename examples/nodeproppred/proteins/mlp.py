@@ -77,7 +77,7 @@ def main():
     parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
-    parser.add_argument('--dropout', type=float, default=0.0)
+    parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--eval_steps', type=int, default=5)
