@@ -63,7 +63,18 @@ class DglNodePropPredDataset(object):
 
             ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)[0]
+
+            if self.meta_info[self.name]["additional node files"] == 'None':
+                additional_node_files = []
+            else:
+                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+
+            if self.meta_info[self.name]["additional edge files"] == 'None':
+                additional_edge_files = []
+            else:
+                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+
+            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
             ### adding prediction target
             node_label = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values

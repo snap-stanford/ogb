@@ -6,7 +6,7 @@ from ogb.utils.url import decide_download, download_url, extract_zip
 from tqdm import tqdm
 
 ### reading raw files from a directory.
-def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
+def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files = [], additional_edge_files = []):
     '''
     raw_dir: path to the raw directory
     add_inverse_edge (bool): whether to add inverse edge or not
@@ -14,6 +14,13 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     return: graph_list, which is a list of graphs.
     Each graph is a dictionary, containing edge_index, edge_feat, node_feat, and num_nodes
     edge_feat and node_feat are optional: if a graph does not contain it, we will have None.
+
+    additional_node_files and additional_edge_files must be in the raw directory.
+    
+    the name should be {additional_node_file, additional_edge_file}.csv.gz
+    the length should be num_nodes or num_edges
+
+    
     '''
 
     print('Loading necessary files...')
@@ -46,6 +53,26 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
     except:
         edge_feat = None
 
+
+    additional_node_info = {}   
+    for additional_file in additional_node_files:
+        temp = pd.read_csv(osp.join(raw_dir, additional_file + ".csv.gz"), compression="gzip", header = None).values
+        if 'int' in str(temp.dtype):
+            additional_node_info[additional_file] = temp.astype(np.int64)
+        else:
+            # float
+            additional_node_info[additional_file] = tempt.astype(np.float32)
+
+    additional_edge_info = {}   
+    for additonal_file in additional_edge_files:
+        temp = pd.read_csv(osp.join(raw_dir, additional_file + ".csv.gz"), compression="gzip", header = None).values
+        if 'int' in str(temp.dtype):
+            additional_edge_info[additional_file] = temp.astype(np.int64)
+        else:
+            # float
+            additional_edge_info[additional_file] = tempt.astype(np.float32)
+
+
     graph_list = []
     num_node_accum = 0
     num_edge_accum = 0
@@ -69,6 +96,9 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
             else:
                 graph["edge_feat"] = None
 
+            for key, value in additional_edge_info.items():
+                graph[key] = np.repeat(value[num_edge_accum:num_edge_accum+num_edge], 2, axis = 0)
+
         else:
             graph["edge_index"] = edge[:, num_edge_accum:num_edge_accum+num_edge]
 
@@ -77,6 +107,9 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
             else:
                 graph["edge_feat"] = None
 
+            for key, value in additional_edge_info.items():
+                graph[key] = value[num_edge_accum:num_edge_accum+num_edge]
+
         num_edge_accum += num_edge
 
         ### handling node
@@ -84,6 +117,10 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False):
             graph["node_feat"] = node_feat[num_node_accum:num_node_accum+num_node]
         else:
             graph["node_feat"] = None
+
+        for key, value in additional_node_info.items():
+            graph[key] = value[num_node_accum:num_node_accum+num_node]
+
 
         graph["num_nodes"] = num_node
         num_node_accum += num_node

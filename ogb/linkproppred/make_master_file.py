@@ -16,6 +16,8 @@ dataset_dict[name]["has_node_attr"] = True
 dataset_dict[name]["has_edge_attr"] = False
 dataset_dict[name]["split"] = "throughput"
 dataset_dict[name]["num nodes"] = 576289
+dataset_dict[name]["additional node files"] = 'None'
+dataset_dict[name]['additional edge files'] = 'None'
 
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 

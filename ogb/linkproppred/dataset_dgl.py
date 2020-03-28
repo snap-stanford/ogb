@@ -60,9 +60,21 @@ class DglLinkPropPredDataset(object):
 
             raw_dir = osp.join(self.root, "raw")
 
-            ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)[0]
+
+            ### pre-process and save
+            if self.meta_info[self.name]["additional node files"] == 'None':
+                additional_node_files = []
+            else:
+                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+
+            if self.meta_info[self.name]["additional edge files"] == 'None':
+                additional_edge_files = []
+            else:
+                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+
+            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+
 
             print('Saving...')
             save_graphs(pre_processed_file_path, graph, {})

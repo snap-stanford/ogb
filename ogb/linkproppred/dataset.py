@@ -59,7 +59,18 @@ class LinkPropPredDataset(object):
 
             ### pre-process and save
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)[0] # only a single graph
+
+            if self.meta_info[self.name]["additional node files"] == 'None':
+                additional_node_files = []
+            else:
+                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+
+            if self.meta_info[self.name]["additional edge files"] == 'None':
+                additional_edge_files = []
+            else:
+                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+
+            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
 
             print('Saving...')
             torch.save(self.graph, pre_processed_file_path)

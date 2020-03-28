@@ -1,5 +1,7 @@
 ,ogbl-ppa
 add_inverse_edge,True
+additional edge files,None
+additional node files,None
 download_name,ppassoc_v4
 has_edge_attr,False
 has_node_attr,True
