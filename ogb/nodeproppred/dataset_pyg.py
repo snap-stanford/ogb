@@ -32,8 +32,10 @@ class PygNodePropPredDataset(InMemoryDataset):
         super(PygNodePropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
-    def get_idx_split(self):
-        split_type = self.meta_info[self.name]["split"]
+    def get_idx_split(self, split_type = None):
+        if split_type is None:
+            split_type = self.meta_info[self.name]["split"]
+
         path = osp.join(self.root, "split", split_type)
 
         train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]

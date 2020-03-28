@@ -75,8 +75,10 @@ class LinkPropPredDataset(object):
             print('Saving...')
             torch.save(self.graph, pre_processed_file_path)
 
-    def get_edge_split(self):
-        split_type = self.meta_info[self.name]["split"]
+    def get_edge_split(self, split_type = None):
+        if split_type is None:
+            split_type = self.meta_info[self.name]["split"]
+            
         path = osp.join(self.root, "split", split_type)
 
         train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values
