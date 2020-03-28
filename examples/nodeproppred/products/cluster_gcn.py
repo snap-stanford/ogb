@@ -1,40 +1,16 @@
 import argparse
 
 import torch
+import numpy as np
 import torch.nn.functional as F
 
+from torch_sparse import SparseTensor
 from torch_geometric.data import ClusterData, ClusterLoader
-from torch_geometric.nn import GCNConv, SAGEConv
+from torch_geometric.nn import SAGEConv
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
-
-
-class GCN(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers,
-                 dropout):
-        super(GCN, self).__init__()
-
-        self.convs = torch.nn.ModuleList()
-        self.convs.append(GCNConv(in_channels, hidden_channels))
-        for _ in range(num_layers - 2):
-            self.convs.append(GCNConv(hidden_channels, hidden_channels))
-        self.convs.append(GCNConv(hidden_channels, out_channels))
-
-        self.dropout = dropout
-
-    def reset_parameters(self):
-        for conv in self.convs:
-            conv.reset_parameters()
-
-    def forward(self, x, edge_index):
-        for conv in self.convs[:-1]:
-            x = conv(x, edge_index)
-            x = F.relu(x)
-            x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, edge_index)
-        return torch.log_softmax(x, dim=-1)
 
 
 class SAGE(torch.nn.Module):
@@ -64,6 +40,20 @@ class SAGE(torch.nn.Module):
         return torch.log_softmax(x, dim=-1)
 
 
+class SAGEInference(torch.nn.Module):
+    def __init__(self, weights):
+        super(SAGEInference, self).__init__()
+        self.weights = weights
+
+    def forward(self, x, adj):
+        out = x
+        for i, (weight, bias) in enumerate(self.weights):
+            tmp = adj @ out @ weight[weight.shape[0] // 2:]
+            out = tmp + out @ weight[:weight.shape[0] // 2] + bias
+            out = np.clip(out, 0, None) if i < len(self.weights) - 1 else out
+        return out
+
+
 def train(model, loader, optimizer, device):
     model.train()
 
@@ -84,39 +74,34 @@ def train(model, loader, optimizer, device):
 
 
 @torch.no_grad()
-def test(model, loader, evaluator, device):
-    model.eval()
+def test(model, data, evaluator):
+    print('Evaluating full-batch GNN on CPU...')
 
-    train_masks, valid_masks, test_masks = [], [], []
-    y_trues, y_preds = [], []
+    weights = [(conv.weight.cpu().detach().numpy(),
+                conv.bias.cpu().detach().numpy()) for conv in model.convs]
+    model = SAGEInference(weights)
 
-    for data in loader:
-        y_trues.append(data.y.clone())
-        train_masks.append(data.train_mask.clone())
-        valid_masks.append(data.valid_mask.clone())
-        test_masks.append(data.test_mask.clone())
+    x = data.x.numpy()
+    adj = SparseTensor(row=data.edge_index[0], col=data.edge_index[1])
+    adj = adj.sum(dim=1).pow(-1).view(-1, 1) * adj
+    adj = adj.to_scipy(layout='csr')
 
-        data = data.to(device)
-        out = model(data.x, data.edge_index)
-        y_preds.append(out.argmax(dim=-1, keepdim=True).cpu())
+    out = model(x, adj)
 
-    train_mask = torch.cat(train_masks, dim=0)
-    valid_mask = torch.cat(valid_masks, dim=0)
-    test_mask = torch.cat(test_masks, dim=0)
-    y_true = torch.cat(y_trues, dim=0)
-    y_pred = torch.cat(y_preds, dim=0)
+    y_true = data.y
+    y_pred = torch.from_numpy(out).argmax(dim=-1, keepdim=True)
 
     train_acc = evaluator.eval({
-        'y_true': y_true[train_mask],
-        'y_pred': y_pred[train_mask]
+        'y_true': y_true[data.train_mask],
+        'y_pred': y_pred[data.train_mask]
     })['acc']
     valid_acc = evaluator.eval({
-        'y_true': y_true[valid_mask],
-        'y_pred': y_pred[valid_mask]
+        'y_true': y_true[data.valid_mask],
+        'y_pred': y_pred[data.valid_mask]
     })['acc']
     test_acc = evaluator.eval({
-        'y_true': y_true[test_mask],
-        'y_pred': y_pred[test_mask]
+        'y_true': y_true[data.test_mask],
+        'y_pred': y_pred[data.test_mask]
     })['acc']
 
     return train_acc, valid_acc, test_acc
@@ -126,7 +111,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (Cluster-GCN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--use_sage', action='store_true')
     parser.add_argument('--num_partitions', type=int, default=15000)
     parser.add_argument('--num_workers', type=int, default=6)
     parser.add_argument('--num_layers', type=int, default=3)
@@ -158,12 +142,8 @@ def main():
     loader = ClusterLoader(cluster_data, batch_size=args.batch_size,
                            shuffle=True, num_workers=args.num_workers)
 
-    if args.use_sage:
-        model = SAGE(data.x.size(-1), args.hidden_channels, 47,
-                     args.num_layers, args.dropout).to(device)
-    else:
-        model = GCN(data.x.size(-1), args.hidden_channels, 47, args.num_layers,
-                    args.dropout).to(device)
+    model = SAGE(data.x.size(-1), args.hidden_channels, 47, args.num_layers,
+                 args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
@@ -173,18 +153,12 @@ def main():
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, loader, optimizer, device)
-            result = test(model, loader, evaluator, device)
-            logger.add_result(run, result)
-
             if epoch % args.log_steps == 0:
-                train_acc, valid_acc, test_acc = result
                 print(f'Run: {run + 1:02d}, '
                       f'Epoch: {epoch:02d}, '
-                      f'Loss: {loss:.4f}, '
-                      f'Train: {100 * train_acc:.2f}%, '
-                      f'Valid: {100 * valid_acc:.2f}% '
-                      f'Test: {100 * test_acc:.2f}%')
-
+                      f'Loss: {loss:.4f}')
+        result = test(model, data, evaluator)
+        logger.add_result(run, result)
         logger.print_statistics(run)
     logger.print_statistics()
 
