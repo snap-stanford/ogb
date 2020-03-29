@@ -1,5 +1,6 @@
 import pandas as pd
 import shutil, os
+import numpy as np
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw
@@ -80,7 +81,7 @@ class GraphPropPredDataset(object):
     def __getitem__(self, idx):
         """Get datapoint with index"""
 
-        if isinstance(idx, int):
+        if isinstance(idx, (int, np.integer)):
             return self.graphs[idx], self.labels[idx]
 
         raise IndexError(
