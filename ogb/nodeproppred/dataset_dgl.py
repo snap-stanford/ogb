@@ -28,6 +28,7 @@ class DglNodePropPredDataset(object):
 
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.task_type = self.meta_info[self.name]["task type"]
+        self.eval_metric = self.meta_info[self.name]["eval metric"]
 
         super(DglNodePropPredDataset, self).__init__()
 

@@ -20,15 +20,15 @@ class Evaluator:
             error_mssg += "\n".join(meta_info.keys())
             raise ValueError(error_mssg)
 
-        self.task_type = meta_info[self.name]["task type"]
+        self.eval_metric = meta_info[self.name]["eval metric"]
 
-        if self.task_type == "link prediction":
+        if self.eval_metric == "hits":
             ### Hits@K
             self.K = 100
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "link prediction":
+        if self.eval_metric == "hits":
             if not "y_pred_pos" in input_dict:
                 RuntimeError("Missing key of y_pred_pos")
             if not "y_pred_neg" in input_dict:
@@ -82,21 +82,21 @@ class Evaluator:
             return y_pred_pos, y_pred_neg, type_info
 
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
 
     def eval(self, input_dict):
 
-        if self.task_type == "link prediction":
+        if self.eval_metric == "hits":
             y_pred_pos, y_pred_neg, type_info = self._parse_and_check_input(input_dict)
-            return self._eval_linkpred(y_pred_pos, y_pred_neg, type_info)
+            return self._eval_hits(y_pred_pos, y_pred_neg, type_info)
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.task_type == "link prediction":
+        if self.eval_metric == "hits":
             desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
             desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )\n"
             desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )\n"
@@ -105,22 +105,22 @@ class Evaluator:
             desc += "y_pred_neg needs to include the scores predicted on ALL the negative edges in the test or validation set.\n"
             desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
         return desc
 
     @property
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
-        if self.task_type == "link prediction":
+        if self.eval_metric == "hits":
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
         return desc
 
-    def _eval_linkpred(self, y_pred_pos, y_pred_neg, type_info):
+    def _eval_hits(self, y_pred_pos, y_pred_neg, type_info):
         """
             compute Hits@K
         """
@@ -141,7 +141,7 @@ class Evaluator:
 
 
 if __name__ == "__main__":
-    ### link prediction case
+    ### hits case
     evaluator = Evaluator(name = "ogbl-ppa")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)

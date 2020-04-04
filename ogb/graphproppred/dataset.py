@@ -25,6 +25,7 @@ class GraphPropPredDataset(object):
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
 
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
+        self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.task_type = self.meta_info[self.name]["task type"]
 
         super(GraphPropPredDataset, self).__init__()

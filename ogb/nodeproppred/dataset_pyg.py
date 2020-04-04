@@ -28,6 +28,7 @@ class PygNodePropPredDataset(InMemoryDataset):
 
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.task_type = self.meta_info[self.name]["task type"]
+        self.eval_metric = self.meta_info[self.name]["eval metric"]
 
         super(PygNodePropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

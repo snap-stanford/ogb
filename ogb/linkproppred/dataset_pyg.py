@@ -27,6 +27,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., ppassoc
 
         self.task_type = self.meta_info[self.name]["task type"]
+        self.eval_metric = self.meta_info[self.name]["eval metric"]
 
         super(PygLinkPropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

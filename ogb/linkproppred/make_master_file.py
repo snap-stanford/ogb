@@ -7,7 +7,7 @@ dataset_list = []
 
 ### add meta-information about protein function prediction task
 name = "ogbl-ppa"
-dataset_dict[name] = {"task type": "link prediction"}
+dataset_dict[name] = {"eval metric": "hits@100", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "ppassoc_v4"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time

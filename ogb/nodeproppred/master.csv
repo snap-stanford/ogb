@@ -3,6 +3,7 @@ add_inverse_edge,True,True
 additional edge files,None,None
 additional node files,species,None
 download_name,proteinfunc_v4,products
+eval metric,rocauc,accuracy
 has_edge_attr,True,False
 has_node_attr,False,True
 num nodes,132534,2449029

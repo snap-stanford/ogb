@@ -7,7 +7,7 @@ dataset_list = []
 
 ### add meta-information about protein function prediction task
 name = "ogbn-proteins"
-dataset_dict[name] = {"num tasks": 112, "task type": "binary classification"}
+dataset_dict[name] = {"num tasks": 112, "eval metric": "rocauc", "task type": "binary classification"}
 dataset_dict[name]["download_name"] = "proteinfunc_v4"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
@@ -21,7 +21,7 @@ dataset_dict[name]['additional edge files'] = 'None'
 
 ### add meta-information about protein function prediction task
 name = "ogbn-products"
-dataset_dict[name] = {"num tasks": 1, "task type": "multiclass classification"}
+dataset_dict[name] = {"num tasks": 1, "eval metric": "accuracy", "task type": "multiclass classification"}
 dataset_dict[name]["download_name"] = "products"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time

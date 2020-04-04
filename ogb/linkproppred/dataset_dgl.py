@@ -28,6 +28,7 @@ class DglLinkPropPredDataset(object):
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., ppassoc
 
         self.task_type = self.meta_info[self.name]["task type"]
+        self.eval_metric = self.meta_info[self.name]["eval metric"]
 
         super(DglLinkPropPredDataset, self).__init__()
 

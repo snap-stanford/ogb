@@ -1,4 +1,4 @@
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import auc, precision_recall_curve, roc_auc_score
 import pandas as pd
 import os
 import numpy as np
@@ -22,11 +22,11 @@ class Evaluator:
             raise ValueError(error_mssg)
 
         self.num_tasks = int(meta_info[self.name]["num tasks"])
-        self.task_type = meta_info[self.name]["task type"]
+        self.eval_metric = meta_info[self.name]["eval metric"]
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.task_type == "binary classification" or self.task_type == "regression" or self.task_type == "multiclass classification":
+        if self.eval_metric == "rocauc" or self.eval_metric == 'prcauc' or self.eval_metric == "rmse" or self.eval_metric == "accuracy":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -63,40 +63,43 @@ class Evaluator:
             return y_true, y_pred
 
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
 
     def eval(self, input_dict):
 
-        if self.task_type == "binary classification":
+        if self.eval_metric == "rocauc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
-            return self._eval_bincls(y_true, y_pred)
-        elif self.task_type == "regression":
+            return self._eval_rocauc(y_true, y_pred)
+        if self.eval_metric == 'prcauc':
             y_true, y_pred = self._parse_and_check_input(input_dict)
-            return self._eval_regression(y_true, y_pred)
-        elif self.task_type == "multiclass classification":
+            return self._eval_prcauc(y_true, y_pred)
+        elif self.eval_metric == "rmse":
             y_true, y_pred = self._parse_and_check_input(input_dict)
-            return self._eval_multicls(y_true, y_pred)
+            return self._eval_rmse(y_true, y_pred)
+        elif self.eval_metric == "accuracy":
+            y_true, y_pred = self._parse_and_check_input(input_dict)
+            return self._eval_acc(y_true, y_pred)
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.task_type == "binary classification":
+        if self.eval_metric == "rocauc" or self.eval_metric == "prcauc":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
-            desc += "where y_pred stores score values (for computing ROC-AUC and Average Precision),\n"
+            desc += "where y_pred stores score values (for computing AUC score),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
-        elif self.task_type == "regression":
+        elif self.eval_metric == "rmse":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
-        elif self.task_type == "multiclass classification":
+        elif self.eval_metric == "accuracy":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
@@ -104,30 +107,33 @@ class Evaluator:
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
         return desc
 
     @property
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
-        if self.task_type == "binary classification":
+        if self.eval_metric == "rocauc":
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.task_type == "regression":
+        elif self.eval_metric == "prcauc":
+            desc += "{\"prcauc\": prcauc}\n"
+            desc += "- prcauc (float): PRC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
+        elif self.eval_metric == "rmse":
             desc += "{\"rmse\": rmse}\n"
             desc += "- rmse (float): root mean squared error averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.task_type == "multiclass classification":
+        elif self.eval_metric == "accuracy":
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
-            raise ValueError("Undefined task type %s" (self.task_type))
+            raise ValueError("Undefined eval metric %s" (self.eval_metric))
 
         return desc
 
-    def _eval_bincls(self, y_true, y_pred):
+    def _eval_rocauc(self, y_true, y_pred):
         """
-            compute ROC-AUC and AP score averaged across tasks
+            compute ROC-AUC averaged across tasks
         """
 
         rocauc_list = []
@@ -143,7 +149,28 @@ class Evaluator:
 
         return {"rocauc": sum(rocauc_list)/len(rocauc_list)}
 
-    def _eval_regression(self, y_true, y_pred):
+
+    def _eval_prcauc(self, y_true, y_pred):
+        """
+            compute ROC-AUC averaged across tasks
+        """
+
+        prcauc_list = []
+
+        for i in range(y_true.shape[1]):
+            #AUC is only defined when there is at least one positive data.
+            if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
+                is_valid = y_true[:,i] == y_true[:,i]
+                precision, recall, _ = precision_recall_curve(y_true[is_valid,i], y_pred[is_valid,i])
+                prc_auc = auc(recall, precision)
+                prcauc_list.append(prc_auc)
+
+        if len(prcauc_list) == 0:
+            raise RuntimeError("No positively labeled data available. Cannot compute PRC-AUC.")
+
+        return {"prcauc": sum(prcauc_list)/len(prcauc_list)}
+
+    def _eval_rmse(self, y_true, y_pred):
         """
             compute RMSE score averaged across tasks
         """
@@ -155,7 +182,7 @@ class Evaluator:
 
         return {"rmse": sum(rmse_list)/len(rmse_list)}
 
-    def _eval_multicls(self, y_true, y_pred):
+    def _eval_acc(self, y_true, y_pred):
         acc_list = []
 
         for i in range(y_true.shape[1]):
@@ -166,8 +193,8 @@ class Evaluator:
         return {"acc": sum(acc_list)/len(acc_list)}
 
 if __name__ == "__main__":
-    ### binary classification case
-    evaluator = Evaluator("ogbg-mol-tox21")
+    ### rocauc case
+    evaluator = Evaluator("ogbg-moltox21")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     y_true = torch.tensor(np.random.randint(2, size = (100,12)))
@@ -176,8 +203,17 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    ### regression case
-    evaluator = Evaluator("ogbg-mol-lipo")
+    evaluator = Evaluator("ogbg-molhiv")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_true = torch.tensor(np.random.randint(2, size = (100,1)))
+    y_pred = torch.tensor(np.random.randn(100,1))
+    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
+    ### rmse case
+    evaluator = Evaluator("ogbg-mollipo")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     y_true = np.random.randn(100,1)
@@ -186,7 +222,7 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    ### multiclass classification
+    ### accuracy
     evaluator = Evaluator("ogbg-ppi")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
