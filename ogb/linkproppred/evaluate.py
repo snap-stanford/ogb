@@ -22,13 +22,13 @@ class Evaluator:
 
         self.eval_metric = meta_info[self.name]["eval metric"]
 
-        if self.eval_metric == "hits":
+        if self.eval_metric == "hits@100":
             ### Hits@K
             self.K = 100
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.eval_metric == "hits":
+        if self.eval_metric == "hits@100":
             if not "y_pred_pos" in input_dict:
                 RuntimeError("Missing key of y_pred_pos")
             if not "y_pred_neg" in input_dict:
@@ -87,7 +87,7 @@ class Evaluator:
 
     def eval(self, input_dict):
 
-        if self.eval_metric == "hits":
+        if self.eval_metric == "hits@100":
             y_pred_pos, y_pred_neg, type_info = self._parse_and_check_input(input_dict)
             return self._eval_hits(y_pred_pos, y_pred_neg, type_info)
         else:
@@ -96,7 +96,7 @@ class Evaluator:
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.eval_metric == "hits":
+        if self.eval_metric == "hits@100":
             desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
             desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )\n"
             desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )\n"
@@ -112,7 +112,7 @@ class Evaluator:
     @property
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
-        if self.eval_metric == "hits":
+        if self.eval_metric == "hits@100":
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         else:
