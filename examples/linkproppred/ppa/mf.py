@@ -44,7 +44,7 @@ class LinkPredictor(torch.nn.Module):
 def train(x, predictor, splitted_edge, optimizer, batch_size):
     predictor.train()
 
-    pos_train_edge = splitted_edge['train_edge'].to(x.weight.device)
+    pos_train_edge = splitted_edge['train']['edge'].to(x.weight.device)
 
     total_loss = total_examples = 0
     for perm in DataLoader(
@@ -76,9 +76,9 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
 def test(x, predictor, splitted_edge, evaluator, batch_size):
     predictor.eval()
 
-    valid_edge = splitted_edge['valid_edge'].to(x.weight.device)
-    test_edge = splitted_edge['test_edge'].to(x.weight.device)
-    pos_train_edge = splitted_edge['train_edge'].to(x.weight.device)
+    valid_edge = splitted_edge['valid']['edge'].to(x.weight.device)
+    test_edge = splitted_edge['test']['edge'].to(x.weight.device)
+    pos_train_edge = splitted_edge['train']['edge'].to(x.weight.device)
 
     pos_train_preds = []
     for perm in DataLoader(
@@ -99,12 +99,12 @@ def test(x, predictor, splitted_edge, evaluator, batch_size):
     pos_train_pred = torch.cat(pos_train_preds, dim=0)
 
     valid_pred = torch.cat(valid_preds, dim=0)
-    pos_valid_pred = valid_pred[splitted_edge['valid_edge_label'] == 1]
-    neg_valid_pred = valid_pred[splitted_edge['valid_edge_label'] == 0]
+    pos_valid_pred = valid_pred[splitted_edge['valid']['label'] == 1]
+    neg_valid_pred = valid_pred[splitted_edge['valid']['label'] == 0]
 
     test_pred = torch.cat(test_preds, dim=0)
-    pos_test_pred = test_pred[splitted_edge['test_edge_label'] == 1]
-    neg_test_pred = test_pred[splitted_edge['test_edge_label'] == 0]
+    pos_test_pred = test_pred[splitted_edge['test']['label'] == 1]
+    neg_test_pred = test_pred[splitted_edge['test']['label'] == 0]
 
     results = {}
     for K in [10, 50, 100]:
