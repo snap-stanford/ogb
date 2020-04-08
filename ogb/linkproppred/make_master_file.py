@@ -21,7 +21,7 @@ dataset_dict[name]['additional edge files'] = 'None'
 
 ### add meta-information about protein function prediction task
 name = "ogbl-collab"
-dataset_dict[name] = {"eval metric": "hits@K", "task type": "link prediction"}
+dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "collab"
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time

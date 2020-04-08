@@ -22,13 +22,16 @@ class Evaluator:
 
         self.eval_metric = meta_info[self.name]["eval metric"]
 
-        if self.eval_metric == "hits@100":
+        if "hits@" in self.eval_metric:
             ### Hits@K
-            self.K = 100
+
+            self.K = int(self.eval_metric.split('@')[1])
+
+        print(self.K)
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.eval_metric == "hits@100":
+        if "hits@" in self.eval_metric:
             if not "y_pred_pos" in input_dict:
                 RuntimeError("Missing key of y_pred_pos")
             if not "y_pred_neg" in input_dict:
@@ -87,7 +90,7 @@ class Evaluator:
 
     def eval(self, input_dict):
 
-        if self.eval_metric == "hits@100":
+        if "hits@" in self.eval_metric:
             y_pred_pos, y_pred_neg, type_info = self._parse_and_check_input(input_dict)
             return self._eval_hits(y_pred_pos, y_pred_neg, type_info)
         else:
@@ -96,7 +99,7 @@ class Evaluator:
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.eval_metric == "hits@100":
+        if "hits@" in self.eval_metric:
             desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
             desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )\n"
             desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )\n"
@@ -112,7 +115,7 @@ class Evaluator:
     @property
     def expected_output_format(self):
         desc = "==== Expected output format of Evaluator for {}\n".format(self.name)
-        if self.eval_metric == "hits@100":
+        if "hits@" in self.eval_metric:
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         else:
@@ -142,12 +145,12 @@ class Evaluator:
 
 if __name__ == "__main__":
     ### hits case
-    evaluator = Evaluator(name = "ogbl-ppa")
+    evaluator = Evaluator(name = "ogbl-collab")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     # y_true = np.random.randint(2, size = (100,))
-    y_pred_pos = torch.tensor(np.random.randn(100,))
-    y_pred_neg = torch.tensor(np.random.randn(1000,))
+    y_pred_pos = torch.tensor(np.random.randn(10,))
+    y_pred_neg = torch.tensor(np.random.randn(1500,))
     input_dict = {"y_pred_pos": y_pred_pos, "y_pred_neg": y_pred_neg}
     result = evaluator.eval(input_dict)
     print(result)
