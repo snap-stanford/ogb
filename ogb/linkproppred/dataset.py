@@ -82,53 +82,9 @@ class LinkPropPredDataset(object):
             
         path = osp.join(self.root, "split", split_type)
 
-        train_edge_df = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip")
-        valid_edge_df = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip")
-        test_edge_df = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip")
-
-        if self.task_type == "link prediction":
-            target_type = np.int64
-        else:
-            target_type = np.float32
-
-        ## building training dict
-        train_edge_dict = {}
-        train_edge = np.ascontiguousarray(np.array([train_edge_df['edge_s'].to_list(), train_edge_df['edge_t'].to_list()], dtype = np.int64).T)
-        train_edge_dict['edge'] = train_edge
-        for header in train_edge_df.columns.values:
-            if header == 'edge_s' or header == 'edge_t':
-                continue
-
-            if header is 'label':
-                train_edge_dict[header] = np.array(train_edge_df[header].to_list(), target_type)
-            else:
-                train_edge_dict[header] = np.array(train_edge_df[header].to_list())
-
-        ## building valid dict
-        valid_edge_dict = {}
-        valid_edge = np.ascontiguousarray(np.array([valid_edge_df['edge_s'].to_list(), valid_edge_df['edge_t'].to_list()], dtype = np.int64).T)
-        valid_edge_dict['edge'] = valid_edge
-        for header in valid_edge_df.columns.values:
-            if header == 'edge_s' or header == 'edge_t':
-                continue
-
-            if header is 'label':
-                valid_edge_dict[header] = np.array(valid_edge_df[header].to_list(), target_type)
-            else:
-                valid_edge_dict[header] = np.array(valid_edge_df[header].to_list())
-
-        ## building test dict
-        test_edge_dict = {}
-        test_edge = np.ascontiguousarray(np.array([test_edge_df['edge_s'].to_list(), test_edge_df['edge_t'].to_list()], dtype = np.int64).T)
-        test_edge_dict['edge'] = test_edge
-        for header in test_edge_df.columns.values:
-            if header == 'edge_s' or header == 'edge_t':
-                continue
-
-            if header is 'label':
-                test_edge_dict[header] = np.array(test_edge_df[header].to_list(), target_type)
-            else:
-                test_edge_dict[header] = np.array(test_edge_df[header].to_list())
+        train_edge_dict = torch.load(osp.join(path, "train.pt"))
+        valid_edge_dict = torch.load(osp.join(path, "valid.pt"))
+        test_edge_dict = torch.load(osp.join(path, "test.pt"))
 
         return {"train": train_edge_dict, "valid": valid_edge_dict, "test": test_edge_dict}
 
@@ -143,7 +99,7 @@ class LinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dataset = LinkPropPredDataset(name = "ogbl-collab")
+    dataset = LinkPropPredDataset(name = "ogbl-ppa")
     splitted_edge = dataset.get_edge_split()
     print(dataset[0])
     print(splitted_edge)
