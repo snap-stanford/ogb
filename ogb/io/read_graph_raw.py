@@ -64,7 +64,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
             additional_node_info[additional_file] = tempt.astype(np.float32)
 
     additional_edge_info = {}   
-    for additonal_file in additional_edge_files:
+    for additional_file in additional_edge_files:
         temp = pd.read_csv(osp.join(raw_dir, additional_file + ".csv.gz"), compression="gzip", header = None).values
         if 'int' in str(temp.dtype):
             additional_edge_info[additional_file] = temp.astype(np.int64)
