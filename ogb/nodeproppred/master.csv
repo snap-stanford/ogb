@@ -1,13 +1,13 @@
-,ogbn-proteins,ogbn-products
-add_inverse_edge,True,True
-additional edge files,None,None
-additional node files,species,None
-download_name,proteinfunc_v4,products
-eval metric,rocauc,accuracy
-has_edge_attr,True,False
-has_node_attr,False,True
-num nodes,132534,2449029
-num tasks,112,1
-split,species,sales_ranking
-task type,binary classification,multiclass classification
-url,https://snap.stanford.edu/ogb/data/nodeproppred/proteinfunc_v4.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip
+,ogbn-proteins,ogbn-products,ogbn-arxiv
+add_inverse_edge,True,True,False
+additional edge files,None,None,None
+additional node files,species,None,node_year
+download_name,proteinfunc_v4,products,arxiv
+eval metric,rocauc,accuracy,accuracy
+has_edge_attr,True,False,False
+has_node_attr,False,True,True
+num nodes,132534,2449029,169343
+num tasks,112,1,1
+split,species,sales_ranking,time
+task type,binary classification,multiclass classification,multiclass classification
+url,https://snap.stanford.edu/ogb/data/nodeproppred/proteinfunc_v4.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip,https://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip

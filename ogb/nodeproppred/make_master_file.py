@@ -33,6 +33,20 @@ dataset_dict[name]["num nodes"] = 2449029
 dataset_dict[name]["additional node files"] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'
 
+### add meta-information about protein function prediction task
+name = "ogbn-arxiv"
+dataset_dict[name] = {"num tasks": 1, "eval metric": "accuracy", "task type": "multiclass classification"}
+dataset_dict[name]["download_name"] = "arxiv"
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
+## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
+dataset_dict[name]["add_inverse_edge"] = False 
+dataset_dict[name]["has_node_attr"] = True
+dataset_dict[name]["has_edge_attr"] = False
+dataset_dict[name]["split"] = "time"
+dataset_dict[name]["num nodes"] = 169343
+dataset_dict[name]["additional node files"] = 'node_year'
+dataset_dict[name]['additional edge files'] = 'None'
+
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 
 df.to_csv("master.csv")

@@ -164,5 +164,15 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
+    ### accuracy case
+    evaluator = Evaluator("ogbn-arxiv")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_true = np.random.randint(5, size = (100,1))
+    y_pred = np.random.randint(5, size = (100,1))
+    input_dict = {"y_true": y_true, "y_pred": y_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
 
 

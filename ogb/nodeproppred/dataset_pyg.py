@@ -104,7 +104,7 @@ class PygNodePropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygNodePropPredDataset(name = "ogbn-proteins")
+    pyg_dataset = PygNodePropPredDataset(name = "ogbn-arxiv")
     splitted_index = pyg_dataset.get_idx_split()
     print(pyg_dataset[0])
     print(splitted_index)
