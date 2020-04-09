@@ -96,8 +96,15 @@ class PygLinkPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-citation")
+    splitted_edge = pyg_dataset.get_edge_split()
+    print(splitted_edge['train'][0])
+    print(splitted_edge['test'][0])
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-ppa")
+    splitted_edge = pyg_dataset.get_edge_split()
+    print(splitted_edge['train'])
+    print(splitted_edge['test'])
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-collab")
     splitted_edge = pyg_dataset.get_edge_split()
-    print(pyg_dataset[0])
-    # print(splitted_edge['train'][0])
-    # print(splitted_edge['valid'][1])
+    print(splitted_edge['train'])
+    print(splitted_edge['test'])
