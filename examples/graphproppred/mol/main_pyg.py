@@ -27,7 +27,7 @@ def train(model, device, loader, optimizer, task_type):
             pred = model(batch)
             optimizer.zero_grad()
             is_valid = batch.y == batch.y
-            if 'classification' in task_type:
+            if "classification" in task_type: 
                 loss = cls_criterion(pred.to(torch.float32)[is_valid], batch.y.to(torch.float32)[is_valid])
             else:
                 loss = reg_criterion(pred.to(torch.float32)[is_valid], batch.y.to(torch.float32)[is_valid])
@@ -138,14 +138,9 @@ def main():
 
         print({'Train': train_perf, 'Validation': valid_perf, 'Test': test_perf})
 
-        if 'classification' in dataset.task_type:
-            train_curve.append(train_perf['rocauc'])
-            valid_curve.append(valid_perf['rocauc'])
-            test_curve.append(test_perf['rocauc'])
-        else:
-            train_curve.append(train_perf['rmse'])
-            valid_curve.append(valid_perf['rmse'])
-            test_curve.append(test_perf['rmse'])
+        train_curve.append(train_perf[dataset.eval_metric])
+        valid_curve.append(valid_perf[dataset.eval_metric])
+        test_curve.append(test_perf[dataset.eval_metric])
 
     if 'classification' in dataset.task_type:
         best_val_epoch = np.argmax(np.array(valid_curve))
