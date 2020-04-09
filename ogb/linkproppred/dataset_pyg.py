@@ -6,6 +6,7 @@ import torch
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_pyg import read_csv_graph_pyg
+from ogb.utils.torch_util import replace_numpy_with_torchtensor
 
 
 class PygLinkPropPredDataset(InMemoryDataset):
@@ -38,23 +39,11 @@ class PygLinkPropPredDataset(InMemoryDataset):
             
         path = osp.join(self.root, "split", split_type)
 
-        train_edge_dict = torch.load(osp.join(path, "train.pt"))
-        valid_edge_dict = torch.load(osp.join(path, "valid.pt"))
-        test_edge_dict = torch.load(osp.join(path, "test.pt"))
+        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, "train.pt")))
+        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, "valid.pt")))
+        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, "test.pt")))
 
-        train_keys = train_edge_dict.keys()
-        for key in train_keys:
-            train_edge_dict[key] = torch.from_numpy(train_edge_dict[key])
-
-        valid_keys = valid_edge_dict.keys()
-        for key in valid_keys:
-            valid_edge_dict[key] = torch.from_numpy(valid_edge_dict[key])
-
-        test_keys = test_edge_dict.keys()
-        for key in test_keys:
-            test_edge_dict[key] = torch.from_numpy(test_edge_dict[key])
-
-        return {"train": train_edge_dict, "valid": valid_edge_dict, "test": test_edge_dict}
+        return {"train": train, "valid": valid, "test": test}
 
     @property
     def raw_file_names(self):
@@ -110,4 +99,5 @@ if __name__ == "__main__":
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-collab")
     splitted_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
-    print(splitted_edge)
+    # print(splitted_edge['train'][0])
+    # print(splitted_edge['valid'][1])

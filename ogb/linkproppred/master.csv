@@ -1,12 +1,12 @@
-,ogbl-ppa,ogbl-collab
-add_inverse_edge,True,True
-additional edge files,None,"edge_weight,edge_year"
-additional node files,None,None
-download_name,ppassoc_v5,collab
-eval metric,hits@100,hits@10
-has_edge_attr,False,False
-has_node_attr,True,True
-num nodes,576289,235868
-split,throughput,time
-task type,link prediction,link prediction
-url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc_v5.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip
+,ogbl-ppa,ogbl-collab,ogbl-citation
+add_inverse_edge,True,True,False
+additional edge files,None,"edge_weight,edge_year",None
+additional node files,None,None,node_year
+download_name,ppassoc_v5,collab,citation
+eval metric,hits@100,hits@10,avghits@10
+has_edge_attr,False,False,False
+has_node_attr,True,True,True
+num nodes,576289,235868,2927963
+split,throughput,time,time
+task type,link prediction,link prediction,link prediction
+url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc_v5.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip,https://snap.stanford.edu/ogb/data/linkproppred/citation.zip

@@ -82,11 +82,11 @@ class LinkPropPredDataset(object):
             
         path = osp.join(self.root, "split", split_type)
 
-        train_edge_dict = torch.load(osp.join(path, "train.pt"))
-        valid_edge_dict = torch.load(osp.join(path, "valid.pt"))
-        test_edge_dict = torch.load(osp.join(path, "test.pt"))
+        train = torch.load(osp.join(path, "train.pt"))
+        valid = torch.load(osp.join(path, "valid.pt"))
+        test = torch.load(osp.join(path, "test.pt"))
 
-        return {"train": train_edge_dict, "valid": valid_edge_dict, "test": test_edge_dict}
+        return {"train": train, "valid": valid, "test": test}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"

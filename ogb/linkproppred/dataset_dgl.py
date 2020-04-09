@@ -7,6 +7,7 @@ from dgl.data.utils import load_graphs, save_graphs, Subset
 import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_dgl import read_csv_graph_dgl
+from ogb.utils.torch_util import replace_numpy_with_torchtensor
 
 class DglLinkPropPredDataset(object):
     """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
@@ -88,23 +89,11 @@ class DglLinkPropPredDataset(object):
             
         path = osp.join(self.root, "split", split_type)
 
-        train_edge_dict = torch.load(osp.join(path, "train.pt"))
-        valid_edge_dict = torch.load(osp.join(path, "valid.pt"))
-        test_edge_dict = torch.load(osp.join(path, "test.pt"))
+        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, "train.pt")))
+        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, "valid.pt")))
+        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, "test.pt")))
 
-        train_keys = train_edge_dict.keys()
-        for key in train_keys:
-            train_edge_dict[key] = torch.from_numpy(train_edge_dict[key])
-
-        valid_keys = valid_edge_dict.keys()
-        for key in valid_keys:
-            valid_edge_dict[key] = torch.from_numpy(valid_edge_dict[key])
-
-        test_keys = test_edge_dict.keys()
-        for key in test_keys:
-            test_edge_dict[key] = torch.from_numpy(test_edge_dict[key])
-
-        return {"train": train_edge_dict, "valid": valid_edge_dict, "test": test_edge_dict}
+        return {"train": train, "valid": valid, "test": test}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"
@@ -117,7 +106,7 @@ class DglLinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-collab")
+    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-citation")
     splitted_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
-    print(splitted_edge)
+    print(splitted_edge['train'][0])
