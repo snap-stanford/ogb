@@ -172,7 +172,6 @@ def main():
     edge_index = data.edge_index.to(device)
     edge_index = to_undirected(edge_index, data.num_nodes)
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
-    print(adj.sizes())
 
     if args.use_sage:
         model = SAGE(data.x.size(-1), args.hidden_channels, 40,
