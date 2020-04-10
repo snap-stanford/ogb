@@ -70,7 +70,7 @@ def test(model, x, y_true, splitted_idx, evaluator):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBN-Products (MLP)')
+    parser = argparse.ArgumentParser(description='OGBN-Arxiv (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--use_node_embedding', action='store_true')
@@ -78,7 +78,7 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
     print(args)
@@ -86,7 +86,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-products')
+    dataset = PygNodePropPredDataset(name='ogbn-arxiv')
     splitted_idx = dataset.get_idx_split()
     data = dataset[0]
 
@@ -102,7 +102,7 @@ def main():
     model = MLP(x.size(-1), args.hidden_channels, 47, args.num_layers,
                 args.dropout).to(device)
 
-    evaluator = Evaluator(name='ogbn-products')
+    evaluator = Evaluator(name='ogbn-arxiv')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):

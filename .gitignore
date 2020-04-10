@@ -6,3 +6,4 @@ dataset/
 *.swp
 *.vscode
 *.DS_Store
+*.pt
