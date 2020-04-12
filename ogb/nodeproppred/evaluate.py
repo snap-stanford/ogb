@@ -62,7 +62,7 @@ class Evaluator:
             return y_true, y_pred
 
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
 
     def eval(self, input_dict):
@@ -74,7 +74,7 @@ class Evaluator:
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_acc(y_true, y_pred)
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
     @property
     def expected_input_format(self):
@@ -94,7 +94,7 @@ class Evaluator:
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one node.\n"
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
         return desc
 
@@ -108,7 +108,7 @@ class Evaluator:
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
         return desc
 
