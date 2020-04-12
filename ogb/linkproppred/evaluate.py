@@ -96,7 +96,7 @@ class Evaluator:
             return y_pred_pos, y_pred_neg, type_info
 
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
 
     def eval(self, input_dict):
@@ -108,7 +108,7 @@ class Evaluator:
             else:
                 return self._eval_hits(y_pred_pos, y_pred_neg, type_info)
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
     @property
     def expected_input_format(self):
@@ -129,7 +129,7 @@ class Evaluator:
                 desc += "y_pred_neg is the predicted scores for negative edges.\n"
                 desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
         return desc
 
@@ -140,7 +140,7 @@ class Evaluator:
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         else:
-            raise ValueError("Undefined eval metric %s" (self.eval_metric))
+            raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
         return desc
 
