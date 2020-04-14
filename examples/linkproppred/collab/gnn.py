@@ -1,5 +1,4 @@
 import argparse
-
 import torch
 from torch.nn import Parameter
 import torch.nn.functional as F
@@ -80,7 +79,7 @@ class SAGEConv(torch.nn.Module):
         zeros(self.bias)
 
     def forward(self, x, adj):
-        out = adj.matmul(x, reduce='mean') @ self.weight
+        out = adj.matmul(x) @ self.weight
         out = out + x @ self.root_weight + self.bias
         return out
 
@@ -147,19 +146,18 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
     total_loss = total_examples = 0
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
                            shuffle=True):
-
         optimizer.zero_grad()
 
         h = model(x, adj)
 
         edge = pos_train_edge[perm].t()
+
         pos_out = predictor(h[edge[0]], h[edge[1]])
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
         edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
                              device=x.device)
-
         neg_out = predictor(h[edge[0]], h[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
@@ -177,38 +175,45 @@ def train(model, predictor, x, adj, splitted_edge, optimizer, batch_size):
 @torch.no_grad()
 def test(model, predictor, x, adj, splitted_edge, evaluator, batch_size):
     model.eval()
+    predictor.eval()
 
     h = model(x, adj)
 
-    valid_edge = splitted_edge['valid']['edge'].to(x.device)
-    test_edge = splitted_edge['test']['edge'].to(x.device)
     pos_train_edge = splitted_edge['train']['edge'].to(x.device)
+    pos_valid_edge = splitted_edge['valid']['edge'].to(x.device)
+    neg_valid_edge = splitted_edge['valid']['edge_neg'].to(x.device)
+    pos_test_edge = splitted_edge['test']['edge'].to(x.device)
+    neg_test_edge = splitted_edge['test']['edge_neg'].to(x.device)
 
     pos_train_preds = []
-    for perm in DataLoader(range(pos_train_edge.size(0)),
-                           batch_size=batch_size):
+    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size):
         edge = pos_train_edge[perm].t()
         pos_train_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
-
-    valid_preds = []
-    for perm in DataLoader(range(valid_edge.size(0)), batch_size=batch_size):
-        edge = valid_edge[perm].t()
-        valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
-
-    test_preds = []
-    for perm in DataLoader(range(test_edge.size(0)), batch_size=batch_size):
-        edge = test_edge[perm].t()
-        test_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
-
     pos_train_pred = torch.cat(pos_train_preds, dim=0)
 
-    valid_pred = torch.cat(valid_preds, dim=0)
-    pos_valid_pred = valid_pred[splitted_edge['valid']['label'] == 1]
-    neg_valid_pred = valid_pred[splitted_edge['valid']['label'] == 0]
+    pos_valid_preds = []
+    for perm in DataLoader(range(pos_valid_edge.size(0)), batch_size):
+        edge = pos_valid_edge[perm].t()
+        pos_valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+    pos_valid_pred = torch.cat(pos_valid_preds, dim=0)
 
-    test_pred = torch.cat(test_preds, dim=0)
-    pos_test_pred = test_pred[splitted_edge['test']['label'] == 1]
-    neg_test_pred = test_pred[splitted_edge['test']['label'] == 0]
+    neg_valid_preds = []
+    for perm in DataLoader(range(pos_valid_edge.size(0)), batch_size):
+        edge = neg_valid_edge[perm].t()
+        neg_valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+    neg_valid_pred = torch.cat(neg_valid_preds, dim=0)
+
+    pos_test_preds = []
+    for perm in DataLoader(range(pos_test_edge.size(0)), batch_size):
+        edge = pos_test_edge[perm].t()
+        pos_test_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+    pos_test_pred = torch.cat(pos_test_preds, dim=0)
+
+    neg_test_preds = []
+    for perm in DataLoader(range(pos_test_edge.size(0)), batch_size):
+        edge = neg_test_edge[perm].t()
+        neg_test_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+    neg_test_pred = torch.cat(neg_test_preds, dim=0)
 
     results = {}
     for K in [10, 50, 100]:
@@ -232,17 +237,16 @@ def test(model, predictor, x, adj, splitted_edge, evaluator, batch_size):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-PPA (Full-Batch)')
+    parser = argparse.ArgumentParser(description='OGBL-COLLAB (GNN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--use_sage', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
     parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--eval_steps', type=int, default=1)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
@@ -251,19 +255,15 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygLinkPropPredDataset(name='ogbl-ppa')
-    data = dataset[0]
+    dataset = PygLinkPropPredDataset(name='ogbl-collab')
     splitted_edge = dataset.get_edge_split()
+    data = dataset[0]
 
-    if args.use_node_embedding:
-        x = data.x.to(torch.float)
-        x = torch.cat([x, torch.load('embedding.pt')], dim=-1)
-        x = x.to(device)
-    else:
-        x = data.x.to(torch.float).to(device)
-
+    x = data.x.to(device)
     edge_index = data.edge_index.to(device)
-    adj = SparseTensor(row=edge_index[0], col=edge_index[1])
+    weight = data.edge_weight.view(-1).to(torch.float).to(device)
+    adj = SparseTensor(row=edge_index[0], col=edge_index[1], value=weight)
+    adj = adj.sum(dim=1).pow(-1).view(-1, 1) * adj
 
     if args.use_sage:
         model = SAGE(x.size(-1), args.hidden_channels, args.hidden_channels,
@@ -273,8 +273,9 @@ def main():
                     args.num_layers, args.dropout).to(device)
 
         # Pre-compute GCN normalization.
+        adj = adj.set_value(None)
         adj = adj.set_diag()
-        deg = adj.sum(dim=1).to(torch.float)
+        deg = adj.sum(dim=1)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
@@ -316,6 +317,7 @@ def main():
                               f'Train: {100 * train_hits:.2f}%, '
                               f'Valid: {100 * valid_hits:.2f}%, '
                               f'Test: {100 * test_hits:.2f}%')
+                    print('---')
 
         for key in loggers.keys():
             print(key)
