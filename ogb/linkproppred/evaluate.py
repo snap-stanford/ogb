@@ -27,8 +27,6 @@ class Evaluator:
 
             self.K = int(self.eval_metric.split('@')[1])
 
-        print(self.K)
-
 
     def _parse_and_check_input(self, input_dict):
         if "hits@" in self.eval_metric:
