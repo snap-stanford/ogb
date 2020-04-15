@@ -93,6 +93,20 @@ class Evaluator:
 
             return y_pred_pos, y_pred_neg, type_info
 
+        elif 'mrr' == self.eval_metric:
+            if 'scores' not in input_dict:
+                raise RuntimeError("Missing key of scores")
+
+            scores = input_dict['scores']
+
+            if not isinstance(scores, torch.Tensor):
+                raise ValueError("scores need to be torch.Tensor")
+
+            if not scores.ndim == 2:
+                raise RuntimeError("scores must be 2-dim array, {}-dim array given".format(scores.ndim))
+
+            return scores
+
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
@@ -105,6 +119,12 @@ class Evaluator:
                 return self._eval_hits_citation(y_pred_pos, y_pred_neg, type_info)
             else:
                 return self._eval_hits(y_pred_pos, y_pred_neg, type_info)
+        elif self.eval_metric == 'mrr':
+            if self.name == 'ogbl-wikikg':
+                scores = self._parse_and_check_input(input_dict)
+                return self._eval_mrr_wikikg(scores)
+            else:
+                raise ValueError("Undefined dataset %s" % self.name)
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
@@ -126,6 +146,15 @@ class Evaluator:
                 desc += "y_pred_pos is the predicted scores for positive edges.\n"
                 desc += "y_pred_neg is the predicted scores for negative edges.\n"
                 desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
+        elif self.eval_metric == 'mrr':
+            if self.name == 'ogbl-wikikg':
+                desc += "{\"scores\": scores, \"positive_args\": positive_args}\n"
+                desc += "- scores: torch.Tensor of shape (batch_size, num_entities)\n"
+                desc += "- positive_args: torch LongTensor of shape (batch_size, )\n"
+                desc += "scores is the predicted scores for all the entities with filter bias added (check ogb/examples/linkproppred/wikikg/model.py).\n"
+                desc += "positive_args is the index of the entity to evaluate.\n"
+            else:
+                raise ValueError("Undefined dataset %s" % self.name)
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
@@ -137,6 +166,15 @@ class Evaluator:
         if "hits@" in self.eval_metric:
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
+        elif self.eval_metric == 'mrr':
+            if self.name == 'ogbl-wikikg':
+                desc += "{" + "\"hits@1\": hits@1, \"hits@3\": hits@3, \n\"hits@10\": hits@10, \"mrr\": mrr}\n "
+                desc += "- hits@1 (list of float): Hits@1 score\n" + \
+                            "- hits@3 (list of float): Hits@3 score\n" + \
+                            "- hits@10 (list of float): Hits@10 score\n" + \
+                            "- mrr (list of float): MRR score\n"
+            else:
+                raise ValueError("Undefined dataset %s" % self.name)
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
@@ -187,7 +225,27 @@ class Evaluator:
             hitsK = float(np.sum(y_pred_pos > kth_score_in_negative_edges)) / len(y_pred_pos)
 
         return {"hits@{}".format(self.K): hitsK}
+    
+    def _eval_mrr_wikikg(self, scores):
+        """
+            compute mrr
+            scores is an array with shape (batch size, num_entities).
+            positive_args is an array with shape (batch size)
+        """
 
+        argsort = torch.argsort(scores, dim = 1, descending = True)
+        # argsort = torch.transpose(torch.transpose(argsort, 0, 1) - positive_args, 0, 1)
+        ranking = (argsort == 0).nonzero()
+        ranking = ranking[:, 1] + 1
+        hits1 = (ranking <= 1).to(torch.float).tolist()
+        hits3 = (ranking <= 3).to(torch.float).tolist()
+        hits10 = (ranking <= 10).to(torch.float).tolist()
+        mrr = (1./ranking.to(torch.float)).tolist()
+
+        return {"hits@1": hits1, 
+                 "hits@3": hits3,
+                 "hits@10": hits10,
+                 "mrr": mrr}
 
 if __name__ == "__main__":
     ### hits case
