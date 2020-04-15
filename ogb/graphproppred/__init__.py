@@ -9,5 +9,5 @@ except ImportError:
 try:
     from .dataset_dgl import DglGraphPropPredDataset
     from .dataset_dgl import collate_dgl
-except ImportError:
+except (ImportError, OSError):
     pass

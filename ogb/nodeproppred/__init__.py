@@ -8,5 +8,5 @@ except ImportError:
 
 try:
     from .dataset_dgl import DglNodePropPredDataset
-except ImportError:
+except (ImportError, OSError):
     pass
