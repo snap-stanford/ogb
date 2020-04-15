@@ -113,14 +113,14 @@ class Evaluator:
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
         if "hits@" in self.eval_metric:
             if self.name == 'ogbl-citation':
-                desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
+                desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_neg\": y_pred_neg}\n"
                 desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_source_node, )\n"
                 desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_source_node, num_target_node_neg)\n"
                 desc += "y_pred_pos[i] is a predicted score for a positive target node for the i-th source node.\n"
                 desc += "y_pred_neg[i] is predicted scores for negative target nodes for the i-th source node.\n"
                 desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
             else:
-                desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_pos\": y_pred_pos}\n"
+                desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_neg\": y_pred_neg}\n"
                 desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )\n"
                 desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )\n"
                 desc += "y_pred_pos is the predicted scores for positive edges.\n"
