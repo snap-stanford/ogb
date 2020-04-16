@@ -160,18 +160,18 @@ class Evaluator:
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
         if "hits@" in self.eval_metric:
             desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_neg\": y_pred_neg}\n"
-            desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch.tensor on GPU is recommended for efficiency.\n"
-            desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, ). Torch.tensor on GPU is recommended for efficiency.\n"
+            desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n"
+            desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n"
             desc += "y_pred_pos is the predicted scores for positive edges.\n"
             desc += "y_pred_neg is the predicted scores for negative edges.\n"
             desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
         elif self.eval_metric == "mrr":
             desc += "{\"y_pred_pos\": y_pred_pos, \"y_pred_neg\": y_pred_neg}\n"
-            desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch.tensor on GPU is recommended for efficiency.\n"
-            desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, num_nodes_neg). Torch.tensor on GPU is recommended for efficiency.\n"
+            desc += "- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n"
+            desc += "- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, num_nodes_neg). Torch tensor on GPU is recommended for efficiency.\n"
             desc += "y_pred_pos is the predicted scores for positive edges.\n"
             desc += "y_pred_neg is the predicted scores for negative edges. It needs to be a 2d matrix.\n"
-            desc += "y_pred_pos[i] is ranked among y_pred_neg[i]."
+            desc += "y_pred_pos[i] is ranked among y_pred_neg[i].\n"
             desc += "Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges."
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
@@ -185,13 +185,13 @@ class Evaluator:
             desc += "{" + "hits@{}\": hits@{}".format(self.K, self.K) + "}\n"
             desc += "- hits@{} (float): Hits@{} score\n".format(self.K, self.K)
         elif self.eval_metric == 'mrr':
-            desc += "{" + "\"hits@1_list\": hits@1_list, \"hits@3_list\": hits@3_list, \n\"hits@10_list\": hits@10_list, \"mrr_list\": mrr_list}\n "
+            desc += "{" + "\"hits@1_list\": hits@1_list, \"hits@3_list\": hits@3_list, \n\"hits@10_list\": hits@10_list, \"mrr_list\": mrr_list}\n"
             desc += "- mrr_list (list of float): list of scores for calculating MRR \n"
             desc += "- hits@1_list (list of float): list of scores for calculating Hits@1 \n" 
             desc += "- hits@3_list (list of float): list of scores to calculating Hits@3\n"
             desc += "- hits@10_list (list of float): list of scores to calculating Hits@10\n" 
             desc += "Note: i-th element corresponds to the prediction score for the i-th edge.\n" 
-            desc += "Note: To obtain the final scores, you need to concatenate the list of scores and take average over the concatenated vector."
+            desc += "Note: To obtain the final score, you need to concatenate the lists of scores and take average over the concatenated list."
         else:
             raise ValueError("Undefined eval metric %s" % (self.eval_metric))
 
@@ -262,15 +262,15 @@ class Evaluator:
 
 if __name__ == "__main__":
     ### hits case
-    # evaluator = Evaluator(name = "ogbl-collab")
-    # print(evaluator.expected_input_format)
-    # print(evaluator.expected_output_format)
-    # # y_true = np.random.randint(2, size = (100,))
-    # y_pred_pos = torch.tensor(np.random.randn(100,))
-    # y_pred_neg = torch.tensor(np.random.randn(100,))
-    # input_dict = {"y_pred_pos": y_pred_pos, "y_pred_neg": y_pred_neg}
-    # result = evaluator.eval(input_dict)
-    # print(result)
+    evaluator = Evaluator(name = "ogbl-collab")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    # y_true = np.random.randint(2, size = (100,))
+    y_pred_pos = torch.tensor(np.random.randn(100,))
+    y_pred_neg = torch.tensor(np.random.randn(100,))
+    input_dict = {"y_pred_pos": y_pred_pos, "y_pred_neg": y_pred_neg}
+    result = evaluator.eval(input_dict)
+    print(result)
 
     evaluator = Evaluator(name = "ogbl-wikikg")
     print(evaluator.expected_input_format)
