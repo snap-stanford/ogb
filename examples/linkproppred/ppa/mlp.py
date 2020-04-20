@@ -133,7 +133,6 @@ def main():
     parser = argparse.ArgumentParser(description='OGBL-PPA (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -153,9 +152,8 @@ def main():
     data = dataset[0]
 
     x = data.x.to(torch.float)
-    if args.use_node_embedding:
-        embedding = torch.load('embedding.pt', map_location='cpu')
-        x = torch.cat([x, embedding], dim=-1)
+    embedding = torch.load('embedding.pt', map_location='cpu')
+    x = torch.cat([x, embedding], dim=-1)
     x = x.to(device)
 
     predictor = LinkPredictor(x.size(-1), args.hidden_channels, 1,
