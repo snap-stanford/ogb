@@ -47,8 +47,8 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
     pos_train_edge = splitted_edge['train']['edge'].to(x.weight.device)
 
     total_loss = total_examples = 0
-    for perm in DataLoader(
-            range(pos_train_edge.size(0)), batch_size, shuffle=True):
+    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
+                           shuffle=True):
         optimizer.zero_grad()
 
         edge = pos_train_edge[perm].t()
@@ -56,8 +56,8 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
-        edge = torch.randint(
-            0, x.size(0), edge.size(), dtype=torch.long, device=x.device)
+        edge = torch.randint(0, x.size(0), edge.size(), dtype=torch.long,
+                             device=x.device)
         neg_out = predictor(x(edge[0]), x(edge[1]))
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
@@ -76,35 +76,41 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
 def test(x, predictor, splitted_edge, evaluator, batch_size):
     predictor.eval()
 
-    valid_edge = splitted_edge['valid']['edge'].to(x.weight.device)
-    test_edge = splitted_edge['test']['edge'].to(x.weight.device)
-    pos_train_edge = splitted_edge['train']['edge'].to(x.weight.device)
+    pos_train_edge = splitted_edge['train']['edge'].to(x.device)
+    pos_valid_edge = splitted_edge['valid']['edge'].to(x.device)
+    neg_valid_edge = splitted_edge['valid']['edge_neg'].to(x.device)
+    pos_test_edge = splitted_edge['test']['edge'].to(x.device)
+    neg_test_edge = splitted_edge['test']['edge_neg'].to(x.device)
 
     pos_train_preds = []
-    for perm in DataLoader(
-            range(pos_train_edge.size(0)), batch_size=batch_size):
+    for perm in DataLoader(range(pos_train_edge.size(0)), batch_size):
         edge = pos_train_edge[perm].t()
-        pos_train_preds += [predictor(x(edge[0]), x(edge[1])).squeeze().cpu()]
-
-    valid_preds = []
-    for perm in DataLoader(range(valid_edge.size(0)), batch_size=batch_size):
-        edge = valid_edge[perm].t()
-        valid_preds += [predictor(x(edge[0]), x(edge[1])).squeeze().cpu()]
-
-    test_preds = []
-    for perm in DataLoader(range(test_edge.size(0)), batch_size=batch_size):
-        edge = test_edge[perm].t()
-        test_preds += [predictor(x(edge[0]), x(edge[1])).squeeze().cpu()]
-
+        pos_train_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
     pos_train_pred = torch.cat(pos_train_preds, dim=0)
 
-    valid_pred = torch.cat(valid_preds, dim=0)
-    pos_valid_pred = valid_pred[splitted_edge['valid']['label'] == 1]
-    neg_valid_pred = valid_pred[splitted_edge['valid']['label'] == 0]
+    pos_valid_preds = []
+    for perm in DataLoader(range(pos_valid_edge.size(0)), batch_size):
+        edge = pos_valid_edge[perm].t()
+        pos_valid_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
+    pos_valid_pred = torch.cat(pos_valid_preds, dim=0)
 
-    test_pred = torch.cat(test_preds, dim=0)
-    pos_test_pred = test_pred[splitted_edge['test']['label'] == 1]
-    neg_test_pred = test_pred[splitted_edge['test']['label'] == 0]
+    neg_valid_preds = []
+    for perm in DataLoader(range(neg_valid_edge.size(0)), batch_size):
+        edge = neg_valid_edge[perm].t()
+        neg_valid_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
+    neg_valid_pred = torch.cat(neg_valid_preds, dim=0)
+
+    pos_test_preds = []
+    for perm in DataLoader(range(pos_test_edge.size(0)), batch_size):
+        edge = pos_test_edge[perm].t()
+        pos_test_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
+    pos_test_pred = torch.cat(pos_test_preds, dim=0)
+
+    neg_test_preds = []
+    for perm in DataLoader(range(neg_test_edge.size(0)), batch_size):
+        edge = neg_test_edge[perm].t()
+        neg_test_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
+    neg_test_pred = torch.cat(neg_test_preds, dim=0)
 
     results = {}
     for K in [10, 50, 100]:
