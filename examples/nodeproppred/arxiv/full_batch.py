@@ -40,8 +40,11 @@ class GCN(torch.nn.Module):
 
         self.convs = torch.nn.ModuleList()
         self.convs.append(GCNConv(in_channels, hidden_channels))
+        self.bns = torch.nn.ModuleList()
+        self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
         for _ in range(num_layers - 2):
             self.convs.append(GCNConv(hidden_channels, hidden_channels))
+            self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
         self.convs.append(GCNConv(hidden_channels, out_channels))
 
         self.dropout = dropout
@@ -51,8 +54,9 @@ class GCN(torch.nn.Module):
             conv.reset_parameters()
 
     def forward(self, x, adj):
-        for conv in self.convs[:-1]:
+        for i, conv in enumerate(self.convs[:-1]):
             x = conv(x, adj)
+            x = self.bns[i](x)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.convs[-1](x, adj)
@@ -90,8 +94,11 @@ class SAGE(torch.nn.Module):
 
         self.convs = torch.nn.ModuleList()
         self.convs.append(SAGEConv(in_channels, hidden_channels))
+        self.bns = torch.nn.ModuleList()
+        self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
         for _ in range(num_layers - 2):
             self.convs.append(SAGEConv(hidden_channels, hidden_channels))
+            self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
         self.convs.append(SAGEConv(hidden_channels, out_channels))
 
         self.dropout = dropout
@@ -101,8 +108,9 @@ class SAGE(torch.nn.Module):
             conv.reset_parameters()
 
     def forward(self, x, adj):
-        for conv in self.convs[:-1]:
+        for i, conv in enumerate(self.convs[:-1]):
             x = conv(x, adj)
+            x = self.bns[i](x)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.convs[-1](x, adj)
@@ -151,7 +159,7 @@ def main():
     parser.add_argument('--use_sage', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
-    parser.add_argument('--dropout', type=float, default=0.0)
+    parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--runs', type=int, default=10)
@@ -163,6 +171,7 @@ def main():
 
     dataset = PygNodePropPredDataset(name='ogbn-arxiv')
     splitted_idx = dataset.get_idx_split()
+
     data = dataset[0]
 
     x = data.x.to(device)
