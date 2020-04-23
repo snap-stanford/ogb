@@ -3,14 +3,14 @@ from ogb.utils.features import (allowable_features, atom_to_feature_vector,
 from rdkit import Chem
 import numpy as np
 
-def mol_to_data_obj(smile_string):
+def mol_to_data_obj(smiles_string):
     """
-    Converts SMILE string to graph Data object
-    :input: SMILE string (str)
+    Converts SMILES string to graph Data object
+    :input: SMILES string (str)
     :return: graph object
     """
 
-    mol = Chem.MolFromSmiles(smile_string)
+    mol = Chem.MolFromSmiles(smiles_string)
 
     # atoms
     atom_features_list = []
