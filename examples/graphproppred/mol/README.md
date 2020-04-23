@@ -41,7 +41,7 @@ The last three datasets (`ogbg-molesol`, `ogbg-molfreesolv`, `ogbg-mollipo`) are
 ### `$FILENAME`: Specifying output files. 
 `$FILENAME` specifies the filename to save the result. The result is a dictionary containing (1) best training performance (`'BestTrain'`), (2) best validation performance (`'Val'`), (3) test performance at the best validation epoch (`'Test'`), and (4) training performance at the best validation epoch (`'Train'`).
 
-### Converting SMILES string into OGB graph object
+## Converting SMILES string into OGB graph object
 Molecules are typically represented as [SMILES strings](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system).
 `smiles2graph.py` is a script that converts a SMILES string into a graph object that is fully compatible with the OGB molecule datasets. 
 This code can be used when one wants to perform transfer learning from external molecular datasets.
