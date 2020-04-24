@@ -62,7 +62,7 @@ def add_zeros(data):
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-ppi data with Pytorch Geometrics')
+    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-ppa data with Pytorch Geometrics')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
     parser.add_argument('--gnn', type=str, default='gin-virtual',
@@ -79,8 +79,8 @@ def main():
                         help='number of epochs to train (default: 100)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
-    parser.add_argument('--dataset', type=str, default="ogbg-ppi",
-                        help='dataset name (default: ogbg-ppi)')
+    parser.add_argument('--dataset', type=str, default="ogbg-ppa",
+                        help='dataset name (default: ogbg-ppa)')
 
     parser.add_argument('--filename', type=str, default="",
                         help='filename to output result (default: )')

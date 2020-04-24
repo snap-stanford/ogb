@@ -1,6 +1,6 @@
-# ogbg-ppi
+# ogbg-ppa
 
-This repository includes the scripts for GNN baselines for `ogbg-ppi` dataset.
+This repository includes the scripts for GNN baselines for `ogbg-ppa` dataset.
 
 ## Training & Evaluation
 
