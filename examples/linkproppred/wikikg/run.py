@@ -160,7 +160,7 @@ def main(args):
     if args.init_checkpoint:
         override_config(args)
 
-    args.save_path = 'log-50/%s/%s/%s/%s'%(args.dataset, args.model, args.gamma, time.time()) if args.save_path == None else args.save_path
+    args.save_path = 'log/%s/%s/%s-%s/%s'%(args.dataset, args.model, args.hidden_dim, args.gamma, time.time()) if args.save_path == None else args.save_path
     writer = SummaryWriter(args.save_path)
     
     # Write logs to checkpoint and console
