@@ -1,4 +1,4 @@
-,ogbg-molbace,ogbg-molbbbp,ogbg-molclintox,ogbg-molmuv,ogbg-molpcba,ogbg-molsider,ogbg-moltox21,ogbg-moltoxcast,ogbg-molhiv,ogbg-molesol,ogbg-molfreesolv,ogbg-mollipo,ogbg-molchembl,ogbg-molsars,ogbg-molecoli,ogbg-molsars2,ogbg-ppi
+,ogbg-molbace,ogbg-molbbbp,ogbg-molclintox,ogbg-molmuv,ogbg-molpcba,ogbg-molsider,ogbg-moltox21,ogbg-moltoxcast,ogbg-molhiv,ogbg-molesol,ogbg-molfreesolv,ogbg-mollipo,ogbg-molchembl,ogbg-molsars,ogbg-molecoli,ogbg-molsars2,ogbg-ppa
 add_inverse_edge,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
 data type,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,mol,
 download_name,bace,bbbp,clintox,muv,pcba,sider,tox21,toxcast,hiv,esol,freesolv,lipophilicity,chembl,sars,ecoli,pseudomonas,ogbg_ppi_medium
