@@ -36,11 +36,11 @@ class LinkPredictor(torch.nn.Module):
         return torch.sigmoid(x)
 
 
-def train(predictor, x, splitted_edge, optimizer, batch_size):
+def train(predictor, x, split_edge, optimizer, batch_size):
     predictor.train()
 
-    source_edge = splitted_edge['train']['source_node'].to(x.device)
-    target_edge = splitted_edge['train']['target_node'].to(x.device)
+    source_edge = split_edge['train']['source_node'].to(x.device)
+    target_edge = split_edge['train']['target_node'].to(x.device)
 
     total_loss = total_examples = 0
     for perm in DataLoader(range(source_edge.size(0)), batch_size,
@@ -70,13 +70,13 @@ def train(predictor, x, splitted_edge, optimizer, batch_size):
 
 
 @torch.no_grad()
-def test(predictor, x, splitted_edge, evaluator, batch_size):
+def test(predictor, x, split_edge, evaluator, batch_size):
     predictor.eval()
 
     def test_split(split):
-        source = splitted_edge[split]['source_node'].to(x.device)
-        target = splitted_edge[split]['target_node'].to(x.device)
-        target_neg = splitted_edge[split]['target_node_neg'].to(x.device)
+        source = split_edge[split]['source_node'].to(x.device)
+        target = split_edge[split]['target_node'].to(x.device)
+        target_neg = split_edge[split]['target_node_neg'].to(x.device)
 
         pos_preds = []
         for perm in DataLoader(range(source.size(0)), batch_size):
@@ -124,16 +124,16 @@ def main():
     device = torch.device(device)
 
     dataset = PygLinkPropPredDataset(name='ogbl-citation')
-    splitted_edge = dataset.get_edge_split()
+    split_edge = dataset.get_edge_split()
     data = dataset[0]
 
     # We randomly pick some training samples that we want to evaluate on:
     torch.manual_seed(12345)
-    idx = torch.randperm(splitted_edge['train']['source_node'].numel())[:86596]
-    splitted_edge['eval_train'] = {
-        'source_node': splitted_edge['train']['source_node'][idx],
-        'target_node': splitted_edge['train']['target_node'][idx],
-        'target_node_neg': splitted_edge['valid']['target_node_neg'],
+    idx = torch.randperm(split_edge['train']['source_node'].numel())[:86596]
+    split_edge['eval_train'] = {
+        'source_node': split_edge['train']['source_node'][idx],
+        'target_node': split_edge['train']['target_node'][idx],
+        'target_node_neg': split_edge['valid']['target_node_neg'],
     }
 
     x = data.x
@@ -153,12 +153,12 @@ def main():
         optimizer = torch.optim.Adam(predictor.parameters(), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, x, splitted_edge, optimizer,
+            loss = train(predictor, x, split_edge, optimizer,
                          args.batch_size)
             print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
 
             if epoch % args.eval_steps == 0:
-                result = test(predictor, x, splitted_edge, evaluator,
+                result = test(predictor, x, split_edge, evaluator,
                               args.batch_size)
                 logger.add_result(run, result)
 

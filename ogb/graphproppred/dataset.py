@@ -103,11 +103,11 @@ class GraphPropPredDataset(object):
 
 if __name__ == "__main__":
     dataset = GraphPropPredDataset(name = "ogbg-molhiv")
-    splitted_index = dataset.get_idx_split()
+    split_index = dataset.get_idx_split()
     print(dataset)
     print(dataset[0])
-    print(splitted_index["train"])
-    print(splitted_index["valid"])
-    print(splitted_index["test"])
+    print(split_index["train"])
+    print(split_index["valid"])
+    print(split_index["test"])
 
 

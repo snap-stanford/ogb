@@ -47,23 +47,23 @@ def train(model, x, y_true, train_idx, optimizer):
 
 
 @torch.no_grad()
-def test(model, x, y_true, splitted_idx, evaluator):
+def test(model, x, y_true, split_idx, evaluator):
     model.eval()
 
     out = model(x)
     y_pred = out.argmax(dim=-1, keepdim=True)
 
     train_acc = evaluator.eval({
-        'y_true': y_true[splitted_idx['train']],
-        'y_pred': y_pred[splitted_idx['train']],
+        'y_true': y_true[split_idx['train']],
+        'y_pred': y_pred[split_idx['train']],
     })['acc']
     valid_acc = evaluator.eval({
-        'y_true': y_true[splitted_idx['valid']],
-        'y_pred': y_pred[splitted_idx['valid']],
+        'y_true': y_true[split_idx['valid']],
+        'y_pred': y_pred[split_idx['valid']],
     })['acc']
     test_acc = evaluator.eval({
-        'y_true': y_true[splitted_idx['test']],
-        'y_pred': y_pred[splitted_idx['test']],
+        'y_true': y_true[split_idx['test']],
+        'y_pred': y_pred[split_idx['test']],
     })['acc']
 
     return train_acc, valid_acc, test_acc
@@ -87,7 +87,7 @@ def main():
     device = torch.device(device)
 
     dataset = PygNodePropPredDataset(name='ogbn-products')
-    splitted_idx = dataset.get_idx_split()
+    split_idx = dataset.get_idx_split()
     data = dataset[0]
 
     x = data.x
@@ -97,7 +97,7 @@ def main():
     x = x.to(device)
 
     y_true = data.y.to(device)
-    train_idx = splitted_idx['train'].to(device)
+    train_idx = split_idx['train'].to(device)
 
     model = MLP(x.size(-1), args.hidden_channels, 47, args.num_layers,
                 args.dropout).to(device)
@@ -110,7 +110,7 @@ def main():
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, x, y_true, train_idx, optimizer)
-            result = test(model, x, y_true, splitted_idx, evaluator)
+            result = test(model, x, y_true, split_idx, evaluator)
             logger.add_result(run, result)
 
             if epoch % args.log_steps == 0:

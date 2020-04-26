@@ -41,10 +41,10 @@ class LinkPredictor(torch.nn.Module):
         return torch.sigmoid(x)
 
 
-def train(x, predictor, splitted_edge, optimizer, batch_size):
+def train(x, predictor, split_edge, optimizer, batch_size):
     predictor.train()
 
-    pos_train_edge = splitted_edge['train']['edge'].to(x.weight.device)
+    pos_train_edge = split_edge['train']['edge'].to(x.weight.device)
 
     total_loss = total_examples = 0
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
@@ -73,14 +73,14 @@ def train(x, predictor, splitted_edge, optimizer, batch_size):
 
 
 @torch.no_grad()
-def test(x, predictor, splitted_edge, evaluator, batch_size):
+def test(x, predictor, split_edge, evaluator, batch_size):
     predictor.eval()
 
-    pos_train_edge = splitted_edge['train']['edge'].to(x.device)
-    pos_valid_edge = splitted_edge['valid']['edge'].to(x.device)
-    neg_valid_edge = splitted_edge['valid']['edge_neg'].to(x.device)
-    pos_test_edge = splitted_edge['test']['edge'].to(x.device)
-    neg_test_edge = splitted_edge['test']['edge_neg'].to(x.device)
+    pos_train_edge = split_edge['train']['edge'].to(x.device)
+    pos_valid_edge = split_edge['valid']['edge'].to(x.device)
+    neg_valid_edge = split_edge['valid']['edge_neg'].to(x.device)
+    pos_test_edge = split_edge['test']['edge'].to(x.device)
+    neg_test_edge = split_edge['test']['edge_neg'].to(x.device)
 
     pos_train_preds = []
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size):
@@ -152,7 +152,7 @@ def main():
     device = torch.device(device)
 
     dataset = PygLinkPropPredDataset(name='ogbl-ppa')
-    splitted_edge = dataset.get_edge_split()
+    split_edge = dataset.get_edge_split()
     data = dataset[0]
 
     x = torch.nn.Embedding(data.num_nodes, args.hidden_channels).to(device)
@@ -174,11 +174,11 @@ def main():
             list(x.parameters()) + list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(x, predictor, splitted_edge, optimizer,
+            loss = train(x, predictor, split_edge, optimizer,
                          args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                results = test(x, predictor, splitted_edge, evaluator,
+                results = test(x, predictor, split_edge, evaluator,
                                args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)

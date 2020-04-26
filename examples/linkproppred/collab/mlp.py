@@ -36,10 +36,10 @@ class LinkPredictor(torch.nn.Module):
         return torch.sigmoid(x)
 
 
-def train(predictor, x, splitted_edge, optimizer, batch_size):
+def train(predictor, x, split_edge, optimizer, batch_size):
     predictor.train()
 
-    pos_train_edge = splitted_edge['train']['edge'].to(x.device)
+    pos_train_edge = split_edge['train']['edge'].to(x.device)
 
     total_loss = total_examples = 0
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
@@ -69,14 +69,14 @@ def train(predictor, x, splitted_edge, optimizer, batch_size):
 
 
 @torch.no_grad()
-def test(predictor, x, splitted_edge, evaluator, batch_size):
+def test(predictor, x, split_edge, evaluator, batch_size):
     predictor.eval()
 
-    pos_train_edge = splitted_edge['train']['edge'].to(x.device)
-    pos_valid_edge = splitted_edge['valid']['edge'].to(x.device)
-    neg_valid_edge = splitted_edge['valid']['edge_neg'].to(x.device)
-    pos_test_edge = splitted_edge['test']['edge'].to(x.device)
-    neg_test_edge = splitted_edge['test']['edge_neg'].to(x.device)
+    pos_train_edge = split_edge['train']['edge'].to(x.device)
+    pos_valid_edge = split_edge['valid']['edge'].to(x.device)
+    neg_valid_edge = split_edge['valid']['edge_neg'].to(x.device)
+    pos_test_edge = split_edge['test']['edge'].to(x.device)
+    neg_test_edge = split_edge['test']['edge_neg'].to(x.device)
 
     pos_train_preds = []
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size):
@@ -149,7 +149,7 @@ def main():
     device = torch.device(device)
 
     dataset = PygLinkPropPredDataset(name='ogbl-collab')
-    splitted_edge = dataset.get_edge_split()
+    split_edge = dataset.get_edge_split()
     data = dataset[0]
 
     x = data.x
@@ -173,11 +173,11 @@ def main():
         optimizer = torch.optim.Adam(predictor.parameters(), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, x, splitted_edge, optimizer,
+            loss = train(predictor, x, split_edge, optimizer,
                          args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                results = test(predictor, x, splitted_edge, evaluator,
+                results = test(predictor, x, split_edge, evaluator,
                                args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)

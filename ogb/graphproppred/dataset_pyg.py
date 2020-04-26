@@ -91,10 +91,10 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
 if __name__ == "__main__":
     pyg_dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
-    splitted_index = pyg_dataset.get_idx_split()
+    split_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
     print(pyg_dataset[0])
     print(pyg_dataset[0].edge_index)
-    print(pyg_dataset[splitted_index["train"]])
-    print(pyg_dataset[splitted_index["valid"]])
-    print(pyg_dataset[splitted_index["test"]])
+    print(pyg_dataset[split_index["train"]])
+    print(pyg_dataset[split_index["valid"]])
+    print(pyg_dataset[split_index["test"]])

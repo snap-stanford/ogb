@@ -127,11 +127,11 @@ def main():
     device = torch.device(device)
 
     dataset = PygNodePropPredDataset(name='ogbn-products')
-    splitted_idx = dataset.get_idx_split()
+    split_idx = dataset.get_idx_split()
     data = dataset[0]
 
     # Convert split indices to boolean masks and add them to `data`.
-    for key, idx in splitted_idx.items():
+    for key, idx in split_idx.items():
         mask = torch.zeros(data.num_nodes, dtype=torch.bool)
         mask[idx] = True
         data[f'{key}_mask'] = mask

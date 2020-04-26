@@ -121,11 +121,11 @@ def collate_dgl(samples):
 
 if __name__ == "__main__":
     dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
-    splitted_index = dgl_dataset.get_idx_split()
+    split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
     print(dgl_dataset[0])
-    print(dgl_dataset[splitted_index["train"]])
-    print(dgl_dataset[splitted_index["valid"]])
-    print(dgl_dataset[splitted_index["test"]])
+    print(dgl_dataset[split_index["train"]])
+    print(dgl_dataset[split_index["valid"]])
+    print(dgl_dataset[split_index["test"]])
 
 

@@ -107,6 +107,6 @@ class DglLinkPropPredDataset(object):
 
 if __name__ == "__main__":
     dgl_dataset = DglLinkPropPredDataset(name = "ogbl-citation")
-    splitted_edge = dgl_dataset.get_edge_split()
+    split_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
-    print(splitted_edge['train'][0])
+    print(split_edge['train'][0])

@@ -100,6 +100,6 @@ class LinkPropPredDataset(object):
 
 if __name__ == "__main__":
     dataset = LinkPropPredDataset(name = "ogbl-wikikg")
-    splitted_edge = dataset.get_edge_split()
+    split_edge = dataset.get_edge_split()
     print(dataset[0])
-    print(splitted_edge)
+    print(split_edge)

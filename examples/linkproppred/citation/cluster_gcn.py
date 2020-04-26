@@ -113,7 +113,7 @@ def train(model, predictor, loader, optimizer, device):
 
 
 @torch.no_grad()
-def test(model, predictor, data, splitted_edge, evaluator, batch_size, device):
+def test(model, predictor, data, split_edge, evaluator, batch_size, device):
     predictor.eval()
     print('Evaluating full-batch GNN on CPU...')
 
@@ -133,9 +133,9 @@ def test(model, predictor, data, splitted_edge, evaluator, batch_size, device):
     h = torch.from_numpy(model(x, adj)).to(device)
 
     def test_split(split):
-        source = splitted_edge[split]['source_node'].to(device)
-        target = splitted_edge[split]['target_node'].to(device)
-        target_neg = splitted_edge[split]['target_node_neg'].to(device)
+        source = split_edge[split]['source_node'].to(device)
+        target = split_edge[split]['target_node'].to(device)
+        target_neg = split_edge[split]['target_node_neg'].to(device)
 
         pos_preds = []
         for perm in DataLoader(range(source.size(0)), batch_size):
@@ -184,7 +184,7 @@ def main():
     device = torch.device(device)
 
     dataset = PygLinkPropPredDataset(name='ogbl-citation')
-    splitted_edge = dataset.get_edge_split()
+    split_edge = dataset.get_edge_split()
     data = dataset[0]
     data.edge_index = to_undirected(data.edge_index, data.num_nodes)
 
@@ -196,11 +196,11 @@ def main():
 
     # We randomly pick some training samples that we want to evaluate on:
     torch.manual_seed(12345)
-    idx = torch.randperm(splitted_edge['train']['source_node'].numel())[:86596]
-    splitted_edge['eval_train'] = {
-        'source_node': splitted_edge['train']['source_node'][idx],
-        'target_node': splitted_edge['train']['target_node'][idx],
-        'target_node_neg': splitted_edge['valid']['target_node_neg'],
+    idx = torch.randperm(split_edge['train']['source_node'].numel())[:86596]
+    split_edge['eval_train'] = {
+        'source_node': split_edge['train']['source_node'][idx],
+        'target_node': split_edge['train']['target_node'][idx],
+        'target_node_neg': split_edge['valid']['target_node_neg'],
     }
 
     model = GCN(data.x.size(-1), args.hidden_channels, args.hidden_channels,
@@ -222,7 +222,7 @@ def main():
             print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
 
             if epoch % args.eval_steps == 0:
-                result = test(model, predictor, data, splitted_edge, evaluator,
+                result = test(model, predictor, data, split_edge, evaluator,
                               64 * 4 * args.batch_size, device)
                 logger.add_result(run, result)
 

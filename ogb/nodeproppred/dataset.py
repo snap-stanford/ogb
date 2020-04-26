@@ -105,6 +105,6 @@ class NodePropPredDataset(object):
 
 if __name__ == "__main__":
     dataset = NodePropPredDataset(name = "ogbn-proteins")
-    splitted_index = dataset.get_idx_split()
+    split_index = dataset.get_idx_split()
     print(dataset[0])
-    print(splitted_index)
+    print(split_index)

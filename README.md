@@ -70,10 +70,10 @@ from torch_geometric.data import DataLoader
 
 dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
 
-splitted_idx = dataset.get_idx_split() 
-train_loader = DataLoader(dataset[splitted_idx["train"]], batch_size=32, shuffle=True)
-valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=32, shuffle=False)
-test_loader = DataLoader(dataset[splitted_idx["test"]], batch_size=32, shuffle=False)
+split_idx = dataset.get_idx_split() 
+train_loader = DataLoader(dataset[split_idx["train"]], batch_size=32, shuffle=True)
+valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=32, shuffle=False)
+test_loader = DataLoader(dataset[split_idx["test"]], batch_size=32, shuffle=False)
 ```
 
 #### (2) Evaluators
