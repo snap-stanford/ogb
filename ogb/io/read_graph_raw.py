@@ -61,7 +61,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
             additional_node_info[additional_file] = temp.astype(np.int64)
         else:
             # float
-            additional_node_info[additional_file] = tempt.astype(np.float32)
+            additional_node_info[additional_file] = temp.astype(np.float32)
 
     additional_edge_info = {}   
     for additional_file in additional_edge_files:
@@ -70,7 +70,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
             additional_edge_info[additional_file] = temp.astype(np.int64)
         else:
             # float
-            additional_edge_info[additional_file] = tempt.astype(np.float32)
+            additional_edge_info[additional_file] = temp.astype(np.float32)
 
 
     graph_list = []
