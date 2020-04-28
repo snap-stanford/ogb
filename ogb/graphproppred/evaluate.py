@@ -93,12 +93,14 @@ class Evaluator:
             desc += "where y_pred stores score values (for computing AUC score),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
+            desc += "nan values in y_true are ignored during evaluation.\n"
         elif self.eval_metric == "rmse":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
+            desc += "nan values in y_true are ignored during evaluation.\n"
         elif self.eval_metric == "accuracy":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
@@ -141,8 +143,9 @@ class Evaluator:
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.
             if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
-                is_valid = y_true[:,i] == y_true[:,i]
-                rocauc_list.append(roc_auc_score(y_true[is_valid,i], y_pred[is_valid,i]))
+                # ignore nan values
+                is_labeled = y_true[:,i] == y_true[:,i]
+                rocauc_list.append(roc_auc_score(y_true[is_labeled,i], y_pred[is_labeled,i]))
 
         if len(rocauc_list) == 0:
             raise RuntimeError("No positively labeled data available. Cannot compute ROC-AUC.")
@@ -160,8 +163,9 @@ class Evaluator:
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.
             if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
-                is_valid = y_true[:,i] == y_true[:,i]
-                precision, recall, _ = precision_recall_curve(y_true[is_valid,i], y_pred[is_valid,i])
+                # ignore nan values
+                is_labeled = y_true[:,i] == y_true[:,i]
+                precision, recall, _ = precision_recall_curve(y_true[is_labeled,i], y_pred[is_labeled,i])
                 prc_auc = auc(recall, precision)
                 prcauc_list.append(prc_auc)
 
@@ -177,8 +181,9 @@ class Evaluator:
         rmse_list = []
 
         for i in range(y_true.shape[1]):
-            is_valid = y_true[:,i] == y_true[:,i]
-            rmse_list.append(np.sqrt(((y_true[is_valid] - y_pred[is_valid])**2).mean()))
+            # ignore nan values
+            is_labeled = y_true[:,i] == y_true[:,i]
+            rmse_list.append(np.sqrt(((y_true[is_labeled] - y_pred[is_labeled])**2).mean()))
 
         return {"rmse": sum(rmse_list)/len(rmse_list)}
 
@@ -186,19 +191,19 @@ class Evaluator:
         acc_list = []
 
         for i in range(y_true.shape[1]):
-            is_valid = y_true[:,i] == y_true[:,i]
-            correct = y_true[is_valid,i] == y_pred[is_valid,i]
+            is_labeled = y_true[:,i] == y_true[:,i]
+            correct = y_true[is_labeled,i] == y_pred[is_labeled,i]
             acc_list.append(float(np.sum(correct))/len(correct))
 
         return {"acc": sum(acc_list)/len(acc_list)}
 
 if __name__ == "__main__":
     ### rocauc case
-    evaluator = Evaluator("ogbg-moltox21")
+    evaluator = Evaluator("ogbg-molpcba")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    y_true = torch.tensor(np.random.randint(2, size = (100,12)))
-    y_pred = torch.tensor(np.random.randn(100,12))
+    y_true = torch.tensor(np.random.randint(2, size = (100,128)))
+    y_pred = torch.tensor(np.random.randn(100,128))
     input_dict = {"y_true": y_true, "y_pred": y_pred}
     result = evaluator.eval(input_dict)
     print(result)
@@ -223,7 +228,7 @@ if __name__ == "__main__":
     print(result)
 
     ### accuracy
-    evaluator = Evaluator("ogbg-ppi")
+    evaluator = Evaluator("ogbg-ppa")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     y_true = np.random.randint(5, size = (100,1))
