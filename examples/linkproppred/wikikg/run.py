@@ -39,7 +39,7 @@ def parse_args(args=None):
     parser.add_argument('--do_test', action='store_true')
     parser.add_argument('--evaluate_train', action='store_true', help='Evaluate on training data')
     
-    parser.add_argument('--dataset', type=str, default='ogbl-wikikg')
+    parser.add_argument('--dataset', type=str, default='ogbl-wikikg', help='dataset name, default to wikikg')
     parser.add_argument('--model', default='TransE', type=str)
     parser.add_argument('-de', '--double_entity_embedding', action='store_true')
     parser.add_argument('-dr', '--double_relation_embedding', action='store_true')
@@ -70,9 +70,9 @@ def parse_args(args=None):
     parser.add_argument('--nentity', type=int, default=0, help='DO NOT MANUALLY SET')
     parser.add_argument('--nrelation', type=int, default=0, help='DO NOT MANUALLY SET')
     
-    parser.add_argument('--print_on_screen', action='store_true')
-    parser.add_argument('--ntriples_eval_train', type=int, default=200000, help='DO NOT MANUALLY SET')
-    parser.add_argument('--neg_size_eval_train', type=int, default=500, help='DO NOT MANUALLY SET')
+    parser.add_argument('--print_on_screen', action='store_true', help='log on screen or not')
+    parser.add_argument('--ntriples_eval_train', type=int, default=200000, help='number of training triples to evaluate eventually')
+    parser.add_argument('--neg_size_eval_train', type=int, default=500, help='number of negative samples when evaluating training triples')
     return parser.parse_args(args)
 
 def override_config(args):
