@@ -26,6 +26,7 @@ def train(model, device, loader, optimizer, task_type):
         else:
             pred = model(batch)
             optimizer.zero_grad()
+            ## ignore nan targets (unlabeled) when computing training loss.
             is_valid = batch.y == batch.y
             if "classification" in task_type: 
                 loss = cls_criterion(pred.to(torch.float32)[is_valid], batch.y.to(torch.float32)[is_valid])
