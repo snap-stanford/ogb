@@ -6,6 +6,7 @@ download_name,proteinfunc_v4,products,arxiv
 eval metric,rocauc,accuracy,accuracy
 has_edge_attr,True,False,False
 has_node_attr,False,True,True
+num classes,2,47,40
 num nodes,132534,2449029,169343
 num tasks,112,1,1
 split,species,sales_ranking,time

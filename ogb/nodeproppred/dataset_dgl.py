@@ -29,6 +29,7 @@ class DglNodePropPredDataset(object):
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
+        self.num_classes = int(self.meta_info[self.name]["num classes"])
 
         super(DglNodePropPredDataset, self).__init__()
 
@@ -115,7 +116,8 @@ class DglNodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglNodePropPredDataset(name = "ogbn-proteins")
+    dgl_dataset = DglNodePropPredDataset(name = "ogbn-arxiv")
+    print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset[0])
     print(split_index)

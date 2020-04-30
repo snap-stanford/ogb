@@ -30,6 +30,7 @@ class DglGraphPropPredDataset(object):
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.task_type = self.meta_info[self.name]["task type"]
+        self.num_classes = self.meta_info[self.name]["num classes"]
 
         super(DglGraphPropPredDataset, self).__init__()
 
@@ -121,6 +122,7 @@ def collate_dgl(samples):
 
 if __name__ == "__main__":
     dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
+    print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
     print(dgl_dataset[0])
