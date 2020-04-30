@@ -183,10 +183,10 @@ def main():
     adj = SparseTensor(row=edge_index[0], col=edge_index[1])
 
     if args.use_sage:
-        model = SAGE(data.x.size(-1), args.hidden_channels, 40,
+        model = SAGE(data.x.size(-1), args.hidden_channels, dataset.num_classes,
                      args.num_layers, args.dropout).to(device)
     else:
-        model = GCN(data.x.size(-1), args.hidden_channels, 40, args.num_layers,
+        model = GCN(data.x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
                     args.dropout).to(device)
 
         # Pre-compute GCN normalization.

@@ -167,7 +167,7 @@ def main():
                                          save_dir=dataset.processed_dir,
                                          num_workers=args.num_workers)
 
-    model = SAGE(ind_data.x.size(-1), args.hidden_channels, 47,
+    model = SAGE(ind_data.x.size(-1), args.hidden_channels, dataset.num_classes,
                  args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')

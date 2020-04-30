@@ -103,7 +103,7 @@ def main():
     y_true = data.y.to(device)
     train_idx = split_idx['train'].to(device)
 
-    model = MLP(x.size(-1), args.hidden_channels, 47, args.num_layers,
+    model = MLP(x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
                 args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-arxiv')

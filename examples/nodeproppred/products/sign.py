@@ -96,7 +96,7 @@ def main():
     y_valid_true = data.y[split_idx['valid']].to(device)
     y_test_true = data.y[split_idx['test']].to(device)
 
-    model = MLP(data.x.size(-1), args.hidden_channels, 47, args.num_layers,
+    model = MLP(data.x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
                 args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
