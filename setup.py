@@ -8,6 +8,7 @@ here = path.abspath(path.dirname(__file__))
 sys.path.insert(0, path.join(here, 'ogb'))
 from version import __version__
 
+print('version')
 print(__version__)
 
 # Get the long description from the README file
