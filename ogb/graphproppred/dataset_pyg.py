@@ -29,6 +29,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.task_type = self.meta_info[self.name]["task type"]
+        self.__num_classes__ = int(self.meta_info[self.name]["num classes"])
 
         super(PygGraphPropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -44,6 +45,10 @@ class PygGraphPropPredDataset(InMemoryDataset):
         test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
 
         return {"train": torch.tensor(train_idx, dtype = torch.long), "valid": torch.tensor(valid_idx, dtype = torch.long), "test": torch.tensor(test_idx, dtype = torch.long)}
+
+    @property
+    def num_classes(self):
+        return self.__num_classes__
 
     @property
     def raw_file_names(self):
@@ -91,6 +96,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
 if __name__ == "__main__":
     pyg_dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
+    print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
     print(pyg_dataset[0])

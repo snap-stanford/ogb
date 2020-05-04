@@ -26,6 +26,7 @@ class NodePropPredDataset(object):
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
+        self.num_classes = int(self.meta_info[self.name]["num classes"])
 
         super(NodePropPredDataset, self).__init__()
 
@@ -104,7 +105,8 @@ class NodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dataset = NodePropPredDataset(name = "ogbn-proteins")
+    dataset = NodePropPredDataset(name = "ogbn-arxiv")
+    print(dataset.num_classes)
     split_index = dataset.get_idx_split()
     print(dataset[0])
     print(split_index)

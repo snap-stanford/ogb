@@ -32,9 +32,7 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-
-### Important 
-**The currently-available OGB datasets are subject to change.** Datasets might be deleted/modified/added. The datasets will be fixed *after* the OGB paper is released (expected to be around mid April). Thank you for your patience.
+**If you have previously installed ogb, please make sure you update the version to 1.1.\*. Then, delete all the downloaded dataset folders, as there are changes to some datasets.**
 
 #### Requirements
  - Python>=3.5
@@ -50,6 +48,14 @@ The recommended way to install OGB is using Python's package manager pip:
 ```bash
 pip install ogb
 ```
+
+```bash
+python -c "import ogb; print(ogb.__version__)"
+# This should print "1.1.*". Otherwise, please update the version by
+pip install -U ogb
+# Then, delete all the downloaded dataset folders.
+```
+
 
 #### From source
 You can also install OGB from source. This is recommended if you want to contribute to OGB.
@@ -89,6 +95,3 @@ evaluator = Evaluator(name = "ogbg-molhiv")
 input_dict = {"y_true": y_true, "y_pred": y_pred}
 result_dict = evaluator.eval(input_dict) # E.g., {"rocauc": 0.7321}
 ```
-
-## Citing OGB
-Coming soon.

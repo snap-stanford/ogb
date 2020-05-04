@@ -27,6 +27,7 @@ class GraphPropPredDataset(object):
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.task_type = self.meta_info[self.name]["task type"]
+        self.num_classes = self.meta_info[self.name]["num classes"]
 
         super(GraphPropPredDataset, self).__init__()
 
@@ -103,6 +104,7 @@ class GraphPropPredDataset(object):
 
 if __name__ == "__main__":
     dataset = GraphPropPredDataset(name = "ogbg-molhiv")
+    print(dataset.num_classes)
     split_index = dataset.get_idx_split()
     print(dataset)
     print(dataset[0])

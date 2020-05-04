@@ -173,11 +173,11 @@ def main():
 
     if args.use_sage:
         model = SAGE(
-            x.size(-1), args.hidden_channels, 47, args.num_layers,
+            x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
             args.dropout).to(device)
     else:
         model = GCN(
-            x.size(-1), args.hidden_channels, 47, args.num_layers,
+            x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
             args.dropout).to(device)
 
         # Pre-compute GCN normalization.

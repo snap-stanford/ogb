@@ -19,9 +19,9 @@ dataset_dict["ogbg-molesol"] = {"num tasks": 1, "eval metric": "rmse", "download
 dataset_dict["ogbg-molfreesolv"] = {"num tasks": 1, "eval metric": "rmse", "download_name": "freesolv"}
 dataset_dict["ogbg-mollipo"] = {"num tasks": 1, "eval metric": "rmse", "download_name": "lipophilicity"}
 dataset_dict["ogbg-molchembl"] = {"num tasks": 1310, "eval metric": "rocauc", "download_name": "chembl"}
-dataset_dict["ogbg-molsars"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "sars"}
-dataset_dict["ogbg-molecoli"] = {"num tasks": 1, "eval metric": "rocauc", "download_name": "ecoli"}
-dataset_dict["ogbg-molsars2"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "pseudomonas"}
+# dataset_dict["ogbg-molsars"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "sars"}
+# dataset_dict["ogbg-molecoli"] = {"num tasks": 1, "eval metric": "rocauc", "download_name": "ecoli"}
+# dataset_dict["ogbg-molsars2"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "pseudomonas"}
 
 mol_dataset_list = list(dataset_dict.keys())
 
@@ -33,15 +33,19 @@ for nme in mol_dataset_list:
     dataset_dict[nme]["has_node_attr"] = True
     dataset_dict[nme]["has_edge_attr"] = True
 
-    if dataset_dict[nme]["has_edge_attr"] == "rmse":
+    if dataset_dict[nme]["eval metric"] == "rmse":
         dataset_dict[nme]["task type"] = "regression"
+        dataset_dict[nme]["num classes"] = -1 # num classes is not defined for regression datasets.
     else:
         dataset_dict[nme]["task type"] = "binary classification"
+        dataset_dict[nme]["num classes"] = 2
 
-    if not nme == 'ogbg-molsars2':
-        dataset_dict[nme]["split"] = "scaffold"
-    else:
-        dataset_dict[nme]["split"] = "hidden"
+    dataset_dict[nme]["split"] = "scaffold"
+
+    # if not nme == 'ogbg-molsars2':
+    #     dataset_dict[nme]["split"] = "scaffold"
+    # else:
+    #     dataset_dict[nme]["split"] = "hidden"
 
 dataset_list.extend(mol_dataset_list)
 
@@ -59,7 +63,7 @@ dataset_dict[name]["num tasks"] = 1
 dataset_dict[name]["has_node_attr"] = False
 dataset_dict[name]["has_edge_attr"] = True
 dataset_dict[nme]["task type"] = "multiclass classification"
-
+dataset_dict[nme]["num classes"] = 37
 
 
 df = pd.DataFrame(dataset_dict)

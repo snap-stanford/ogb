@@ -142,7 +142,7 @@ def main():
     loader = ClusterLoader(cluster_data, batch_size=args.batch_size,
                            shuffle=True, num_workers=args.num_workers)
 
-    model = SAGE(data.x.size(-1), args.hidden_channels, 47, args.num_layers,
+    model = SAGE(data.x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
                  args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
