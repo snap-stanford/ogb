@@ -8,7 +8,8 @@ dataset_list = []
 ### add meta-information about protein function prediction task
 name = "ogbl-ppa"
 dataset_dict[name] = {"eval metric": "hits@100", "task type": "link prediction"}
-dataset_dict[name]["download_name"] = "ppassoc_v5"
+dataset_dict[name]["download_name"] = "ppassoc"
+dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
@@ -23,6 +24,7 @@ dataset_dict[name]['additional edge files'] = 'None'
 name = "ogbl-collab"
 dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "collab"
+dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
@@ -37,6 +39,7 @@ dataset_dict[name]['additional edge files'] = 'edge_weight,edge_year'
 name = "ogbl-citation"
 dataset_dict[name] = {"eval metric": "mrr", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "citation"
+dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = False 
@@ -51,6 +54,7 @@ dataset_dict[name]['additional edge files'] = 'None'
 name = "ogbl-wikikg"
 dataset_dict[name] = {"eval metric": "mrr", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "wikikg"
+dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = False 

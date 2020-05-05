@@ -24,6 +24,15 @@ class DglNodePropPredDataset(object):
             error_mssg += "\n".join(self.meta_info.keys())
             raise ValueError(error_mssg)
 
+        # check version
+        # First check whether the dataset has been already downloaded or not.
+        # If so, check whether the dataset version is the newest or not.
+        # If the dataset is not the newest version, notify this to the user. 
+        if osp.isdir(self.root) and (not osp.exists(osp.join(self.root, 'RELEASE_v' + str(self.meta_info[self.name]['version']) + '.txt'))):
+            print(self.name + ' has been updated.')
+            if input("Will you update the dataset now? (y/N)\n").lower() == "y":
+                shutil.rmtree(self.root)
+
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
 
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
@@ -116,7 +125,7 @@ class DglNodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglNodePropPredDataset(name = "ogbn-arxiv")
+    dgl_dataset = DglNodePropPredDataset(name = "ogbn-products")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset[0])

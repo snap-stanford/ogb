@@ -25,6 +25,15 @@ class PygLinkPropPredDataset(InMemoryDataset):
             error_mssg += "\n".join(self.meta_info.keys())
             raise ValueError(error_mssg)
 
+        # check version
+        # First check whether the dataset has been already downloaded or not.
+        # If so, check whether the dataset version is the newest or not.
+        # If the dataset is not the newest version, notify this to the user. 
+        if osp.isdir(self.root) and (not osp.exists(osp.join(self.root, 'RELEASE_v' + str(self.meta_info[self.name]['version']) + '.txt'))):
+            print(self.name + ' has been updated.')
+            if input("Will you update the dataset now? (y/N)\n").lower() == "y":
+                shutil.rmtree(self.root)
+
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., ppassoc
 
         self.task_type = self.meta_info[self.name]["task type"]
@@ -103,8 +112,8 @@ if __name__ == "__main__":
     print(split_edge['test'])
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-citation")
     split_edge = pyg_dataset.get_edge_split()
-    print(split_edge['train'][0])
-    print(split_edge['test'][0])
+    print(split_edge['train'])
+    print(split_edge['test'])
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-ppa")
     split_edge = pyg_dataset.get_edge_split()
     print(split_edge['train'])

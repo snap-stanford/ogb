@@ -24,6 +24,17 @@ class PygNodePropPredDataset(InMemoryDataset):
             error_mssg += "\n".join(self.meta_info.keys())
             raise ValueError(error_mssg)
 
+
+        # check version
+        # First check whether the dataset has been already downloaded or not.
+        # If so, check whether the dataset version is the newest or not.
+        # If the dataset is not the newest version, notify this to the user. 
+        if osp.isdir(self.root) and (not osp.exists(osp.join(self.root, 'RELEASE_v' + str(self.meta_info[self.name]['version']) + '.txt'))):
+            print(self.name + ' has been updated.')
+            if input("Will you update the dataset now? (y/N)\n").lower() == "y":
+                shutil.rmtree(self.root)
+
+
         self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
 
         self.num_tasks = int(self.meta_info[self.name]["num tasks"])
@@ -109,7 +120,7 @@ class PygNodePropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygNodePropPredDataset(name = "ogbn-arxiv")
+    pyg_dataset = PygNodePropPredDataset(name = "ogbn-proteins")
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
     print(pyg_dataset[0])

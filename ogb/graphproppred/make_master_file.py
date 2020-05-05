@@ -27,6 +27,7 @@ mol_dataset_list = list(dataset_dict.keys())
 
 for nme in mol_dataset_list:
     download_folder_name = dataset_dict[nme]["download_name"]
+    dataset_dict[nme]["version"] = 1
     dataset_dict[nme]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/" + download_folder_name + ".zip"
     dataset_dict[nme]["add_inverse_edge"] = True
     dataset_dict[nme]["data type"] = "mol"
@@ -55,6 +56,7 @@ dataset_list.extend(mol_dataset_list)
 name = "ogbg-ppa"
 dataset_dict[name] = {"eval metric": "accuracy"}
 dataset_dict[name]["download_name"] = "ogbg_ppi_medium"
+dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/ogbg_ppi_medium.zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
@@ -62,8 +64,8 @@ dataset_dict[name]["split"] = "species"
 dataset_dict[name]["num tasks"] = 1
 dataset_dict[name]["has_node_attr"] = False
 dataset_dict[name]["has_edge_attr"] = True
-dataset_dict[nme]["task type"] = "multiclass classification"
-dataset_dict[nme]["num classes"] = 37
+dataset_dict[name]["task type"] = "multiclass classification"
+dataset_dict[name]["num classes"] = 37
 
 
 df = pd.DataFrame(dataset_dict)

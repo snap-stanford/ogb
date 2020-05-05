@@ -2,11 +2,12 @@
 add_inverse_edge,True,True,False,False
 additional edge files,None,"edge_weight,edge_year",None,edge_reltype
 additional node files,None,None,node_year,None
-download_name,ppassoc_v5,collab,citation,wikikg
+download_name,ppassoc,collab,citation,wikikg
 eval metric,hits@100,hits@10,mrr,mrr
 has_edge_attr,False,False,False,False
 has_node_attr,True,True,True,False
 num nodes,576289,235868,2927963,2500604
 split,throughput,time,time,time
 task type,link prediction,link prediction,link prediction,link prediction
-url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc_v5.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip,https://snap.stanford.edu/ogb/data/linkproppred/citation.zip,https://snap.stanford.edu/ogb/data/linkproppred/wikikg.zip
+url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip,https://snap.stanford.edu/ogb/data/linkproppred/citation.zip,https://snap.stanford.edu/ogb/data/linkproppred/wikikg.zip
+version,1,1,1,1

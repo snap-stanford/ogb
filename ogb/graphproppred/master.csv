@@ -5,8 +5,9 @@ download_name,bace,bbbp,clintox,muv,pcba,sider,tox21,toxcast,hiv,esol,freesolv,l
 eval metric,rocauc,rocauc,rocauc,prcauc,prcauc,rocauc,rocauc,rocauc,rocauc,rmse,rmse,rmse,rocauc,accuracy
 has_edge_attr,True,True,True,True,True,True,True,True,True,True,True,True,True,True
 has_node_attr,True,True,True,True,True,True,True,True,True,True,True,True,True,False
-num classes,2,2,2,2,2,2,2,2,2,-1,-1,-1,37,
+num classes,2,2,2,2,2,2,2,2,2,-1,-1,-1,2,37
 num tasks,1,1,2,17,128,27,12,617,1,1,1,1,1310,1
 split,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,species
-task type,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,regression,regression,regression,multiclass classification,
+task type,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,regression,regression,regression,binary classification,multiclass classification
 url,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/bace.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/bbbp.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/clintox.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/muv.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/pcba.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/sider.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/tox21.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/toxcast.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/hiv.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/esol.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/freesolv.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/lipophilicity.zip,https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/chembl.zip,https://snap.stanford.edu/ogb/data/graphproppred/ogbg_ppi_medium.zip
+version,1,1,1,1,1,1,1,1,1,1,1,1,1,1
