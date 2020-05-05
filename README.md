@@ -98,7 +98,7 @@ result_dict = evaluator.eval(input_dict) # E.g., {"rocauc": 0.7321}
 ## Citing OGB
 If you use OGB datasets in your work, please cite our paper (Bibtex below).
 ```
-@article{hu2019ogb,
+@article{hu2020ogb,
   title={Open Graph Benchmark: Datasets for Machine Learning on Graphs},
   author={Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, Jure Leskovec},
   journal={arXiv preprint arXiv:2005.00687},
