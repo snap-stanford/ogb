@@ -32,7 +32,7 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.1.\*. Then, delete all the downloaded dataset folders, as there are changes to some datasets.**
+**If you have previously installed ogb, please make sure you update the version to 1.1.1\*.**
 
 #### Requirements
  - Python>=3.5
@@ -51,9 +51,8 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.1.*". Otherwise, please update the version by
+# This should print "1.1.1". Otherwise, please update the version by
 pip install -U ogb
-# Then, delete all the downloaded dataset folders.
 ```
 
 
