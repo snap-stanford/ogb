@@ -44,7 +44,7 @@ class LinkPredictor(torch.nn.Module):
 def train(x, predictor, split_edge, optimizer, batch_size):
     predictor.train()
 
-    pos_train_edge = split_edge['train']['edge'].to(x.weight.device)
+    pos_train_edge = split_edge['train']['edge'].to(x.device)
 
     total_loss = total_examples = 0
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size,
@@ -174,11 +174,11 @@ def main():
             list(x.parameters()) + list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(x, predictor, split_edge, optimizer,
+            loss = train(x.weight, predictor, split_edge, optimizer,
                          args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                results = test(x, predictor, split_edge, evaluator,
+                results = test(x.weight, predictor, split_edge, evaluator,
                                args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)
