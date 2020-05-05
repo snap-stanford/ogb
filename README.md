@@ -94,3 +94,14 @@ evaluator = Evaluator(name = "ogbg-molhiv")
 input_dict = {"y_true": y_true, "y_pred": y_pred}
 result_dict = evaluator.eval(input_dict) # E.g., {"rocauc": 0.7321}
 ```
+
+## Citing OGB
+If you use OGB datasets in your work, please cite our paper (Bibtex below).
+```
+@article{hu2019ogb,
+  title={Open Graph Benchmark: Datasets for Machine Learning on Graphs},
+  author={Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, Jure Leskovec},
+  journal={arXiv preprint arXiv:2005.00687},
+  year={2020}
+}
+```
