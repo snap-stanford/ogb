@@ -262,7 +262,7 @@ class Evaluator:
 
 if __name__ == "__main__":
     ### hits case
-    evaluator = Evaluator(name = "ogbl-collab")
+    evaluator = Evaluator(name = "ogbl-ddi")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     # y_true = np.random.randint(2, size = (100,))

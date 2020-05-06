@@ -65,6 +65,21 @@ dataset_dict[name]["num nodes"] = 2500604 # number of relations is 535
 dataset_dict[name]["additional node files"] = 'None'
 dataset_dict[name]['additional edge files'] = 'edge_reltype'
 
+### add meta-information about wikidata knowledge graph completion task
+name = "ogbl-ddi"
+dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
+dataset_dict[name]["download_name"] = "ddi"
+dataset_dict[name]["version"] = 1
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
+## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
+dataset_dict[name]["add_inverse_edge"] = True 
+dataset_dict[name]["has_node_attr"] = False
+dataset_dict[name]["has_edge_attr"] = False
+dataset_dict[name]["split"] = "target"
+dataset_dict[name]["num nodes"] = 4267
+dataset_dict[name]["additional node files"] = 'None'
+dataset_dict[name]['additional edge files'] = 'None'
+
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 
 df.to_csv("master.csv")
