@@ -10,7 +10,11 @@ import time
 import numpy as np
 
 ### importing OGB
-from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
+
+### for loading dataset
+from ogb.graphproppred import PygGraphPropPredDataset
+### for evaluation
+from ogb.graphproppred import Evaluator
 
 multicls_criterion = torch.nn.CrossEntropyLoss()
 
@@ -92,14 +96,14 @@ def main():
 
     dataset = PygGraphPropPredDataset(name = args.dataset, transform = add_zeros)
 
-    split_idx = dataset.get_idx_split()
+    splitted_idx = dataset.get_idx_split()
 
     ### automatic evaluator. takes dataset name as input
     evaluator = Evaluator(args.dataset)
 
-    train_loader = DataLoader(dataset[split_idx["train"]], batch_size=args.batch_size, shuffle=True, num_workers = args.num_workers)
-    valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
-    test_loader = DataLoader(dataset[split_idx["test"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+    train_loader = DataLoader(dataset[splitted_idx["train"]], batch_size=args.batch_size, shuffle=True, num_workers = args.num_workers)
+    valid_loader = DataLoader(dataset[splitted_idx["valid"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+    test_loader = DataLoader(dataset[splitted_idx["test"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.gnn == 'gin':
         model = GNN(gnn_type = 'gin', num_class = dataset.num_classes, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False).to(device)
@@ -141,8 +145,7 @@ def main():
     print('Best validation score: {}'.format(valid_curve[best_val_epoch]))
     print('Test score: {}'.format(test_curve[best_val_epoch]))
 
-    if not args.filename == '':
-        torch.save({'Val': valid_curve[best_val_epoch], 'Test': test_curve[best_val_epoch], 'Train': train_curve[best_val_epoch], 'BestTrain': best_train}, args.filename)
+    torch.save({'Val': valid_curve[best_val_epoch], 'Test': test_curve[best_val_epoch], 'Train': train_curve[best_val_epoch], 'BestTrain': best_train}, args.filename)
 
 
 if __name__ == "__main__":
