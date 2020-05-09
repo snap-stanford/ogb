@@ -43,6 +43,9 @@ for nme in mol_dataset_list:
 
     dataset_dict[nme]["split"] = "scaffold"
 
+    dataset_dict[nme]["additional node files"] = 'None'
+    dataset_dict[nme]['additional edge files'] = 'None'
+
     # if not nme == 'ogbg-molsars2':
     #     dataset_dict[nme]["split"] = "scaffold"
     # else:
@@ -57,7 +60,7 @@ name = "ogbg-ppa"
 dataset_dict[name] = {"eval metric": "accuracy"}
 dataset_dict[name]["download_name"] = "ogbg_ppi_medium"
 dataset_dict[name]["version"] = 1
-dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/ogbg_ppi_medium.zip"
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/" + dataset_dict[name]["download_name"] + ".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
 dataset_dict[name]["split"] = "species"
@@ -66,6 +69,25 @@ dataset_dict[name]["has_node_attr"] = False
 dataset_dict[name]["has_edge_attr"] = True
 dataset_dict[name]["task type"] = "multiclass classification"
 dataset_dict[name]["num classes"] = 37
+dataset_dict[name]["additional node files"] = 'None'
+dataset_dict[name]['additional edge files'] = 'None'
+
+
+### add ppi dataset (medium)
+name = "ogbg-code"
+dataset_dict[name] = {"eval metric": "BLEU"}
+dataset_dict[name]["download_name"] = "code"
+dataset_dict[name]["version"] = 1
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/" + dataset_dict[name]["download_name"] + ".zip"
+dataset_dict[name]["add_inverse_edge"] = False 
+dataset_dict[name]["split"] = "repository"
+dataset_dict[name]["num tasks"] = 1
+dataset_dict[name]["has_node_attr"] = True
+dataset_dict[name]["has_edge_attr"] = False
+dataset_dict[name]["task type"] = "sequence prediction"
+dataset_dict[name]["num classes"] = -1
+dataset_dict[name]["additional node files"] = 'is_attributed,dfs_order,depth'
+dataset_dict[name]['additional edge files'] = 'None'
 
 
 df = pd.DataFrame(dataset_dict)

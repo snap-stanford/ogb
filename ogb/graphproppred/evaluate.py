@@ -8,6 +8,8 @@ try:
 except ImportError:
     torch = None
 
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
+
 ### Evaluator for graph classification
 class Evaluator:
     def __init__(self, name):
@@ -23,6 +25,9 @@ class Evaluator:
 
         self.num_tasks = int(meta_info[self.name]["num tasks"])
         self.eval_metric = meta_info[self.name]["eval metric"]
+
+        if self.eval_metric == 'BLEU':
+            self.chencherry = SmoothingFunction().method1
 
 
     def _parse_and_check_input(self, input_dict):
@@ -62,6 +67,25 @@ class Evaluator:
 
             return y_true, y_pred
 
+        elif self.eval_metric == 'BLEU':
+            if not "seq_ref" in input_dict:
+                RuntimeError("Missing key of seq_ref")
+            if not "seq_pred" in input_dict:
+                RuntimeError("Missing key of seq_pred")
+
+            seq_ref, seq_pred = input_dict["seq_ref"], input_dict["seq_pred"]
+
+            if not isinstance(seq_ref, list):
+                raise RuntimeError("seq_ref must be of type list")
+
+            if not isinstance(seq_pred, list):
+                raise RuntimeError("seq_pred must be of type list")
+            
+            if len(seq_ref) != len(seq_pred):
+                raise RuntimeError("Length of seq_true and seq_pred should be the same")
+
+            return seq_ref, seq_pred
+
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -80,6 +104,9 @@ class Evaluator:
         elif self.eval_metric == "accuracy":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_acc(y_true, y_pred)
+        elif self.eval_metric == 'BLEU':
+            seq_ref, seq_pred = self._parse_and_check_input(input_dict)
+            return self._eval_BLEU(seq_ref, seq_pred)
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -108,6 +135,13 @@ class Evaluator:
             desc += "where y_pred stores predicted class label (integer),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
+        elif self.eval_metric == "BLEU":
+            desc += "{\"seq_ref\": seq_ref, \"seq_pred\": seq_pred}\n"
+            desc += "- seq_ref: list of list of strings\n"
+            desc += "- seq_pred: list of list of strings\n"
+            desc += "where seq_ref stores the reference sequence of tokens,\n"
+            desc += "where seq_pred stores the predicted sequence of tokens.\n"
+            desc += "Note: BLEU socre is computed at the corpus level. All sequences need to be passed.\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -128,6 +162,9 @@ class Evaluator:
         elif self.eval_metric == "accuracy":
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
+        elif self.eval_metric == "BLEU":
+            desc += "{\"BLEU\": BLEU}\n"
+            desc += "- BLEU (float): corpus-level BLEU3 score\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -197,8 +234,24 @@ class Evaluator:
 
         return {"acc": sum(acc_list)/len(acc_list)}
 
+    def _eval_BLEU(self, seq_ref, seq_pred):
+        """
+            compute corpus-level BLEU3 score
+        """
+        return {"BLEU": corpus_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./3, 1./3, 1./3), smoothing_function = self.chencherry)}
+
 if __name__ == "__main__":
-    ### rocauc case
+    evaluator = Evaluator("ogbg-code")
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    seq_ref = [['tom', 'is', 'is'], ['he', 'he'], ['he', 'he'], ['he', 'he']]
+    seq_pred = [['tom', 'is', 'is'], ['he', 'he'], ['he', 'he'], ['he', 'he']]
+    input_dict = {"seq_ref": seq_ref, "seq_pred": seq_pred}
+    result = evaluator.eval(input_dict)
+    print(result)
+
+    exit(-1)
+
     evaluator = Evaluator("ogbg-molpcba")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)

@@ -70,8 +70,26 @@ class GraphPropPredDataset(object):
 
             ### preprocess
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            self.graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge)
-            self.labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+
+            if self.meta_info[self.name]["additional node files"] == 'None':
+                additional_node_files = []
+            else:
+                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+
+            if self.meta_info[self.name]["additional edge files"] == 'None':
+                additional_edge_files = []
+            else:
+                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+
+            self.graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+
+
+            if self.task_type == 'sequence prediction':
+                labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                # need to split each element into subtokens
+                self.labels = [str(labels_joined[i][0]).split(' ') for i in range(len(labels_joined))]
+            else:
+                self.labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
 
             print('Saving...')
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path)
@@ -112,13 +130,21 @@ class GraphPropPredDataset(object):
 
 
 if __name__ == "__main__":
-    dataset = GraphPropPredDataset(name = "ogbg-molhiv")
+    dataset = GraphPropPredDataset(name = "ogbg-code")
+    target_list = np.array([len(label) for label in dataset.labels])
+    print(np.sum(target_list == 1)/ float(len(target_list)))
+    print(np.sum(target_list == 2)/ float(len(target_list)))
+    print(np.sum(target_list == 3)/ float(len(target_list)))
+
+    from collections import Counter
+    print(Counter(target_list))
+
     print(dataset.num_classes)
     split_index = dataset.get_idx_split()
-    print(dataset)
-    print(dataset[0])
-    print(split_index["train"])
-    print(split_index["valid"])
-    print(split_index["test"])
+    # print(dataset)
+    # print(dataset[2])
+    # print(split_index["train"])
+    # print(split_index["valid"])
+    # print(split_index["test"])
 
 

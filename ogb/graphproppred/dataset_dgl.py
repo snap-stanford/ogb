@@ -50,9 +50,18 @@ class DglGraphPropPredDataset(object):
         raw_dir = osp.join(self.root, 'raw')
         pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
+        if self.task_type == 'sequence prediction':
+            target_sequence_file_path = osp.join(processed_dir, 'target_sequence')
+
         if os.path.exists(pre_processed_file_path):
-            self.graphs, label_dict = load_graphs(pre_processed_file_path)
-            self.labels = label_dict['labels']
+
+            if self.task_type == "sequence prediction":
+                self.graphs, _ = load_graphs(pre_processed_file_path)
+                self.labels = torch.load(target_sequence_file_path)
+
+            else:
+                self.graphs, label_dict = load_graphs(pre_processed_file_path)
+                self.labels = label_dict['labels']
 
         else:
             ### download
@@ -73,15 +82,43 @@ class DglGraphPropPredDataset(object):
 
             ### preprocess
             add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
-            graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge)
-            labels = torch.tensor(pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values)
 
-            print('Saving...')
-            save_graphs(pre_processed_file_path, graphs, labels={'labels': labels})
+            if self.meta_info[self.name]["additional node files"] == 'None':
+                additional_node_files = []
+            else:
+                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
 
-            ### load preprocessed files
-            self.graphs, label_dict = load_graphs(pre_processed_file_path)
-            self.labels = label_dict['labels']
+            if self.meta_info[self.name]["additional edge files"] == 'None':
+                additional_edge_files = []
+            else:
+                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+
+            graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+
+
+            if self.task_type == "sequence prediction":
+                # the downloaded labels are initially joined by ' '
+                labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                # need to split each element into subtokens
+                labels = [str(labels_joined[i][0]).split(' ') for i in range(len(labels_joined))]
+
+                print('Saving...')
+                save_graphs(pre_processed_file_path, graphs)
+                torch.save(labels, target_sequence_file_path)
+
+                ### load preprocessed files
+                self.graphs, _ = load_graphs(pre_processed_file_path)
+                self.labels = torch.load(target_sequence_file_path)
+
+            else:
+                labels = torch.tensor(pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values)
+
+                print('Saving...')
+                save_graphs(pre_processed_file_path, graphs, labels={'labels': labels})
+
+                ### load preprocessed files
+                self.graphs, label_dict = load_graphs(pre_processed_file_path)
+                self.labels = label_dict['labels']
 
 
     def get_idx_split(self, split_type = None):
@@ -124,13 +161,20 @@ class DglGraphPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 
+# Collate function for ordinary graph classification 
 def collate_dgl(samples):
     graphs, labels = map(list, zip(*samples))
     batched_graph = dgl.batch(graphs)
     return batched_graph, torch.stack(labels)
 
+# Collate function for seqiemce prediction
+def collate_dgl_seq(samples):
+    graphs, labels = map(list, zip(*samples))
+    batched_graph = dgl.batch(graphs)
+    return batched_graph, labels
+
 if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
+    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-code")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
@@ -138,5 +182,6 @@ if __name__ == "__main__":
     print(dgl_dataset[split_index["train"]])
     print(dgl_dataset[split_index["valid"]])
     print(dgl_dataset[split_index["test"]])
+    print(collate_dgl_seq([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
 
 
