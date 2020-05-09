@@ -164,7 +164,7 @@ class Evaluator:
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.eval_metric == "BLEU":
             desc += "{\"BLEU\": BLEU}\n"
-            desc += "- BLEU (float): corpus-level BLEU3 score\n"
+            desc += "- BLEU (float): corpus-level BLEU3 score with smoothing\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -236,7 +236,7 @@ class Evaluator:
 
     def _eval_BLEU(self, seq_ref, seq_pred):
         """
-            compute corpus-level BLEU3 score
+            compute corpus-level BLEU3 score with smoothing
         """
         return {"BLEU": corpus_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./3, 1./3, 1./3), smoothing_function = self.chencherry)}
 
