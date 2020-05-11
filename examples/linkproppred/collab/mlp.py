@@ -91,7 +91,7 @@ def test(predictor, x, split_edge, evaluator, batch_size):
     pos_valid_pred = torch.cat(pos_valid_preds, dim=0)
 
     neg_valid_preds = []
-    for perm in DataLoader(range(pos_valid_edge.size(0)), batch_size):
+    for perm in DataLoader(range(neg_valid_edge.size(0)), batch_size):
         edge = neg_valid_edge[perm].t()
         neg_valid_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
     neg_valid_pred = torch.cat(neg_valid_preds, dim=0)
@@ -103,7 +103,7 @@ def test(predictor, x, split_edge, evaluator, batch_size):
     pos_test_pred = torch.cat(pos_test_preds, dim=0)
 
     neg_test_preds = []
-    for perm in DataLoader(range(pos_test_edge.size(0)), batch_size):
+    for perm in DataLoader(range(neg_test_edge.size(0)), batch_size):
         edge = neg_test_edge[perm].t()
         neg_test_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
     neg_test_pred = torch.cat(neg_test_preds, dim=0)
@@ -173,8 +173,7 @@ def main():
         optimizer = torch.optim.Adam(predictor.parameters(), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, x, split_edge, optimizer,
-                         args.batch_size)
+            loss = train(predictor, x, split_edge, optimizer, args.batch_size)
 
             if epoch % args.eval_steps == 0:
                 results = test(predictor, x, split_edge, evaluator,
