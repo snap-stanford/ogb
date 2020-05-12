@@ -69,7 +69,7 @@ dataset_dict[name]['additional edge files'] = 'edge_reltype'
 name = "ogbl-ddi"
 dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "ddi"
-dataset_dict[name]["version"] = 1
+dataset_dict[name]["version"] = 0
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]["add_inverse_edge"] = True 
