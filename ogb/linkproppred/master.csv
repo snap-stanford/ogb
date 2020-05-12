@@ -1,5 +1,5 @@
 ,ogbl-ppa,ogbl-collab,ogbl-citation,ogbl-wikikg,ogbl-ddi
-eval metric,hits@100,hits@10,mrr,mrr,mrr
+eval metric,hits@100,hits@10,mrr,mrr,hits@10
 task type,link prediction,link prediction,link prediction,link prediction,link prediction
 download_name,ppassoc,collab,citation,wikikg,ddi
 version,1,1,1,1,1
