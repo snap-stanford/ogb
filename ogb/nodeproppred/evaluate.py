@@ -122,8 +122,8 @@ class Evaluator:
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.
             if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
-                is_valid = y_true[:,i] == y_true[:,i]
-                rocauc_list.append(roc_auc_score(y_true[is_valid,i], y_pred[is_valid,i]))
+                is_labeled = y_true[:,i] == y_true[:,i]
+                rocauc_list.append(roc_auc_score(y_true[is_labeled,i], y_pred[is_labeled,i]))
 
         if len(rocauc_list) == 0:
             raise RuntimeError("No positively labeled data available. Cannot compute ROC-AUC.")
@@ -134,8 +134,8 @@ class Evaluator:
         acc_list = []
 
         for i in range(y_true.shape[1]):
-            is_valid = y_true[:,i] == y_true[:,i]
-            correct = y_true[is_valid,i] == y_pred[is_valid,i]
+            is_labeled = y_true[:,i] == y_true[:,i]
+            correct = y_true[is_labeled,i] == y_pred[is_labeled,i]
             acc_list.append(float(np.sum(correct))/len(correct))
 
         return {"acc": sum(acc_list)/len(acc_list)}
