@@ -86,7 +86,7 @@ dataset_dict[name]["has_node_attr"] = True
 dataset_dict[name]["has_edge_attr"] = False
 dataset_dict[name]["task type"] = "sequence prediction"
 dataset_dict[name]["num classes"] = -1
-dataset_dict[name]["additional node files"] = 'is_attributed,dfs_order,depth'
+dataset_dict[name]["additional node files"] = 'node_is_attributed,node_dfs_order,node_depth'
 dataset_dict[name]['additional edge files'] = 'None'
 
 
