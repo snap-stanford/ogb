@@ -67,7 +67,7 @@ dataset_dict[name]['additional edge files'] = 'edge_reltype'
 
 ### add meta-information about wikidata knowledge graph completion task
 name = "ogbl-ddi"
-dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
+dataset_dict[name] = {"eval metric": "mrr", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "ddi"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
