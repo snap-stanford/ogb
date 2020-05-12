@@ -172,8 +172,7 @@ def main():
         predictor.reset_parameters()
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, x, split_edge, optimizer,
-                         args.batch_size)
+            loss = train(predictor, x, split_edge, optimizer, args.batch_size)
 
             if epoch % args.eval_steps == 0:
                 results = test(predictor, x, split_edge, evaluator,
