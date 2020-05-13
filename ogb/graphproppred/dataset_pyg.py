@@ -42,10 +42,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
         super(PygGraphPropPredDataset, self).__init__(self.root, transform)
 
-        if self.task_type == "sequence prediction":
-            self.data, self.slices, self.target_sequence_list = torch.load(self.processed_paths[0])
-        else:
-            self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0])
 
     def get_idx_split(self, split_type = None):
         if split_type is None:
@@ -106,52 +103,24 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
         data_list = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
-        graph_label = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
-
         if self.task_type == "sequence prediction":
-             ### add target idx
+            graph_label_notparsed = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+            graph_label = [str(graph_label_notparsed[i][0]).split(' ') for i in range(len(graph_label_notparsed))]
+
             for i, g in enumerate(data_list):
-                g.idx = torch.tensor([i])
+                g.y = graph_label[i]
 
-            target_sequence_list = [str(graph_label[i][0]).split(' ') for i in range(len(graph_label))]
-
-            data, slices = self.collate(data_list)
-
-            print('Saving...')
-            torch.save((data, slices, target_sequence_list), self.processed_paths[0])
         else:
-            ### add target labels
+            graph_label = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+
             for i, g in enumerate(data_list):
                 g.y = torch.tensor(graph_label[i]).view(1,-1)
+        
 
-            data, slices = self.collate(data_list)
+        data, slices = self.collate(data_list)
 
-            print('Saving...')
-            torch.save((data, slices), self.processed_paths[0])
-
-
-    def get_target_sequence(self, idx):
-        '''
-        Implemented for sequence prediction task.
-
-        Input: an integer or a pytorch LongTensor
-        Output: a target sequence or a list of target sequences
-        '''
-
-        if not self.task_type == "sequence prediction":
-            raise NotImplementedError('Only implemented for sequence prediction task')
-
-        if isinstance(idx, int):
-            return self.target_sequence_list[idx]
-        elif isinstance(idx, torch.LongTensor):
-            if idx.ndim == 0:
-                return self.target_sequence_list[idx]
-            elif idx.ndim == 1:
-                return [self.target_sequence_list[i] for i in idx]
-            else:
-                raise ValueError('Input must be 0 or 1-dim torch.LongTensor, {}-dim torch.LongTensor given.\n'.format(idx.ndim))
-        else:
-            raise ValueError('Input type not supported. Must be either integer or torch.LongTensor.\n')
+        print('Saving...')
+        torch.save((data, slices), self.processed_paths[0])
 
 
 if __name__ == "__main__":
@@ -169,10 +138,18 @@ if __name__ == "__main__":
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
-    print(pyg_dataset[0])
+    print(pyg_dataset[0].y)
     print(pyg_dataset[0].edge_index)
     print(pyg_dataset[split_index["train"]])
     print(pyg_dataset[split_index["valid"]])
     print(pyg_dataset[split_index["test"]])
-    print(pyg_dataset.get_target_sequence(split_index["test"][:5]))
-    print(pyg_dataset.get_target_sequence(2))
+
+    # from torch_geometric.data import DataLoader
+    # loader = DataLoader(pyg_dataset, batch_size=32, shuffle=True)
+    # for batch in loader:
+    #     print(batch)
+    #     print(batch.y)
+    #     print(len(batch.y))
+
+    #     exit(-1)
+
