@@ -165,16 +165,14 @@ class DglGraphPropPredDataset(object):
 def collate_dgl(samples):
     graphs, labels = map(list, zip(*samples))
     batched_graph = dgl.batch(graphs)
-    return batched_graph, torch.stack(labels)
 
-# Collate function for seqiemce prediction
-def collate_dgl_seq(samples):
-    graphs, labels = map(list, zip(*samples))
-    batched_graph = dgl.batch(graphs)
-    return batched_graph, labels
+    if isinstance(labels[0], torch.Tensor):
+        return batched_graph, torch.stack(labels)
+    else:
+        return batched_graph, labels
 
 if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-code")
+    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molcode")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
@@ -182,6 +180,6 @@ if __name__ == "__main__":
     print(dgl_dataset[split_index["train"]])
     print(dgl_dataset[split_index["valid"]])
     print(dgl_dataset[split_index["test"]])
-    print(collate_dgl_seq([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
+    print(collate_dgl([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
 
 
