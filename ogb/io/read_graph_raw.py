@@ -370,7 +370,36 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
 
     return graph_list
 
+def read_node_label_hetero(raw_dir):
+    df = pd.read_csv(osp.join(raw_dir, 'nodetype-has-label.csv.gz'))
+    label_dict = {}
+    for nodetype in df.keys():
+        has_label = df[nodetype].values[0]
+        if has_label:
+            label_dict[nodetype] = pd.read_csv(osp.join(raw_dir, "node-label", nodetype, "node-label.csv.gz"), compression="gzip", header = None).values
 
+    if len(label_dict) == 0:
+        raise RuntimeError('No node label file found.')
+
+    return label_dict
+
+
+def read_nodesplitidx_split_hetero(split_dir):
+    df = pd.read_csv(osp.join(split_dir, 'nodetype-has-split.csv.gz'))
+    train_dict = {}
+    valid_dict = {}
+    test_dict = {}
+    for nodetype in df.keys():
+        has_label = df[nodetype].values[0]
+        if has_label:
+            train_dict[nodetype] = pd.read_csv(osp.join(split_dir, nodetype, "train.csv.gz"), compression="gzip", header = None).values.T[0]
+            valid_dict[nodetype] = pd.read_csv(osp.join(split_dir, nodetype, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
+            test_dict[nodetype] = pd.read_csv(osp.join(split_dir, nodetype, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+
+    if len(train_dict) == 0:
+        raise RuntimeError('No split file found.')
+
+    return train_dict, valid_dict, test_dict
 
 if __name__ == "__main__":
     pass
