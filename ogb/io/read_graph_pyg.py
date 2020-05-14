@@ -46,6 +46,7 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
         g = Data()
         
         g.__num_nodes__ = graph["num_nodes_dict"]
+        g.num_nodes_dict = graph["num_nodes_dict"]
 
         # add edge connectivity
         g.edge_index_dict = {}
@@ -63,14 +64,14 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
                 g.x_dict[nodetype] = torch.from_numpy(graph["node_feat_dict"][nodetype])
 
         for key in additional_edge_files:
-            g[key] = {}
+            g[key + '_dict'] = {}
             for triplet in graph[key].keys():
-                g[key][triplet] = torch.from_numpy(graph[key][triplet])
+                g[key + '_dict'][triplet] = torch.from_numpy(graph[key][triplet])
 
         for key in additional_node_files:
-            g[key] = {}
+            g[key + '_dict'] = {}
             for nodetype in graph[key].keys():
-                g[key][nodetype] = torch.from_numpy(graph[key][nodetype])
+                g[key + '_dict'][nodetype] = torch.from_numpy(graph[key][nodetype])
 
         pyg_graph_list.append(g)
 
