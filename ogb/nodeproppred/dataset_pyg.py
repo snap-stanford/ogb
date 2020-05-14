@@ -5,8 +5,8 @@ import os.path as osp
 import torch
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_pyg import read_csv_graph_pyg
-
+from ogb.io.read_graph_pyg import read_csv_graph_pyg, read_csv_heterograph_pyg
+from ogb.io.read_graph_raw import read_node_label_hetero, read_nodesplitidx_split_hetero
 
 class PygNodePropPredDataset(InMemoryDataset):
     def __init__(self, name, root = "dataset", transform=None, pre_transform=None):
@@ -41,6 +41,7 @@ class PygNodePropPredDataset(InMemoryDataset):
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.__num_classes__ = int(self.meta_info[self.name]["num classes"])
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(PygNodePropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -51,11 +52,21 @@ class PygNodePropPredDataset(InMemoryDataset):
 
         path = osp.join(self.root, "split", split_type)
 
-        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
-        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
-        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+        if self.is_hetero:
+            train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
+            for nodetype in train_idx_dict.keys():
+                train_idx_dict[nodetype] = torch.from_numpy(train_idx_dict[nodetype]).to(torch.long)
+                valid_idx_dict[nodetype] = torch.from_numpy(valid_idx_dict[nodetype]).to(torch.long)
+                test_idx_dict[nodetype] = torch.from_numpy(test_idx_dict[nodetype]).to(torch.long)
 
-        return {"train": torch.tensor(train_idx, dtype = torch.long), "valid": torch.tensor(valid_idx, dtype = torch.long), "test": torch.tensor(test_idx, dtype = torch.long)}
+                return {"train": train_idx_dict, "valid": valid_idx_dict, "test": test_idx_dict}
+
+        else:
+            train_idx = torch.from_numpy(pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+            valid_idx = torch.from_numpy(pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+            test_idx = torch.from_numpy(pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+
+            return {"train": train_idx, "valid": valid_idx, "test": test_idx}
 
     @property
     def num_classes(self):
@@ -63,12 +74,15 @@ class PygNodePropPredDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        file_names = ["edge"]
-        if self.meta_info[self.name]["has_node_attr"] == "True":
-            file_names.append("node-feat")
-        if self.meta_info[self.name]["has_edge_attr"] == "True":
-            file_names.append("edge-feat")
-        return [file_name + ".csv.gz" for file_name in file_names]
+        if self.is_hetero:
+            return ['num-node-dict.csv.gz', 'triplet-type-list.csv.gz']
+        else:
+            file_names = ["edge"]
+            if self.meta_info[self.name]["has_node_attr"] == "True":
+                file_names.append("node-feat")
+            if self.meta_info[self.name]["has_edge_attr"] == "True":
+                file_names.append("edge-feat")
+            return [file_name + ".csv.gz" for file_name in file_names]
 
     @property
     def processed_file_names(self):
@@ -100,17 +114,31 @@ class PygNodePropPredDataset(InMemoryDataset):
         else:
             additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-        data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+        if self.is_hetero:
+            data = read_csv_heterograph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-        ### adding prediction target
-        node_label = pd.read_csv(osp.join(self.raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
-        if "classification" in self.task_type:
-            data.y = torch.tensor(node_label, dtype = torch.long)
+            node_label_dict = read_node_label_hetero(self.raw_dir)
+
+            data.y_dict = {}
+            if "classification" in self.task_type:
+                for nodetype, node_label in node_label_dict.items():
+                    data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.long)
+            else:
+                for nodetype, node_label in node_label_dict.items():
+                    data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.float32)
+
         else:
-            data.y = torch.tensor(node_label, dtype = torch.float32)
-        data.__num_nodes__ = int(self.meta_info[self.name]["num nodes"])
+            data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-        data = data if self.pre_transform is None else self.pre_transform(data)
+            ### adding prediction target
+            node_label = pd.read_csv(osp.join(self.raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
+
+            if "classification" in self.task_type:
+                data.y = torch.from_numpy(node_label).to(torch.long)
+            else:
+                data.y = torch.from_numpy(node_label).to(torch.float32)
+
+        data if self.pre_transform is None else self.pre_transform(data)
 
         print('Saving...')
         torch.save(self.collate([data]), self.processed_paths[0])
@@ -120,8 +148,11 @@ class PygNodePropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
-    pyg_dataset = PygNodePropPredDataset(name = "ogbn-proteins")
+    pyg_dataset = PygNodePropPredDataset(name = "ogbn-mag")
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
-    print(pyg_dataset[0])
-    print(split_index)
+    print(pyg_dataset[0].edge_index_dict)
+    print(pyg_dataset[0].num_nodes_dict)
+    # print(pyg_dataset[0].node_year_dict['paper'])
+    print(pyg_dataset[0].node_year_dict)
+    
