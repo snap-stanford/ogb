@@ -27,6 +27,8 @@ class MLP(torch.nn.Module):
     def reset_parameters(self):
         for lin in self.lins:
             lin.reset_parameters()
+        for bn in self.bns:
+            bn.reset_parameters()
 
     def forward(self, x):
         for i, lin in enumerate(self.lins[:-1]):
@@ -103,8 +105,8 @@ def main():
     y_true = data.y.to(device)
     train_idx = split_idx['train'].to(device)
 
-    model = MLP(x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
-                args.dropout).to(device)
+    model = MLP(x.size(-1), args.hidden_channels, dataset.num_classes,
+                args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-arxiv')
     logger = Logger(args.runs, args)
