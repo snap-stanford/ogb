@@ -8,6 +8,7 @@ import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_dgl import read_csv_graph_dgl, read_csv_heterograph_dgl
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
+import pickle
 
 class DglLinkPropPredDataset(object):
     """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
@@ -54,7 +55,8 @@ class DglLinkPropPredDataset(object):
             if not self.is_hetero:
                 self.graph, _ = load_graphs(pre_processed_file_path)
             else:
-                raise NotImplementedError('Saving of DGLHeteroGraph object has not implemented yet.')
+                with open(pre_processed_file_path, 'rb') as f:
+                    self.graph = pickle.load(f)
 
         else:
             ### check if the downloaded file exists
@@ -97,9 +99,11 @@ class DglLinkPropPredDataset(object):
             if self.is_hetero:
                 graph = read_csv_heterograph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-                self.graph = [graph]
+                with open(pre_processed_file_path, 'wb') as f:
+                    pickle.dump([graph], f)
 
-                ### (TODO) Implement graph saving for DGL heterogeneous graph
+                with open(pre_processed_file_path, 'rb') as f:
+                    self.graph = pickle.load(f)
 
             else:
                 graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
