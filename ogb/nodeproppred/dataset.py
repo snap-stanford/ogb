@@ -2,7 +2,7 @@ import pandas as pd
 import shutil, os
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_raw import read_csv_graph_raw
+from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw, read_node_label_hetero, read_nodesplitidx_split_hetero
 import torch
 
 class NodePropPredDataset(object):
@@ -36,6 +36,7 @@ class NodePropPredDataset(object):
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.num_classes = int(self.meta_info[self.name]["num classes"])
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(NodePropPredDataset, self).__init__()
 
@@ -51,7 +52,12 @@ class NodePropPredDataset(object):
 
         else:
             ### check download
-            if not osp.exists(osp.join(self.root, "raw", "edge.csv.gz")):
+            has_necessary_file_simple = osp.exists(osp.join(self.root, "raw", "edge.csv.gz")) and (not self.is_hetero)
+            has_necessary_file_hetero = osp.exists(osp.join(self.root, "raw", "triplet-type-list.csv.gz")) and self.is_hetero
+
+            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero
+
+            if not has_necessary_file:
                 url = self.meta_info[self.name]["url"]
                 if decide_download(url):
                     path = download_url(url, self.original_root)
@@ -82,10 +88,15 @@ class NodePropPredDataset(object):
             else:
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
+            if self.is_hetero:
+                self.graph = read_csv_heterograph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
+                self.labels = read_node_label_hetero(raw_dir)
 
-            ### adding prediction target
-            self.labels = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
+            else:
+                self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
+
+                ### adding prediction target
+                self.labels = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
 
             print('Saving...')
             torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path)
@@ -97,11 +108,21 @@ class NodePropPredDataset(object):
 
         path = osp.join(self.root, "split", split_type)
 
-        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
-        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
-        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+        if self.is_hetero:
+            train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
+            for nodetype in train_idx_dict.keys():
+                train_idx_dict[nodetype] = train_idx_dict[nodetype]
+                valid_idx_dict[nodetype] = valid_idx_dict[nodetype]
+                test_idx_dict[nodetype] = test_idx_dict[nodetype]
 
-        return {"train": train_idx, "valid": valid_idx, "test": test_idx}
+                return {"train": train_idx_dict, "valid": valid_idx_dict, "test": test_idx_dict}
+
+        else:
+            train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
+            valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
+            test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+
+            return {"train": train_idx, "valid": valid_idx, "test": test_idx}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"
@@ -114,7 +135,7 @@ class NodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dataset = NodePropPredDataset(name = "ogbn-arxiv")
+    dataset = NodePropPredDataset(name = "ogbn-mag")
     print(dataset.num_classes)
     split_index = dataset.get_idx_split()
     print(dataset[0])
