@@ -51,9 +51,9 @@ class DglNodePropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
         if osp.exists(pre_processed_file_path):
-            self.graph, label_dict = load_graphs(pre_processed_file_path)
-
+    
             if not self.is_hetero:
+                self.graph, label_dict = load_graphs(pre_processed_file_path)
                 self.labels = label_dict['labels']
             else:
                 raise NotImplementedError('Saving of DGLHeteroGraph object has not implemented yet.')
