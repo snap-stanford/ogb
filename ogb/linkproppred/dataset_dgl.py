@@ -6,7 +6,7 @@ import numpy as np
 from dgl.data.utils import load_graphs, save_graphs, Subset
 import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_dgl import read_csv_graph_dgl
+from ogb.io.read_graph_dgl import read_csv_graph_dgl, read_csv_heterograph_dgl
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
 
 class DglLinkPropPredDataset(object):
@@ -39,6 +39,7 @@ class DglLinkPropPredDataset(object):
 
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(DglLinkPropPredDataset, self).__init__()
 
@@ -84,8 +85,9 @@ class DglLinkPropPredDataset(object):
             else:
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
+
+            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
             print('Saving...')
             save_graphs(pre_processed_file_path, graph, {})
@@ -115,7 +117,7 @@ class DglLinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-citation")
+    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-biokg")
     split_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
     print(split_edge['train'][0])
