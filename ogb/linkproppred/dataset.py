@@ -2,7 +2,7 @@ import pandas as pd
 import shutil, os
 import os.path as osp
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_raw import read_csv_graph_raw
+from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw
 import torch
 import numpy as np
 
@@ -35,6 +35,7 @@ class LinkPropPredDataset(object):
 
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(LinkPropPredDataset, self).__init__()
 
@@ -49,7 +50,12 @@ class LinkPropPredDataset(object):
 
         else:
             ### check download
-            if not osp.exists(osp.join(self.root, "raw", "edge.csv.gz")):
+            has_necessary_file_simple = osp.exists(osp.join(self.root, "raw", "edge.csv.gz")) and (not self.is_hetero)
+            has_necessary_file_hetero = osp.exists(osp.join(self.root, "raw", "triplet-type-list.csv.gz")) and self.is_hetero
+
+            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero
+
+            if not has_necessary_file:
                 url = self.meta_info[self.name]["url"]
                 if decide_download(url):
                     path = download_url(url, self.original_root)
@@ -80,7 +86,11 @@ class LinkPropPredDataset(object):
             else:
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-            self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
+            if self.is_hetero:
+                self.graph = read_csv_heterograph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
+
+            else:
+                self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
 
             print('Saving...')
             torch.save(self.graph, pre_processed_file_path)
@@ -108,7 +118,33 @@ class LinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dataset = LinkPropPredDataset(name = "ogbl-wikikg")
+    dataset = LinkPropPredDataset(name = "ogbl-biokg")
     split_edge = dataset.get_edge_split()
     print(dataset[0])
-    print(split_edge)
+    print(split_edge['train'].keys())
+    print(split_edge['test'].keys())
+
+    for key, item in split_edge['train'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))
+
+    print("")
+
+    for key, item in split_edge['valid'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))
+
+    print("")
+
+    for key, item in split_edge['test'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))

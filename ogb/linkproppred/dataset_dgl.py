@@ -50,11 +50,19 @@ class DglLinkPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
         if osp.exists(pre_processed_file_path):
-            self.graph, _ = load_graphs(pre_processed_file_path)
+
+            if not self.is_hetero:
+                self.graph, _ = load_graphs(pre_processed_file_path)
+            else:
+                raise NotImplementedError('Saving of DGLHeteroGraph object has not implemented yet.')
 
         else:
-            ### check download
-            if not osp.exists(osp.join(self.root, "raw", "edge.csv.gz")):
+            ### check if the downloaded file exists
+            has_necessary_file_simple = osp.exists(osp.join(self.root, "raw", "edge.csv.gz")) and (not self.is_hetero)
+            has_necessary_file_hetero = osp.exists(osp.join(self.root, "raw", "triplet-type-list.csv.gz")) and self.is_hetero
+
+            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero
+            if not has_necessary_file:
                 url = self.meta_info[self.name]["url"]
                 if decide_download(url):
                     path = download_url(url, self.original_root)
@@ -86,13 +94,20 @@ class DglLinkPropPredDataset(object):
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
 
+            if self.is_hetero:
+                graph = read_csv_heterograph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+                self.graph = [graph]
 
-            print('Saving...')
-            save_graphs(pre_processed_file_path, graph, {})
+                ### (TODO) Implement graph saving for DGL heterogeneous graph
 
-            self.graph, _ = load_graphs(pre_processed_file_path)
+            else:
+                graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+
+                print('Saving...')
+                save_graphs(pre_processed_file_path, graph, {})
+
+                self.graph, _ = load_graphs(pre_processed_file_path)
 
     def get_edge_split(self, split_type = None):
         if split_type is None:
@@ -120,4 +135,5 @@ if __name__ == "__main__":
     dgl_dataset = DglLinkPropPredDataset(name = "ogbl-biokg")
     split_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
-    print(split_edge['train'][0])
+    print(split_edge['train'].keys())
+    print(split_edge['valid'].keys())
