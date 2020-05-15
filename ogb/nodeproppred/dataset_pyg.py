@@ -122,7 +122,11 @@ class PygNodePropPredDataset(InMemoryDataset):
             data.y_dict = {}
             if "classification" in self.task_type:
                 for nodetype, node_label in node_label_dict.items():
-                    data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.long)
+                    # detect if there is any nan
+                    if np.isnan(node_label).any():
+                        data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.float32)
+                    else:
+                        data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.long)
             else:
                 for nodetype, node_label in node_label_dict.items():
                     data.y_dict[nodetype] = torch.from_numpy(node_label).to(torch.float32)
@@ -134,7 +138,12 @@ class PygNodePropPredDataset(InMemoryDataset):
             node_label = pd.read_csv(osp.join(self.raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
 
             if "classification" in self.task_type:
-                data.y = torch.from_numpy(node_label).to(torch.long)
+                # detect if there is any nan
+                if np.isnan(node_label).any():
+                    data.y = torch.from_numpy(node_label).to(torch.float32)
+                else:
+                    data.y = torch.from_numpy(node_label).to(torch.long)
+
             else:
                 data.y = torch.from_numpy(node_label).to(torch.float32)
 
@@ -151,8 +160,5 @@ if __name__ == "__main__":
     pyg_dataset = PygNodePropPredDataset(name = "ogbn-mag")
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
-    print(pyg_dataset[0].edge_index_dict)
-    print(pyg_dataset[0].num_nodes_dict)
-    # print(pyg_dataset[0].node_year_dict['paper'])
-    print(pyg_dataset[0].node_year_dict)
+    print(pyg_dataset[0].y_dict)
     
