@@ -6,7 +6,8 @@ import numpy as np
 from dgl.data.utils import load_graphs, save_graphs, Subset
 import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_dgl import read_csv_graph_dgl
+from ogb.io.read_graph_dgl import read_csv_graph_dgl, read_csv_heterograph_dgl
+from ogb.io.read_graph_raw import read_node_label_hetero, read_nodesplitidx_split_hetero
 
 class DglNodePropPredDataset(object):
     def __init__(self, name, root = "dataset"):
@@ -39,6 +40,7 @@ class DglNodePropPredDataset(object):
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
         self.num_classes = int(self.meta_info[self.name]["num classes"])
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(DglNodePropPredDataset, self).__init__()
 
@@ -50,11 +52,19 @@ class DglNodePropPredDataset(object):
 
         if osp.exists(pre_processed_file_path):
             self.graph, label_dict = load_graphs(pre_processed_file_path)
-            self.labels = label_dict['labels']
+
+            if not self.is_hetero:
+                self.labels = label_dict['labels']
+            else:
+                raise NotImplementedError('Saving of DGLHeteroGraph object has not implemented yet.')
 
         else:
-            ### check download
-            if not osp.exists(osp.join(self.root, "raw", "edge.csv.gz")):
+            ### check if the downloaded file exists
+            has_necessary_file_simple = osp.exists(osp.join(self.root, "raw", "edge.csv.gz")) and (not self.is_hetero)
+            has_necessary_file_hetero = osp.exists(osp.join(self.root, "raw", "triplet-type-list.csv.gz")) and self.is_hetero
+
+            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero
+            if not has_necessary_file:
                 url = self.meta_info[self.name]["url"]
                 if decide_download(url):
                     path = download_url(url, self.original_root)
@@ -85,22 +95,52 @@ class DglNodePropPredDataset(object):
             else:
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-            graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-            ### adding prediction target
-            node_label = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
-            if "classification" in self.task_type:
-                node_label = torch.tensor(node_label, dtype = torch.long)
+            if self.is_hetero:
+                graph = read_csv_heterograph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+                
+                label_dict = read_node_label_hetero(raw_dir)
+
+                # convert into torch tensor
+                if "classification" in self.task_type:
+                    for nodetype in label_dict.keys():
+                        # detect if there is any nan
+                        node_label = label_dict[nodetype]
+                        if np.isnan(node_label).any():
+                            label_dict[nodetype] = torch.from_numpy(node_label).to(torch.float32)
+                        else:
+                            label_dict[nodetype] = torch.from_numpy(node_label).to(torch.long)
+                else:
+                    for nodetype in label_dict.keys():
+                        node_label = label_dict[nodetype]
+                        label_dict[nodetype] = torch.from_numpy(node_label).to(torch.float32)
+
+                self.graph = [graph]
+                self.labels = label_dict
+
+                ### (TODO) Implement graph saving for DGL heterogeneous graph
+
             else:
-                node_label = torch.tensor(node_label, dtype = torch.float32)
+                graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-            label_dict = {"labels": node_label}
+                ### adding prediction target
+                node_label = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
 
-            print('Saving...')
-            save_graphs(pre_processed_file_path, graph, label_dict)
+                if "classification" in self.task_type:
+                    # detect if there is any nan
+                    if np.isnan(node_label).any():
+                        node_label = torch.from_numpy(node_label).to(torch.float32)
+                    else:
+                        node_label = torch.from_numpy(node_label).to(torch.long)
+                else:
+                    node_label = torch.from_numpy(node_label).to(torch.float32)
 
-            self.graph, label_dict = load_graphs(pre_processed_file_path)
-            self.labels = label_dict['labels']
+                label_dict = {"labels": node_label}
+
+                save_graphs(pre_processed_file_path, graph, label_dict)
+
+                self.graph, label_dict = load_graphs(pre_processed_file_path)
+                self.labels = label_dict['labels']
 
     def get_idx_split(self, split_type = None):
         if split_type is None:
@@ -108,11 +148,21 @@ class DglNodePropPredDataset(object):
 
         path = osp.join(self.root, "split", split_type)
 
-        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
-        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
-        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+        if self.is_hetero:
+            train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
+            for nodetype in train_idx_dict.keys():
+                train_idx_dict[nodetype] = torch.from_numpy(train_idx_dict[nodetype]).to(torch.long)
+                valid_idx_dict[nodetype] = torch.from_numpy(valid_idx_dict[nodetype]).to(torch.long)
+                test_idx_dict[nodetype] = torch.from_numpy(test_idx_dict[nodetype]).to(torch.long)
 
-        return {"train": torch.tensor(train_idx, dtype = torch.long), "valid": torch.tensor(valid_idx, dtype = torch.long), "test": torch.tensor(test_idx, dtype = torch.long)}
+                return {"train": train_idx_dict, "valid": valid_idx_dict, "test": test_idx_dict}
+
+        else:
+            train_idx = torch.from_numpy(pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+            valid_idx = torch.from_numpy(pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+            test_idx = torch.from_numpy(pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]).to(torch.long)
+
+            return {"train": train_idx, "valid": valid_idx, "test": test_idx}
 
     def __getitem__(self, idx):
         assert idx == 0, "This dataset has only one graph"
@@ -125,7 +175,7 @@ class DglNodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglNodePropPredDataset(name = "ogbn-products")
+    dgl_dataset = DglNodePropPredDataset(name = "ogbn-mag")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset[0])
