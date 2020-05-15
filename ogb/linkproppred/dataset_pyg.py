@@ -5,7 +5,7 @@ import os.path as osp
 import torch
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.io.read_graph_pyg import read_csv_graph_pyg
+from ogb.io.read_graph_pyg import read_csv_graph_pyg, read_csv_heterograph_pyg
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
 
 
@@ -38,6 +38,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
 
         self.task_type = self.meta_info[self.name]["task type"]
         self.eval_metric = self.meta_info[self.name]["eval metric"]
+        self.is_hetero = self.meta_info[self.name]["is hetero"] == "True"
 
         super(PygLinkPropPredDataset, self).__init__(self.root, transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -56,12 +57,15 @@ class PygLinkPropPredDataset(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        file_names = ["edge"]
-        if self.meta_info[self.name]["has_node_attr"] == "True":
-            file_names.append("node-feat")
-        if self.meta_info[self.name]["has_edge_attr"] == "True":
-            file_names.append("edge-feat")
-        return [file_name + ".csv.gz" for file_name in file_names]
+        if self.is_hetero:
+            return ['num-node-dict.csv.gz', 'triplet-type-list.csv.gz']
+        else:
+            file_names = ["edge"]
+            if self.meta_info[self.name]["has_node_attr"] == "True":
+                file_names.append("node-feat")
+            if self.meta_info[self.name]["has_edge_attr"] == "True":
+                file_names.append("edge-feat")
+            return [file_name + ".csv.gz" for file_name in file_names]
 
     @property
     def processed_file_names(self):
@@ -93,7 +97,10 @@ class PygLinkPropPredDataset(InMemoryDataset):
         else:
             additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
-        data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+        if self.is_hetero:
+            data = read_csv_heterograph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
+        else:
+            data = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
         data = data if self.pre_transform is None else self.pre_transform(data)
 
@@ -105,14 +112,51 @@ class PygLinkPropPredDataset(InMemoryDataset):
         
 
 if __name__ == "__main__":
+
+    pyg_dataset = PygLinkPropPredDataset(name = "ogbl-biokg")
+    split_edge = pyg_dataset.get_edge_split()
+    print(pyg_dataset[0])
+    print(pyg_dataset[0].edge_index)
+    print(pyg_dataset[0].num_nodes)
+    print(split_edge['train'].keys())
+    print(split_edge['test'].keys())
+
+    for key, item in split_edge['train'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))
+
+    print("")
+
+    for key, item in split_edge['valid'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))
+
+    print("")
+
+    for key, item in split_edge['test'].items():
+        print(key)
+        if isinstance(item, torch.Tensor):
+            print(item.shape)
+        else:
+            print(len(item))
+
+
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-ddi")
     split_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
+    print(pyg_dataset[0].num_nodes)
     print(split_edge['train'])
     print(split_edge['test'])
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-wikikg")
     split_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
+    print(pyg_dataset[0].num_nodes)
     print(split_edge['train'])
     print(split_edge['test'])
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-citation")
