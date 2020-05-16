@@ -58,20 +58,32 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
     additional_node_info = {}   
     for additional_file in additional_node_files:
         temp = pd.read_csv(osp.join(raw_dir, additional_file + ".csv.gz"), compression="gzip", header = None).values
+
+        if 'node_' not in additional_file:
+            feat_name = 'node_' + additional_file
+        else:
+            feat_name = additional_file
+
         if 'int' in str(temp.dtype):
-            additional_node_info[additional_file] = temp.astype(np.int64)
+            additional_node_info[feat_name] = temp.astype(np.int64)
         else:
             # float
-            additional_node_info[additional_file] = temp.astype(np.float32)
+            additional_node_info[feat_name] = temp.astype(np.float32)
 
     additional_edge_info = {}   
     for additional_file in additional_edge_files:
         temp = pd.read_csv(osp.join(raw_dir, additional_file + ".csv.gz"), compression="gzip", header = None).values
+
+        if 'edge_' not in additional_file:
+            feat_name = 'edge_' + additional_file
+        else:
+            feat_name = additional_file
+
         if 'int' in str(temp.dtype):
-            additional_edge_info[additional_file] = temp.astype(np.int64)
+            additional_edge_info[feat_name] = temp.astype(np.int64)
         else:
             # float
-            additional_edge_info[additional_file] = temp.astype(np.float32)
+            additional_edge_info[feat_name] = temp.astype(np.float32)
 
 
     graph_list = []
@@ -247,7 +259,13 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
 
             except FileNotFoundError:
                 pass
-        additional_node_info[additional_file] = additional_feat_dict
+
+        if 'node_' not in additional_file:
+            feat_name = 'node_' + additional_file
+        else:
+            feat_name = additional_file
+
+        additional_node_info[feat_name] = additional_feat_dict
 
     additional_edge_info = {}
     # e.g., additional_edge_info['edge_reltype'] = edge_feat_dict for edge_reltype
@@ -270,7 +288,13 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
 
             except FileNotFoundError:
                 pass
-        additional_edge_info[additional_file] = additional_feat_dict
+
+        if 'edge_' not in additional_file:
+            feat_name = 'edge_' + additional_file
+        else:
+            feat_name = additional_file
+
+        additional_edge_info[feat_name] = additional_feat_dict
 
     graph_list = []
     num_node_accum_dict = {nodetype: 0 for nodetype in nodetype_list}

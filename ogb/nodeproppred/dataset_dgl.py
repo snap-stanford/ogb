@@ -178,7 +178,7 @@ class DglNodePropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglNodePropPredDataset(name = "ogbn-mag")
+    dgl_dataset = DglNodePropPredDataset(name = "ogbn-proteins")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset[0])

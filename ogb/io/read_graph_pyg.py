@@ -25,10 +25,18 @@ def read_csv_graph_pyg(raw_dir, add_inverse_edge = True, additional_node_files =
             g.x = torch.from_numpy(graph["node_feat"])
 
         for key in additional_node_files:
-            g[key] = torch.from_numpy(graph[key])
+            if 'node_' not in key:
+                feat_name = 'node_' + key
+            else:
+                feat_name = key
+            g[feat_name] = torch.from_numpy(graph[feat_name])
 
         for key in additional_edge_files:
-            g[key] = torch.from_numpy(graph[key])
+            if 'edge_' not in key:
+                feat_name = 'edge_' + key
+            else:
+                feat_name = key
+            g[feat_name] = torch.from_numpy(graph[feat_name])
 
         pyg_graph_list.append(g)
 
@@ -63,15 +71,27 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
             for nodetype in graph["node_feat_dict"].keys():
                 g.x_dict[nodetype] = torch.from_numpy(graph["node_feat_dict"][nodetype])
 
-        for key in additional_edge_files:
-            g[key + '_dict'] = {}
-            for triplet in graph[key].keys():
-                g[key + '_dict'][triplet] = torch.from_numpy(graph[key][triplet])
 
         for key in additional_node_files:
-            g[key + '_dict'] = {}
-            for nodetype in graph[key].keys():
-                g[key + '_dict'][nodetype] = torch.from_numpy(graph[key][nodetype])
+            if 'node_' not in key:
+                feat_name = 'node_' + key
+            else:
+                feat_name = key
+
+            g[feat_name + '_dict'] = {}
+            for nodetype in graph[feat_name].keys():
+                g[feat_name + '_dict'][nodetype] = torch.from_numpy(graph[feat_name][nodetype])
+
+        for key in additional_edge_files:
+
+            if 'edge_' not in key:
+                feat_name = 'edge_' + key
+            else:
+                feat_name = key
+
+            g[feat_name + '_dict'] = {}
+            for triplet in graph[feat_name].keys():
+                g[feat_name + '_dict'][triplet] = torch.from_numpy(graph[feat_name][triplet])
 
         pyg_graph_list.append(g)
 

@@ -25,10 +25,18 @@ def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files =
             g.ndata["feat"] = torch.from_numpy(graph["node_feat"])
 
         for key in additional_node_files:
-            g.ndata[key] = torch.from_numpy(graph[key])
+            if 'node_' not in key:
+                feat_name = 'node_' + key
+            else:
+                feat_name = key
+            g.ndata[feat_name] = torch.from_numpy(graph[feat_name])
 
         for key in additional_edge_files:
-            g.edata[key] = torch.from_numpy(graph[key])
+            if 'edge_' not in key:
+                feat_name = 'edge_' + key
+            else:
+                feat_name = key
+            g.edata[feat_name] = torch.from_numpy(graph[feat_name])
 
         dgl_graph_list.append(g)
 
@@ -60,13 +68,26 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
             for nodetype in graph["node_feat_dict"].keys():
                 dgl_hetero_graph.nodes[nodetype].data["feat"] = torch.from_numpy(graph["node_feat_dict"][nodetype])
 
-        for key in additional_edge_files:
-            for triplet in graph[key].keys():
-                dgl_hetero_graph.edges[triplet].data[key] = torch.from_numpy(graph[key][triplet])
-
         for key in additional_node_files:
-            for nodetype in graph[key].keys():
-                dgl_hetero_graph.nodes[nodetype].data[key] = torch.from_numpy(graph[key][nodetype])
+            if 'node_' not in key:
+                feat_name = 'node_' + key
+            else:
+                feat_name = key
+
+            for triplet in graph[feat_name].keys():
+                dgl_hetero_graph.edges[triplet].data[feat_name] = torch.from_numpy(graph[feat_name][triplet])
+
+            for nodetype in graph[feat_name].keys():
+                dgl_hetero_graph.nodes[nodetype].data[feat_name] = torch.from_numpy(graph[feat_name][nodetype])
+
+        for key in additional_edge_files:
+            if 'edge_' not in key:
+                feat_name = 'edge_' + key
+            else:
+                feat_name = key
+
+            for triplet in graph[feat_name].keys():
+                dgl_hetero_graph.edges[triplet].data[feat_name] = torch.from_numpy(graph[feat_name][triplet])
 
         dgl_graph_list.append(dgl_hetero_graph)
 
