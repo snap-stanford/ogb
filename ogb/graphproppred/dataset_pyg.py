@@ -9,7 +9,7 @@ from ogb.io.read_graph_pyg import read_csv_graph_pyg
 
 
 class PygGraphPropPredDataset(InMemoryDataset):
-    def __init__(self, name, root = "dataset", transform=None):
+    def __init__(self, name, root = "dataset", transform=None, pre_transform = None):
         self.name = name ## original name, e.g., ogbg-mol-tox21
         self.dir_name = "_".join(name.split("-")) + "_pyg" ## replace hyphen with underline, e.g., ogbg_mol_tox21_pyg
 
@@ -40,7 +40,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
         self.task_type = self.meta_info[self.name]["task type"]
         self.__num_classes__ = int(self.meta_info[self.name]["num classes"])
 
-        super(PygGraphPropPredDataset, self).__init__(self.root, transform)
+        super(PygGraphPropPredDataset, self).__init__(self.root, transform, pre_transform)
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -115,7 +115,9 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
             for i, g in enumerate(data_list):
                 g.y = torch.tensor(graph_label[i]).view(1,-1)
-        
+
+        if self.pre_transform is not None:
+            data_list = [self.pre_transform(data) for data in data_list]
 
         data, slices = self.collate(data_list)
 
