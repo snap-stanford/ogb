@@ -57,7 +57,7 @@ dataset_list.extend(mol_dataset_list)
 
 ### add ppi dataset (medium)
 name = "ogbg-ppa"
-dataset_dict[name] = {"eval metric": "accuracy"}
+dataset_dict[name] = {"eval metric": "acc"}
 dataset_dict[name]["download_name"] = "ogbg_ppi_medium"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/" + dataset_dict[name]["download_name"] + ".zip"

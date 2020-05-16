@@ -22,7 +22,7 @@ dataset_dict[name]['is hetero'] = False
 
 ### add meta-information about product category prediction task
 name = "ogbn-products"
-dataset_dict[name] = {"num tasks": 1, "num classes": 47, "eval metric": "accuracy", "task type": "multiclass classification"}
+dataset_dict[name] = {"num tasks": 1, "num classes": 47, "eval metric": "acc", "task type": "multiclass classification"}
 dataset_dict[name]["download_name"] = "products"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
@@ -37,7 +37,7 @@ dataset_dict[name]['is hetero'] = False
 
 ### add meta-information about arxiv category prediction task
 name = "ogbn-arxiv"
-dataset_dict[name] = {"num tasks": 1, "num classes": 40, "eval metric": "accuracy", "task type": "multiclass classification"}
+dataset_dict[name] = {"num tasks": 1, "num classes": 40, "eval metric": "acc", "task type": "multiclass classification"}
 dataset_dict[name]["download_name"] = "arxiv"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
@@ -51,7 +51,7 @@ dataset_dict[name]['is hetero'] = False
 
 ### add meta-information about paper venue prediction task
 name = "ogbn-mag"
-dataset_dict[name] = {"num tasks": 1, "num classes": 349, "eval metric": "accuracy", "task type": "multiclass classification"}
+dataset_dict[name] = {"num tasks": 1, "num classes": 349, "eval metric": "acc", "task type": "multiclass classification"}
 dataset_dict[name]["download_name"] = "mag"
 dataset_dict[name]["version"] = 0
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"

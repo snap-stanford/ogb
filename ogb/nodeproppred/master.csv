@@ -3,7 +3,7 @@ add_inverse_edge,True,True,False,False
 additional edge files,None,None,None,edge_reltype
 additional node files,species,None,node_year,node_year
 download_name,proteinfunc,products,arxiv,mag
-eval metric,rocauc,accuracy,accuracy,accuracy
+eval metric,rocauc,acc,acc,acc
 has_edge_attr,True,False,False,False
 has_node_attr,False,True,True,True
 is hetero,False,False,False,True

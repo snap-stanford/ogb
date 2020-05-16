@@ -31,7 +31,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.eval_metric == "rocauc" or self.eval_metric == 'prcauc' or self.eval_metric == "rmse" or self.eval_metric == "accuracy":
+        if self.eval_metric == "rocauc" or self.eval_metric == 'prcauc' or self.eval_metric == "rmse" or self.eval_metric == "acc":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -101,7 +101,7 @@ class Evaluator:
         elif self.eval_metric == "rmse":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_rmse(y_true, y_pred)
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_acc(y_true, y_pred)
         elif self.eval_metric == 'BLEU':
@@ -128,7 +128,7 @@ class Evaluator:
             desc += "where num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
             desc += "nan values in y_true are ignored during evaluation.\n"
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
@@ -159,7 +159,7 @@ class Evaluator:
         elif self.eval_metric == "rmse":
             desc += "{\"rmse\": rmse}\n"
             desc += "- rmse (float): root mean squared error averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.eval_metric == "BLEU":
@@ -250,8 +250,6 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    exit(-1)
-
     evaluator = Evaluator("ogbg-molpcba")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
@@ -280,7 +278,7 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    ### accuracy
+    ### acc
     evaluator = Evaluator("ogbg-ppa")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)

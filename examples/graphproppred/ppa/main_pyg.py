@@ -130,9 +130,9 @@ def main():
 
         print({'Train': train_perf, 'Validation': valid_perf, 'Test': test_perf})
 
-        train_curve.append(train_perf['acc'])
-        valid_curve.append(valid_perf['acc'])
-        test_curve.append(test_perf['acc'])
+        train_curve.append(train_perf[dataset.eval_metric])
+        valid_curve.append(valid_perf[dataset.eval_metric])
+        test_curve.append(test_perf[dataset.eval_metric])
 
     best_val_epoch = np.argmax(np.array(valid_curve))
     best_train = max(train_curve)

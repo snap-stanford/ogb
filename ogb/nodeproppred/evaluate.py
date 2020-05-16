@@ -26,7 +26,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.eval_metric == "rocauc" or self.eval_metric == "accuracy":
+        if self.eval_metric == "rocauc" or self.eval_metric == "acc":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -70,7 +70,7 @@ class Evaluator:
         if self.eval_metric == "rocauc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_rocauc(y_true, y_pred)
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_acc(y_true, y_pred)
         else:
@@ -86,7 +86,7 @@ class Evaluator:
             desc += "where y_pred stores score values (for computing ROC-AUC),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one node.\n"
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n"
@@ -104,7 +104,7 @@ class Evaluator:
         if self.eval_metric == "rocauc":
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.eval_metric == "accuracy":
+        elif self.eval_metric == "acc":
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         else:
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    ### accuracy case
+    ### acc case
     evaluator = Evaluator("ogbn-products")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    ### accuracy case
+    ### acc case
     evaluator = Evaluator("ogbn-arxiv")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
