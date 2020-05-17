@@ -39,7 +39,7 @@ def parse_args(args=None):
     parser.add_argument('--do_test', action='store_true')
     parser.add_argument('--evaluate_train', action='store_true', help='Evaluate on training data')
     
-    parser.add_argument('--dataset', type=str, default='ogbl-wikikg', help='dataset name, default to wikikg')
+    parser.add_argument('--dataset', type=str, default='ogbl-biokg', help='dataset name, default to biokg')
     parser.add_argument('--model', default='TransE', type=str)
     parser.add_argument('-de', '--double_entity_embedding', action='store_true')
     parser.add_argument('-dr', '--double_relation_embedding', action='store_true')
@@ -166,10 +166,16 @@ def main(args):
     # Write logs to checkpoint and console
     set_logger(args)
     
-    dataset = LinkPropPredDataset(name = args.dataset)
-    split_dict = dataset.get_edge_split()
-    nentity = dataset.graph['num_nodes']
-    nrelation = int(max(dataset.graph['edge_reltype'])[0])+1
+    dataset = LinkPropPredDataset(name = 'ogbl-biokg')
+    split_edge = dataset.get_edge_split()
+    train_triples, valid_triples, test_triples = split_edge["train"], split_edge["valid"], split_edge["test"]
+    nrelation = int(max(train_triples['relation']))+1
+    entity_dict = dict()
+    cur_idx = 0
+    for key in dataset[0]['num_nodes_dict']:
+        entity_dict[key] = (cur_idx, cur_idx + dataset[0]['num_nodes_dict'][key])
+        cur_idx += dataset[0]['num_nodes_dict'][key]
+    nentity = sum(dataset[0]['num_nodes_dict'].values())
 
     evaluator = Evaluator(name = args.dataset)
 
@@ -181,18 +187,19 @@ def main(args):
     logging.info('#entity: %d' % nentity)
     logging.info('#relation: %d' % nrelation)
     
-    train_triples = split_dict['train']
+    # train_triples = split_dict['train']
     logging.info('#train: %d' % len(train_triples['head']))
-    valid_triples = split_dict['valid']
+    # valid_triples = split_dict['valid']
     logging.info('#valid: %d' % len(valid_triples['head']))
-    test_triples = split_dict['test']
+    # test_triples = split_dict['test']
     logging.info('#test: %d' % len(test_triples['head']))
 
     train_count, train_true_head, train_true_tail = defaultdict(lambda: 4), defaultdict(list), defaultdict(list)
     for i in tqdm(range(len(train_triples['head']))):
         head, relation, tail = train_triples['head'][i], train_triples['relation'][i], train_triples['tail'][i]
-        train_count[(head, relation)] += 1
-        train_count[(tail, -relation-1)] += 1
+        head_type, tail_type = train_triples['head_type'][i], train_triples['tail_type'][i]
+        train_count[(head, relation, head_type)] += 1
+        train_count[(tail, -relation-1, tail_type)] += 1
         train_true_head[(relation, tail)].append(head)
         train_true_tail[(head, relation)].append(tail)
     
@@ -214,12 +221,19 @@ def main(args):
     if args.cuda:
         kge_model = kge_model.cuda()
     
+    if args.init_checkpoint:
+        # Restore model from checkpoint directory
+        logging.info('Loading checkpoint %s...' % args.init_checkpoint)
+        checkpoint = torch.load(os.path.join(args.init_checkpoint, 'checkpoint'))
+        entity_dict = checkpoint['entity_dict']
+
     if args.do_train:
         # Set training dataloader iterator
         train_dataloader_head = DataLoader(
             TrainDataset(train_triples, nentity, nrelation, 
                 args.negative_sample_size, 'head-batch',
-                train_count, train_true_head, train_true_tail), 
+                train_count, train_true_head, train_true_tail,
+                entity_dict), 
             batch_size=args.batch_size,
             shuffle=True, 
             num_workers=max(1, args.cpu_num//2),
@@ -229,7 +243,8 @@ def main(args):
         train_dataloader_tail = DataLoader(
             TrainDataset(train_triples, nentity, nrelation, 
                 args.negative_sample_size, 'tail-batch',
-                train_count, train_true_head, train_true_tail), 
+                train_count, train_true_head, train_true_tail,
+                entity_dict), 
             batch_size=args.batch_size,
             shuffle=True, 
             num_workers=max(1, args.cpu_num//2),
@@ -251,10 +266,11 @@ def main(args):
 
     if args.init_checkpoint:
         # Restore model from checkpoint directory
-        logging.info('Loading checkpoint %s...' % args.init_checkpoint)
-        checkpoint = torch.load(os.path.join(args.init_checkpoint, 'checkpoint'))
+        # logging.info('Loading checkpoint %s...' % args.init_checkpoint)
+        # checkpoint = torch.load(os.path.join(args.init_checkpoint, 'checkpoint'))
         init_step = checkpoint['step']
         kge_model.load_state_dict(checkpoint['model_state_dict'])
+        # entity_dict = checkpoint['entity_dict']
         if args.do_train:
             current_learning_rate = checkpoint['current_learning_rate']
             warm_up_steps = checkpoint['warm_up_steps']
@@ -301,7 +317,8 @@ def main(args):
                 save_variable_list = {
                     'step': step, 
                     'current_learning_rate': current_learning_rate,
-                    'warm_up_steps': warm_up_steps
+                    'warm_up_steps': warm_up_steps,
+                    'entity_dict': entity_dict
                 }
                 save_model(kge_model, optimizer, save_variable_list, args)
 
