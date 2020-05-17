@@ -25,6 +25,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import time
 from tensorboardX import SummaryWriter
+import pdb
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -356,7 +357,10 @@ def main(args):
         small_train_triples = {}
         indices = np.random.choice(len(train_triples['head']), args.ntriples_eval_train, replace=False)
         for i in train_triples:
-            small_train_triples[i] = train_triples[i][indices]
+            if 'type' in i:
+                small_train_triples[i] = [train_triples[i][x] for x in indices]
+            else:
+                small_train_triples[i] = train_triples[i][indices]
         metrics = kge_model.test_step(kge_model, small_train_triples, args, entity_dict, random_sampling=True)
         log_metrics('Train', step, metrics, writer)
         
