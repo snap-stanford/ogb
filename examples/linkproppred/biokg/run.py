@@ -331,7 +331,7 @@ def main(args):
                 
             if args.do_valid and step % args.valid_steps == 0 and step > 0:
                 logging.info('Evaluating on Valid Dataset...')
-                metrics = kge_model.test_step(kge_model, valid_triples, args)
+                metrics = kge_model.test_step(kge_model, valid_triples, args, entity_dict)
                 log_metrics('Valid', step, metrics, writer)
         
         save_variable_list = {
@@ -343,12 +343,12 @@ def main(args):
         
     if args.do_valid:
         logging.info('Evaluating on Valid Dataset...')
-        metrics = kge_model.test_step(kge_model, valid_triples, args)
+        metrics = kge_model.test_step(kge_model, valid_triples, args, entity_dict)
         log_metrics('Valid', step, metrics, writer)
     
     if args.do_test:
         logging.info('Evaluating on Test Dataset...')
-        metrics = kge_model.test_step(kge_model, test_triples, args)
+        metrics = kge_model.test_step(kge_model, test_triples, args, entity_dict)
         log_metrics('Test', step, metrics, writer)
     
     if args.evaluate_train:
@@ -357,7 +357,7 @@ def main(args):
         indices = np.random.choice(len(train_triples['head']), args.ntriples_eval_train, replace=False)
         for i in train_triples:
             small_train_triples[i] = train_triples[i][indices]
-        metrics = kge_model.test_step(kge_model, small_train_triples, args, random_sampling=True)
+        metrics = kge_model.test_step(kge_model, small_train_triples, args, entity_dict, random_sampling=True)
         log_metrics('Train', step, metrics, writer)
         
 if __name__ == '__main__':

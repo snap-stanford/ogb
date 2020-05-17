@@ -285,7 +285,7 @@ class KGEModel(nn.Module):
         return log
     
     @staticmethod
-    def test_step(model, test_triples, args, random_sampling=False):
+    def test_step(model, test_triples, args, entity_dict, random_sampling=False):
         '''
         Evaluate the model on test or valid datasets
         '''
@@ -298,7 +298,8 @@ class KGEModel(nn.Module):
                 test_triples, 
                 args, 
                 'head-batch',
-                random_sampling
+                random_sampling,
+                entity_dict
             ), 
             batch_size=args.test_batch_size,
             num_workers=max(1, args.cpu_num//2), 
@@ -310,7 +311,8 @@ class KGEModel(nn.Module):
                 test_triples, 
                 args, 
                 'tail-batch',
-                random_sampling
+                random_sampling,
+                entity_dict
             ), 
             batch_size=args.test_batch_size,
             num_workers=max(1, args.cpu_num//2), 
