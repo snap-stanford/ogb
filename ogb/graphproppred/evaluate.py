@@ -8,7 +8,7 @@ try:
 except ImportError:
     torch = None
 
-from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
 ### Evaluator for graph classification
 class Evaluator:
@@ -141,7 +141,7 @@ class Evaluator:
             desc += "- seq_pred: list of list of strings\n"
             desc += "where seq_ref stores the reference sequence of tokens,\n"
             desc += "where seq_pred stores the predicted sequence of tokens.\n"
-            desc += "Note: BLEU socre is computed at the corpus level. All sequences need to be passed.\n"
+            desc += "Note: BLEU socre is computed at the sentence level. All sequences need to be passed.\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -164,7 +164,7 @@ class Evaluator:
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.eval_metric == "BLEU":
             desc += "{\"BLEU\": BLEU}\n"
-            desc += "- BLEU (float): corpus-level BLEU3 score with smoothing\n"
+            desc += "- BLEU (float): sentence-level BLEU3 score with smoothing\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -236,19 +236,27 @@ class Evaluator:
 
     def _eval_BLEU(self, seq_ref, seq_pred):
         """
-            compute corpus-level BLEU3 score with smoothing
+            compute sentence-level BLEU3 score with smoothing
         """
-        return {"BLEU": corpus_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./3, 1./3, 1./3), smoothing_function = self.chencherry)}
+
+        ## auto_reweighting scheme is adopted so that the exact match gives the BLEU score of 1.
+        BLEU2_list = [sentence_bleu([seq_r], seq_p, weights = (1 / min(len(seq_p),2),) * min(len(seq_p),2), smoothing_function = self.chencherry) for seq_r, seq_p in zip(seq_ref, seq_pred)]
+        BLEU3_list = [sentence_bleu([seq_r], seq_p, weights = (1 / min(len(seq_p),3),) * min(len(seq_p),3), smoothing_function = self.chencherry) for seq_r, seq_p in zip(seq_ref, seq_pred)]
+        # BLEU2 = sentence_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./2, 1./2), smoothing_function = self.chencherry)
+        # BLEU3 = sentence_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./3, 1./3, 1./3), smoothing_function = self.chencherry)
+        return {"BLEU2": sum(BLEU2_list)/len(BLEU2_list), "BLEU3": sum(BLEU3_list)/len(BLEU3_list)}
 
 if __name__ == "__main__":
     evaluator = Evaluator("ogbg-code")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    seq_ref = [['tom', 'is', 'is'], ['he', 'he'], ['he', 'he'], ['he', 'he']]
-    seq_pred = [['tom', 'is', 'is'], ['he', 'he'], ['he', 'he'], ['he', 'he']]
+    seq_ref = [['tom', 'is', 'is'], ['he'], ['he', 'he'], ['hey', 'fea', 'he'], ['alpha'], ['beta', 'fe4qfq', 'fe4qfq', 'fe4qfq', 'fe4qfq']]
+    seq_pred = [['tom', 'is', 'is'], ['he'], ['he', 'he'], ['hey', 'fea', 'he'], ['alpha'], ['beta', 'fe4qfq', 'fe4qfq', 'fe4qfq', 'fe4qfq']]
     input_dict = {"seq_ref": seq_ref, "seq_pred": seq_pred}
     result = evaluator.eval(input_dict)
     print(result)
+
+    exit(-1)
 
     evaluator = Evaluator("ogbg-molpcba")
     print(evaluator.expected_input_format)
