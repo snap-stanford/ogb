@@ -75,7 +75,7 @@ dataset_dict[name]['additional edge files'] = 'None'
 
 ### add ppi dataset (medium)
 name = "ogbg-code"
-dataset_dict[name] = {"eval metric": "BLEU"}
+dataset_dict[name] = {"eval metric": "F1"}
 dataset_dict[name]["download_name"] = "code"
 dataset_dict[name]["version"] = 0
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/graphproppred/" + dataset_dict[name]["download_name"] + ".zip"

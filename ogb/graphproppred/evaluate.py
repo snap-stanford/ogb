@@ -8,8 +8,6 @@ try:
 except ImportError:
     torch = None
 
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-
 ### Evaluator for graph classification
 class Evaluator:
     def __init__(self, name):
@@ -25,9 +23,6 @@ class Evaluator:
 
         self.num_tasks = int(meta_info[self.name]["num tasks"])
         self.eval_metric = meta_info[self.name]["eval metric"]
-
-        if self.eval_metric == 'BLEU':
-            self.chencherry = SmoothingFunction().method1
 
 
     def _parse_and_check_input(self, input_dict):
@@ -67,7 +62,7 @@ class Evaluator:
 
             return y_true, y_pred
 
-        elif self.eval_metric == 'BLEU':
+        elif self.eval_metric == 'F1':
             if not "seq_ref" in input_dict:
                 RuntimeError("Missing key of seq_ref")
             if not "seq_pred" in input_dict:
@@ -104,9 +99,9 @@ class Evaluator:
         elif self.eval_metric == "acc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_acc(y_true, y_pred)
-        elif self.eval_metric == 'BLEU':
+        elif self.eval_metric == 'F1':
             seq_ref, seq_pred = self._parse_and_check_input(input_dict)
-            return self._eval_BLEU(seq_ref, seq_pred)
+            return self._eval_F1(seq_ref, seq_pred)
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -135,13 +130,12 @@ class Evaluator:
             desc += "where y_pred stores predicted class label (integer),\n"
             desc += "num_task is {}, and ".format(self.num_tasks)
             desc += "each row corresponds to one graph.\n"
-        elif self.eval_metric == "BLEU":
+        elif self.eval_metric == "F1":
             desc += "{\"seq_ref\": seq_ref, \"seq_pred\": seq_pred}\n"
             desc += "- seq_ref: list of list of strings\n"
             desc += "- seq_pred: list of list of strings\n"
             desc += "where seq_ref stores the reference sequence of tokens,\n"
             desc += "where seq_pred stores the predicted sequence of tokens.\n"
-            desc += "Note: BLEU socre is computed at the sentence level. All sequences need to be passed.\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -162,9 +156,9 @@ class Evaluator:
         elif self.eval_metric == "acc":
             desc += "{\"acc\": acc}\n"
             desc += "- acc (float): Accuracy score averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.eval_metric == "BLEU":
-            desc += "{\"BLEU\": BLEU}\n"
-            desc += "- BLEU (float): sentence-level BLEU3 score with smoothing\n"
+        elif self.eval_metric == "F1":
+            desc += "{\"F1\": F1}\n"
+            desc += "- F1 (float): F1 score averaged over samples.\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 
@@ -234,24 +228,51 @@ class Evaluator:
 
         return {"acc": sum(acc_list)/len(acc_list)}
 
-    def _eval_BLEU(self, seq_ref, seq_pred):
-        """
-            compute sentence-level BLEU3 score with smoothing
-        """
+    def _eval_F1(self, seq_ref, seq_pred):
+        # """
+        #     compute F1 score averaged over samples
+        # """
 
-        ## auto_reweighting scheme is adopted so that the exact match gives the BLEU score of 1.
-        BLEU2_list = [sentence_bleu([seq_r], seq_p, weights = (1 / min(len(seq_p),2),) * min(len(seq_p),2), smoothing_function = self.chencherry) for seq_r, seq_p in zip(seq_ref, seq_pred)]
-        BLEU3_list = [sentence_bleu([seq_r], seq_p, weights = (1 / min(len(seq_p),3),) * min(len(seq_p),3), smoothing_function = self.chencherry) for seq_r, seq_p in zip(seq_ref, seq_pred)]
-        # BLEU2 = sentence_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./2, 1./2), smoothing_function = self.chencherry)
-        # BLEU3 = sentence_bleu([[seq] for seq in seq_ref], seq_pred, weights = (1./3, 1./3, 1./3), smoothing_function = self.chencherry)
-        return {"BLEU2": sum(BLEU2_list)/len(BLEU2_list), "BLEU3": sum(BLEU3_list)/len(BLEU3_list)}
+        precision_list = []
+        recall_list = []
+        f1_list = []
+        
+        for l, p in zip(seq_ref, seq_pred):
+            label = set(l)
+            prediction = set(p)
+            true_positive = len(label.intersection(prediction))
+            false_positive = len(prediction - label)
+            false_negative = len(label - prediction)
+
+            if true_positive + false_positive > 0:
+                precision = true_positive / (true_positive + false_positive)
+            else:
+                precision = 0
+                
+            if true_positive + false_negative > 0:
+                recall = true_positive / (true_positive + false_negative)
+            else:
+                recall = 0
+            if precision + recall > 0:
+                f1 = 2 * precision * recall / (precision + recall)
+            else:
+                f1 = 0
+            
+            precision_list.append(precision)
+            recall_list.append(recall)
+            f1_list.append(f1)
+                
+        return {'precision': np.average(precision_list),
+                'recall': np.average(recall_list),
+                'F1': np.average(f1_list)}
+
 
 if __name__ == "__main__":
     evaluator = Evaluator("ogbg-code")
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    seq_ref = [['tom', 'is', 'is'], ['he'], ['he', 'he'], ['hey', 'fea', 'he'], ['alpha'], ['beta', 'fe4qfq', 'fe4qfq', 'fe4qfq', 'fe4qfq']]
-    seq_pred = [['tom', 'is', 'is'], ['he'], ['he', 'he'], ['hey', 'fea', 'he'], ['alpha'], ['beta', 'fe4qfq', 'fe4qfq', 'fe4qfq', 'fe4qfq']]
+    seq_ref = [['tom', 'is'], ['he'], ['he'], ['hey', 'fea', 'he'], ['alpha'], ['fe4qfq', 'beta'], ['aa']]
+    seq_pred = [['tom', 'is'], ['he'], ['he'], ['hey', 'he', 'fea'], ['alpha'], ['beta', 'fe4qfq'], ['aa']] # [['tom', 'is'] , ['he'], ['the', 'he'], ['hey', 'fea', 'he'], ['alpha'], ['beta', 'fe4qfq', 'c', 'fe4qf'], ['']]
     input_dict = {"seq_ref": seq_ref, "seq_pred": seq_pred}
     result = evaluator.eval(input_dict)
     print(result)
