@@ -1,26 +1,20 @@
 import argparse
 
 import torch
-from torch.utils.data import DataLoader
-
 from torch_geometric.nn import Node2Vec
 
 from ogb.nodeproppred import PygNodePropPredDataset
 
 
-@torch.no_grad()
 def save_embedding(model):
-    model.eval()
-    device = model.embedding.weight.device
-    embedding = model(torch.arange(model.num_nodes, device=device)).cpu()
-    torch.save(embedding, 'embedding.pt')
+    torch.save(model.embedding.weight.data.cpu(), 'embedding.pt')
 
 
 def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (Node2Vec)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--embedding_dim', type=int, default=128)
-    parser.add_argument('--walk_length', type=int, default=80)
+    parser.add_argument('--walk_length', type=int, default=40)
     parser.add_argument('--context_size', type=int, default=20)
     parser.add_argument('--walks_per_node', type=int, default=10)
     parser.add_argument('--batch_size', type=int, default=256)
@@ -35,22 +29,19 @@ def main():
     dataset = PygNodePropPredDataset(name='ogbn-products')
     data = dataset[0]
 
-    edge_index = data.edge_index.to(device)
-    perm = torch.argsort(edge_index[0] * data.num_nodes + edge_index[1])
-    edge_index = edge_index[:, perm]
+    model = Node2Vec(data.edge_index, args.embedding_dim, args.walk_length,
+                     args.context_size, args.walks_per_node,
+                     sparse=True).to(device)
 
-    model = Node2Vec(data.num_nodes, args.embedding_dim, args.walk_length,
-                     args.context_size, args.walks_per_node).to(device)
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    loader = DataLoader(
-        torch.arange(data.num_nodes), batch_size=args.batch_size, shuffle=True)
+    loader = model.loader(batch_size=args.batch_size, shuffle=True,
+                          num_workers=4)
+    optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.lr)
 
     model.train()
     for epoch in range(1, args.epochs + 1):
-        for i, subset in enumerate(loader):
+        for i, (pos_rw, neg_rw) in enumerate(loader):
             optimizer.zero_grad()
-            loss = model.loss(edge_index, subset.to(edge_index.device))
+            loss = model.loss(pos_rw.to(device), neg_rw.to(device))
             loss.backward()
             optimizer.step()
 

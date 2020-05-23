@@ -1,20 +1,14 @@
 import argparse
 
 import torch
-from torch.utils.data import DataLoader
-
 from torch_geometric.nn import Node2Vec
 from torch_geometric.utils import to_undirected
 
 from ogb.nodeproppred import PygNodePropPredDataset
 
 
-@torch.no_grad()
 def save_embedding(model):
-    model.eval()
-    device = model.embedding.weight.device
-    embedding = model(torch.arange(model.num_nodes, device=device)).cpu()
-    torch.save(embedding, 'embedding.pt')
+    torch.save(model.embedding.weight.data.cpu(), 'embedding.pt')
 
 
 def main():
@@ -35,22 +29,21 @@ def main():
 
     dataset = PygNodePropPredDataset(name='ogbn-arxiv')
     data = dataset[0]
+    data.edge_index = to_undirected(data.edge_index, data.num_nodes)
 
-    edge_index = data.edge_index.to(device)
-    edge_index = to_undirected(edge_index, data.num_nodes)
+    model = Node2Vec(data.edge_index, args.embedding_dim, args.walk_length,
+                     args.context_size, args.walks_per_node,
+                     sparse=True).to(device)
 
-    model = Node2Vec(data.num_nodes, args.embedding_dim, args.walk_length,
-                     args.context_size, args.walks_per_node).to(device)
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    loader = DataLoader(torch.arange(data.num_nodes),
-                        batch_size=args.batch_size, shuffle=True)
+    loader = model.loader(batch_size=args.batch_size, shuffle=True,
+                          num_workers=4)
+    optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.lr)
 
     model.train()
     for epoch in range(1, args.epochs + 1):
-        for i, subset in enumerate(loader):
+        for i, (pos_rw, neg_rw) in enumerate(loader):
             optimizer.zero_grad()
-            loss = model.loss(edge_index, subset.to(edge_index.device))
+            loss = model.loss(pos_rw.to(device), neg_rw.to(device))
             loss.backward()
             optimizer.step()
 

@@ -1,4 +1,5 @@
 import argparse
+
 import torch
 from torch.nn import Parameter
 import torch.nn.functional as F
@@ -79,7 +80,7 @@ class SAGEConv(torch.nn.Module):
         zeros(self.bias)
 
     def forward(self, x, adj):
-        out = adj.matmul(x) @ self.weight
+        out = adj.matmul(x, reduce='mean') @ self.weight
         out = out + x @ self.root_weight + self.bias
         return out
 
@@ -263,7 +264,6 @@ def main():
     edge_index = data.edge_index.to(device)
     weight = data.edge_weight.view(-1).to(torch.float).to(device)
     adj = SparseTensor(row=edge_index[0], col=edge_index[1], value=weight)
-    adj = adj.sum(dim=1).pow(-1).view(-1, 1) * adj
 
     if args.use_sage:
         model = SAGE(x.size(-1), args.hidden_channels, args.hidden_channels,
