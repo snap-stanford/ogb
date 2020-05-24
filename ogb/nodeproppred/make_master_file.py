@@ -63,6 +63,20 @@ dataset_dict[name]["additional node files"] = 'node_year'
 dataset_dict[name]['additional edge files'] = 'edge_reltype'
 dataset_dict[name]['is hetero'] = True
 
+### add meta-information about paper category prediction in huge paper citation network
+name = "ogbn-papers100M"
+dataset_dict[name] = {"num tasks": 1, "num classes": 172, "eval metric": "acc", "task type": "multiclass classification"}
+dataset_dict[name]["download_name"] = "papers100M"
+dataset_dict[name]["version"] = 1
+dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
+dataset_dict[name]["add_inverse_edge"] = False 
+dataset_dict[name]["has_node_attr"] = True
+dataset_dict[name]["has_edge_attr"] = False
+dataset_dict[name]["split"] = "time"
+dataset_dict[name]["additional node files"] = 'node_year'
+dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['is hetero'] = False
+
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 
 df.to_csv("master.csv")

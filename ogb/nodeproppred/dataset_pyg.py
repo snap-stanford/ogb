@@ -160,5 +160,8 @@ if __name__ == "__main__":
     pyg_dataset = PygNodePropPredDataset(name = "ogbn-mag")
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
-    print(pyg_dataset[0])
+    print(len(pyg_dataset[0].y_dict[0]['paper']))
+    print(len(pyg_dataset[0].node_year_dict[0]['paper']))
+    print(len(pyg_dataset[0].x_dict[0]['paper']))
+    print(len(split_index['train']['paper']) + len(split_index['valid']['paper']) + len(split_index['test']['paper']))
     
