@@ -21,11 +21,11 @@ class SAGE(torch.nn.Module):
         super(SAGE, self).__init__()
 
         self.convs = torch.nn.ModuleList()
-        self.convs.append(SAGEConv(in_channels, hidden_channels, concat=True))
+        self.convs.append(SAGEConv(in_channels, hidden_channels))
         for _ in range(num_layers - 2):
             self.convs.append(
-                SAGEConv(hidden_channels, hidden_channels, concat=True))
-        self.convs.append(SAGEConv(hidden_channels, out_channels, concat=True))
+                SAGEConv(hidden_channels, hidden_channels))
+        self.convs.append(SAGEConv(hidden_channels, out_channels))
 
         for conv in self.convs:
             conv.aggr = 'add'
