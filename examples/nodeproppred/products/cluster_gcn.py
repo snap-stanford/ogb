@@ -21,8 +21,7 @@ class SAGE(torch.nn.Module):
         self.convs = torch.nn.ModuleList()
         self.convs.append(SAGEConv(in_channels, hidden_channels))
         for _ in range(num_layers - 2):
-            self.convs.append(
-                SAGEConv(hidden_channels, hidden_channels))
+            self.convs.append(SAGEConv(hidden_channels, hidden_channels))
         self.convs.append(SAGEConv(hidden_channels, out_channels))
 
         self.dropout = dropout
@@ -47,9 +46,9 @@ class SAGEInference(torch.nn.Module):
 
     def forward(self, x, adj):
         out = x
-        for i, (weight, bias) in enumerate(self.weights):
-            tmp = adj @ out @ weight[weight.shape[0] // 2:]
-            out = tmp + out @ weight[:weight.shape[0] // 2] + bias
+        for i, (weight, bias, root_weight) in enumerate(self.weights):
+            tmp = adj @ out @ weight
+            out = tmp + out @ root_weight + bias
             out = np.clip(out, 0, None) if i < len(self.weights) - 1 else out
         return out
 
@@ -77,8 +76,10 @@ def train(model, loader, optimizer, device):
 def test(model, data, evaluator):
     print('Evaluating full-batch GNN on CPU...')
 
-    weights = [(conv.weight.cpu().detach().numpy(),
-                conv.bias.cpu().detach().numpy()) for conv in model.convs]
+    weights = [(conv.lin_rel.weight.t().cpu().detach().numpy(),
+                conv.lin_rel.bias.cpu().detach().numpy(),
+                conv.lin_root.weight.t().cpu().detach().numpy())
+               for conv in model.convs]
     model = SAGEInference(weights)
 
     x = data.x.numpy()
@@ -111,14 +112,15 @@ def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (Cluster-GCN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--num_partitions', type=int, default=15000)
+    parser.add_argument('--num_partitions', type=int, default=5000)
     parser.add_argument('--num_workers', type=int, default=6)
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--batch_size', type=int, default=256)
+    parser.add_argument('--dropout', type=float, default=0.5)
+    parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--eval_steps', type=int, default=10)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
     print(args)
@@ -142,8 +144,8 @@ def main():
     loader = ClusterLoader(cluster_data, batch_size=args.batch_size,
                            shuffle=True, num_workers=args.num_workers)
 
-    model = SAGE(data.x.size(-1), args.hidden_channels, dataset.num_classes, args.num_layers,
-                 args.dropout).to(device)
+    model = SAGE(data.x.size(-1), args.hidden_channels, dataset.num_classes,
+                 args.num_layers, args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
@@ -157,8 +159,17 @@ def main():
                 print(f'Run: {run + 1:02d}, '
                       f'Epoch: {epoch:02d}, '
                       f'Loss: {loss:.4f}')
-        result = test(model, data, evaluator)
-        logger.add_result(run, result)
+
+            if epoch % args.eval_steps == 0:
+                result = test(model, data, evaluator)
+                logger.add_result(run, result)
+                train_acc, valid_acc, test_acc = result
+                print(f'Run: {run + 1:02d}, '
+                      f'Epoch: {epoch:02d}, '
+                      f'Train: {100 * train_acc:.2f}%, '
+                      f'Valid: {100 * valid_acc:.2f}% '
+                      f'Test: {100 * test_acc:.2f}%')
+
         logger.print_statistics(run)
     logger.print_statistics()
 
