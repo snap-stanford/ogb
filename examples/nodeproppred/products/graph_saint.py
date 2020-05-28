@@ -1,14 +1,12 @@
-import copy
 import argparse
 
 import torch
-import numpy as np
+from tqdm import tqdm
 import torch.nn.functional as F
 
-from torch_sparse import SparseTensor
-from torch_geometric.data import GraphSAINTRandomWalkSampler
+from torch_geometric.data import GraphSAINTRandomWalkSampler, NeighborSampler
 from torch_geometric.nn import SAGEConv
-from torch_geometric.utils import degree, subgraph
+from torch_geometric.utils import subgraph
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
@@ -26,9 +24,6 @@ class SAGE(torch.nn.Module):
             self.convs.append(SAGEConv(hidden_channels, hidden_channels))
         self.convs.append(SAGEConv(hidden_channels, out_channels))
 
-        for conv in self.convs:
-            conv.aggr = 'add'
-
         self.dropout = dropout
 
     def reset_parameters(self):
@@ -43,19 +38,28 @@ class SAGE(torch.nn.Module):
         x = self.convs[-1](x, edge_index, edge_weight)
         return torch.log_softmax(x, dim=-1)
 
+    def inference(self, x_all, subgraph_loader, device):
+        pbar = tqdm(total=x_all.size(0) * len(self.convs))
+        pbar.set_description('Evaluating')
 
-class SAGEInference(torch.nn.Module):
-    def __init__(self, weights):
-        super(SAGEInference, self).__init__()
-        self.weights = weights
+        for i, conv in enumerate(self.convs):
+            xs = []
+            for batch_size, n_id, adj in subgraph_loader:
+                edge_index, _, size = adj.to(device)
+                x = x_all[n_id].to(device)
+                x_target = x[:size[1]]
+                x = conv((x, x_target), edge_index)
+                if i != len(self.convs) - 1:
+                    x = F.relu(x)
+                xs.append(x.cpu())
 
-    def forward(self, x, adj):
-        out = x
-        for i, (weight, bias, root_weight) in enumerate(self.weights):
-            tmp = adj @ out @ weight
-            out = tmp + out @ root_weight + bias
-            out = np.clip(out, 0, None) if i < len(self.weights) - 1 else out
-        return out
+                pbar.update(batch_size)
+
+            x_all = torch.cat(xs, dim=0)
+
+        pbar.close()
+
+        return x_all
 
 
 def train(model, loader, optimizer, device):
@@ -65,9 +69,9 @@ def train(model, loader, optimizer, device):
     for data in loader:
         data = data.to(device)
         optimizer.zero_grad()
-        out = model(data.x, data.edge_index, data.edge_norm * data.edge_attr)
-        loss = F.nll_loss(out, data.y.squeeze(1), reduction='none')
-        loss = (loss * data.node_norm)[data.train_mask].sum()
+        out = model(data.x, data.edge_index)
+        y = data.y.squeeze(1)
+        loss = F.nll_loss(out[data.train_mask], y[data.train_mask])
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
@@ -76,24 +80,13 @@ def train(model, loader, optimizer, device):
 
 
 @torch.no_grad()
-def test(model, data, evaluator):
-    print('Evaluating full-batch GNN on CPU...')
+def test(model, data, evaluator, subgraph_loader, device):
+    model.eval()
 
-    weights = [(conv.lin_rel.weight.t().cpu().detach().numpy(),
-                conv.lin_rel.bias.cpu().detach().numpy(),
-                conv.lin_root.weight.t().cpu().detach().numpy())
-               for conv in model.convs]
-    model = SAGEInference(weights)
-
-    x = data.x.numpy()
-    adj = SparseTensor(row=data.edge_index[0], col=data.edge_index[1])
-    adj = adj.sum(dim=1).pow(-1).view(-1, 1) * adj
-    adj = adj.to_scipy(layout='csr')
-
-    out = model(x, adj)
+    out = model.inference(data.x, subgraph_loader, device)
 
     y_true = data.y
-    y_pred = torch.from_numpy(out).argmax(dim=-1, keepdim=True)
+    y_pred = out.argmax(dim=-1, keepdim=True)
 
     train_acc = evaluator.eval({
         'y_true': y_true[data.train_mask],
@@ -112,11 +105,10 @@ def test(model, data, evaluator):
 
 
 def to_inductive(data):
-    mask = data.train_mask | data.valid_mask
+    mask = data.train_mask
     data.x = data.x[mask]
     data.y = data.y[mask]
     data.train_mask = data.train_mask[mask]
-    data.valid_mask = data.valid_mask[mask]
     data.test_mask = None
     data.edge_index, _ = subgraph(mask, data.edge_index, None,
                                   relabel_nodes=True, num_nodes=data.num_nodes)
@@ -127,19 +119,17 @@ def to_inductive(data):
 def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (GraphSAINT)')
     parser.add_argument('--device', type=int, default=0)
-    parser.add_argument('--log_steps', type=int, default=5)
-    parser.add_argument('--use_sage', action='store_true')
-    parser.add_argument('--num_workers', type=int, default=0)
+    parser.add_argument('--log_steps', type=int, default=1)
+    parser.add_argument('--inductive', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=8000)
     parser.add_argument('--walk_length', type=int, default=3)
-    parser.add_argument('--sample_coverage', type=int, default=1000)
-    parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--num_steps', type=int, default=20)
-    parser.add_argument('--epochs', type=int, default=150)
-    parser.add_argument('--eval_steps', type=int, default=25)
+    parser.add_argument('--lr', type=float, default=0.01)
+    parser.add_argument('--num_steps', type=int, default=30)
+    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--eval_steps', type=int, default=5)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
     print(args)
@@ -157,20 +147,25 @@ def main():
         mask[idx] = True
         data[f'{key}_mask'] = mask
 
-    # Create "inductive" subgraph containing only train and validation nodes.
-    ind_data = to_inductive(copy.copy(data))
-    row, col = ind_data.edge_index
-    ind_data.edge_attr = 1. / degree(col, ind_data.num_nodes)[col]
+    # We omit normalization factors here since those are only defined for the
+    # inductive learning setup.
+    sampler_data = data
+    if args.inductive:
+        sampler_data = to_inductive(data)
 
-    loader = GraphSAINTRandomWalkSampler(ind_data, batch_size=args.batch_size,
+    loader = GraphSAINTRandomWalkSampler(sampler_data,
+                                         batch_size=args.batch_size,
                                          walk_length=args.walk_length,
                                          num_steps=args.num_steps,
-                                         sample_coverage=args.sample_coverage,
-                                         save_dir=dataset.processed_dir,
-                                         num_workers=args.num_workers)
+                                         sample_coverage=0,
+                                         save_dir=dataset.processed_dir)
 
-    model = SAGE(ind_data.x.size(-1), args.hidden_channels,
-                 dataset.num_classes, args.num_layers, args.dropout).to(device)
+    model = SAGE(data.x.size(-1), args.hidden_channels, dataset.num_classes,
+                 args.num_layers, args.dropout).to(device)
+
+    subgraph_loader = NeighborSampler(data.edge_index, sizes=[-1],
+                                      batch_size=4096, shuffle=False,
+                                      num_workers=12)
 
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
@@ -185,8 +180,8 @@ def main():
                       f'Epoch: {epoch:02d}, '
                       f'Loss: {loss:.4f}')
 
-            if epoch % args.eval_steps == 0:
-                result = test(model, data, evaluator)
+            if epoch > 19 and epoch % args.eval_steps == 0:
+                result = test(model, data, evaluator, subgraph_loader, device)
                 logger.add_result(run, result)
                 train_acc, valid_acc, test_acc = result
                 print(f'Run: {run + 1:02d}, '
