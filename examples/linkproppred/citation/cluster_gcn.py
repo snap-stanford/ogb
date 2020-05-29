@@ -47,11 +47,10 @@ class GCNInference(torch.nn.Module):
         self.weights = weights
 
     def forward(self, x, adj):
-        out = x
         for i, (weight, bias) in enumerate(self.weights):
-            out = adj @ out @ weight + bias
-            out = np.clip(out, 0, None) if i < len(self.weights) - 1 else out
-        return out
+            x = adj @ x @ weight + bias
+            x = np.clip(x, 0, None) if i < len(self.weights) - 1 else x
+        return x
 
 
 class LinkPredictor(torch.nn.Module):
@@ -168,7 +167,7 @@ def main():
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--num_partitions', type=int, default=15000)
-    parser.add_argument('--num_workers', type=int, default=6)
+    parser.add_argument('--num_workers', type=int, default=12)
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -221,19 +220,18 @@ def main():
             loss = train(model, predictor, loader, optimizer, device)
             print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
 
-            if epoch % args.eval_steps == 0:
+            if epoch > 49 and epoch % args.eval_steps == 0:
                 result = test(model, predictor, data, split_edge, evaluator,
-                              64 * 4 * args.batch_size, device)
+                              batch_size=64 * 1024, device=device)
                 logger.add_result(run, result)
 
-                if epoch % args.log_steps == 0:
-                    train_mrr, valid_mrr, test_mrr = result
-                    print(f'Run: {run + 1:02d}, '
-                          f'Epoch: {epoch:02d}, '
-                          f'Loss: {loss:.4f}, '
-                          f'Train: {train_mrr:.4f}, '
-                          f'Valid: {valid_mrr:.4f}, '
-                          f'Test: {test_mrr:.4f}')
+                train_mrr, valid_mrr, test_mrr = result
+                print(f'Run: {run + 1:02d}, '
+                      f'Epoch: {epoch:02d}, '
+                      f'Loss: {loss:.4f}, '
+                      f'Train: {train_mrr:.4f}, '
+                      f'Valid: {valid_mrr:.4f}, '
+                      f'Test: {test_mrr:.4f}')
 
         logger.print_statistics(run)
     logger.print_statistics()
