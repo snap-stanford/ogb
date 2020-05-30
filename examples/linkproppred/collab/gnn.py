@@ -283,7 +283,7 @@ def main():
     predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 
-    evaluator = Evaluator(name='ogbl-ppa')
+    evaluator = Evaluator(name='ogbl-collab')
     loggers = {
         'Hits@10': Logger(args.runs, args),
         'Hits@50': Logger(args.runs, args),
