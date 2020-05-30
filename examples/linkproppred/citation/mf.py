@@ -109,6 +109,7 @@ def main():
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--num_layers', type=int, default=3)
+    parser.add_argument('--std', type=float, default=0.2)
     parser.add_argument('--hidden_channels', type=int, default=128)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
@@ -143,7 +144,7 @@ def main():
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
-        emb.reset_parameters()
+        torch.nn.init.normal_(emb.weight, std = args.std)
         predictor.reset_parameters()
         optimizer = torch.optim.Adam(
             list(emb.parameters()) + list(predictor.parameters()), lr=args.lr)
