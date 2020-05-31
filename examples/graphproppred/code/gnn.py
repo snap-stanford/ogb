@@ -51,16 +51,6 @@ class GNN(torch.nn.Module):
         else:
             raise ValueError("Invalid graph pooling type.")
 
-        # self.graph_pred_mlp_list = torch.nn.ModuleList()
-
-        # if graph_pooling == "set2set":
-        #     for i in range(max_seq_len):
-        #          self.graph_pred_mlp_list.append(torch.nn.Sequential(torch.nn.Linear(2*emb_dim, 2*emb_dim), torch.nn.BatchNorm1d(2*emb_dim), torch.nn.ReLU(), torch.nn.Linear(2*emb_dim, self.num_vocab)))
-
-        # else:
-        #     for i in range(max_seq_len):
-        #          self.graph_pred_mlp_list.append(torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), torch.nn.BatchNorm1d(2*emb_dim), torch.nn.ReLU(), torch.nn.Linear(2*emb_dim, self.num_vocab)))
-
         self.graph_pred_linear_list = torch.nn.ModuleList()
 
         if graph_pooling == "set2set":
