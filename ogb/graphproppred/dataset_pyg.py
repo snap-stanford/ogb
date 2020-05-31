@@ -113,8 +113,16 @@ class PygGraphPropPredDataset(InMemoryDataset):
         else:
             graph_label = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
 
+            has_nan = np.isnan(graph_label).any()
+
             for i, g in enumerate(data_list):
-                g.y = torch.tensor(graph_label[i]).view(1,-1)
+                if "classification" in self.task_type:
+                    if has_nan:
+                        g.y = torch.from_numpy(graph_label[i]).view(1,-1).to(torch.float32)
+                    else:
+                        g.y = torch.from_numpy(graph_label[i]).view(1,-1).to(torch.long)
+                else:
+                    g.y = torch.from_numpy(graph_label[i]).view(1,-1).to(torch.float32)
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
@@ -126,25 +134,27 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
 
 if __name__ == "__main__":
-    # pyg_dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
-    # print(pyg_dataset.num_classes)
-    # split_index = pyg_dataset.get_idx_split()
-    # print(pyg_dataset)
-    # print(pyg_dataset[0])
-    # print(pyg_dataset[0].edge_index)
-    # print(pyg_dataset[split_index["train"]])
-    # print(pyg_dataset[split_index["valid"]])
-    # print(pyg_dataset[split_index["test"]])
-
-    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-code")
+    pyg_dataset = PygGraphPropPredDataset(name = "ogbg-molpcba")
     print(pyg_dataset.num_classes)
     split_index = pyg_dataset.get_idx_split()
     print(pyg_dataset)
+    print(pyg_dataset[0])
     print(pyg_dataset[0].y)
+    print(pyg_dataset[0].y.dtype)
     print(pyg_dataset[0].edge_index)
     print(pyg_dataset[split_index["train"]])
     print(pyg_dataset[split_index["valid"]])
     print(pyg_dataset[split_index["test"]])
+
+    # pyg_dataset = PygGraphPropPredDataset(name = "ogbg-code")
+    # print(pyg_dataset.num_classes)
+    # split_index = pyg_dataset.get_idx_split()
+    # print(pyg_dataset)
+    # print(pyg_dataset[0].y)
+    # print(pyg_dataset[0].edge_index)
+    # print(pyg_dataset[split_index["train"]])
+    # print(pyg_dataset[split_index["valid"]])
+    # print(pyg_dataset[split_index["test"]])
 
     # from torch_geometric.data import DataLoader
     # loader = DataLoader(pyg_dataset, batch_size=32, shuffle=True)

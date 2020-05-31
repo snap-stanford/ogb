@@ -111,7 +111,18 @@ class DglGraphPropPredDataset(object):
                 self.labels = torch.load(target_sequence_file_path)
 
             else:
-                labels = torch.tensor(pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values)
+                labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+
+                has_nan = np.isnan(labels).any()
+
+                if "classification" in self.task_type:
+                    if has_nan:
+                        labels = torch.from_numpy(labels).to(torch.float32)
+                    else:
+                        labels = torch.from_numpy(labels).to(torch.long)
+                else:
+                    labels = torch.from_numpy(labels).to(torch.float32)
+
 
                 print('Saving...')
                 save_graphs(pre_processed_file_path, graphs, labels={'labels': labels})
@@ -172,14 +183,15 @@ def collate_dgl(samples):
         return batched_graph, labels
 
 if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molcode")
+    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
     print(dgl_dataset[0])
+    print(dgl_dataset[0][1].dtype)
     print(dgl_dataset[split_index["train"]])
     print(dgl_dataset[split_index["valid"]])
     print(dgl_dataset[split_index["test"]])
-    print(collate_dgl([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
+    # print(collate_dgl([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
 
 
