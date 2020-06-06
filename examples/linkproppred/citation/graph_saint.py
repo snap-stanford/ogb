@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torch_sparse import SparseTensor
 from torch_geometric.data import GraphSAINTRandomWalkSampler
 from torch_geometric.nn import GCNConv
-from torch_geometric.utils import to_undirected, degree
+from torch_geometric.utils import to_undirected
 
 from ogb.linkproppred import PygLinkPropPredDataset, Evaluator
 
@@ -21,13 +21,10 @@ class GCN(torch.nn.Module):
         super(GCN, self).__init__()
 
         self.convs = torch.nn.ModuleList()
-        self.convs.append(
-            GCNConv(in_channels, hidden_channels, normalize=False))
+        self.convs.append(GCNConv(in_channels, hidden_channels))
         for _ in range(num_layers - 2):
-            self.convs.append(
-                GCNConv(hidden_channels, hidden_channels, normalize=False))
-        self.convs.append(
-            GCNConv(hidden_channels, out_channels, normalize=False))
+            self.convs.append(GCNConv(hidden_channels, hidden_channels))
+        self.convs.append(GCNConv(hidden_channels, out_channels))
 
         self.dropout = dropout
 
@@ -35,12 +32,12 @@ class GCN(torch.nn.Module):
         for conv in self.convs:
             conv.reset_parameters()
 
-    def forward(self, x, edge_index, edge_weight=None):
+    def forward(self, x, edge_index):
         for conv in self.convs[:-1]:
-            x = conv(x, edge_index, edge_weight)
+            x = conv(x, edge_index)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, edge_index, edge_weight)
+        x = self.convs[-1](x, edge_index)
         return x
 
 
@@ -91,7 +88,7 @@ def train(model, predictor, loader, optimizer, device):
         data = data.to(device)
         optimizer.zero_grad()
 
-        h = model(data.x, data.edge_index, data.edge_norm * data.edge_attr)
+        h = model(data.x, data.edge_index)
 
         src, dst = data.edge_index
         pos_out = predictor(h[src], h[dst])
@@ -124,8 +121,12 @@ def test(model, predictor, data, split_edge, evaluator, batch_size, device):
     model = GCNInference(weights)
 
     x = data.x.numpy()
-    adj = SparseTensor(row=data.edge_index[0], col=data.edge_index[1],
-                       value=data.edge_attr)
+    adj = SparseTensor(row=data.edge_index[0], col=data.edge_index[1])
+    adj = adj.set_diag()
+    deg = adj.sum(dim=1)
+    deg_inv_sqrt = deg.pow(-0.5)
+    deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
+    adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
     adj = adj.to_scipy(layout='csr')
 
     h = torch.from_numpy(model(x, adj)).to(device)
@@ -165,13 +166,11 @@ def main():
     parser = argparse.ArgumentParser(description='OGBL-Citation (GraphSAINT)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--batch_size', type=int, default=16 * 1024)
     parser.add_argument('--walk_length', type=int, default=3)
-    parser.add_argument('--sample_coverage', type=int, default=400)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--num_steps', type=int, default=100)
@@ -187,21 +186,12 @@ def main():
     split_edge = dataset.get_edge_split()
     data = dataset[0]
     data.edge_index = to_undirected(data.edge_index, data.num_nodes)
-    data.edge_index, data.edge_attr = GCNConv.norm(data.edge_index,
-                                                   data.num_nodes)
-    print(data.edge_index)
-    print(data.edge_attr)
 
     loader = GraphSAINTRandomWalkSampler(data, batch_size=args.batch_size,
                                          walk_length=args.walk_length,
                                          num_steps=args.num_steps,
-                                         sample_coverage=args.sample_coverage,
-                                         save_dir=dataset.processed_dir,
-                                         num_workers=args.num_workers)
-
-    print(loader.adj)
-    print(loader.edge_norm)
-    print(loader.edge_norm.min(), loader.edge_norm.max())
+                                         sample_coverage=0,
+                                         save_dir=dataset.processed_dir)
 
     # We randomly pick some training samples that we want to evaluate on:
     torch.manual_seed(12345)
@@ -230,19 +220,18 @@ def main():
             loss = train(model, predictor, loader, optimizer, device)
             print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
 
-            if epoch % args.eval_steps == 0:
+            if epoch > 49 and epoch % args.eval_steps == 0:
                 result = test(model, predictor, data, split_edge, evaluator,
                               batch_size=64 * 1024, device=device)
                 logger.add_result(run, result)
 
-                if epoch % args.log_steps == 0:
-                    train_mrr, valid_mrr, test_mrr = result
-                    print(f'Run: {run + 1:02d}, '
-                          f'Epoch: {epoch:02d}, '
-                          f'Loss: {loss:.4f}, '
-                          f'Train: {train_mrr:.4f}, '
-                          f'Valid: {valid_mrr:.4f}, '
-                          f'Test: {test_mrr:.4f}')
+                train_mrr, valid_mrr, test_mrr = result
+                print(f'Run: {run + 1:02d}, '
+                      f'Epoch: {epoch:02d}, '
+                      f'Loss: {loss:.4f}, '
+                      f'Train: {train_mrr:.4f}, '
+                      f'Valid: {valid_mrr:.4f}, '
+                      f'Test: {test_mrr:.4f}')
 
         logger.print_statistics(run)
     logger.print_statistics()
