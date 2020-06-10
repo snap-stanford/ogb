@@ -7,3 +7,4 @@ dataset/
 *.vscode
 *.DS_Store
 *.pt
+*.so
