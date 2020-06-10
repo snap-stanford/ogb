@@ -116,9 +116,7 @@ def main():
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
     ### automatic dataloading and splitting
-    # add augment_edge and target entransformation
     dataset = PygGraphPropPredDataset(name = args.dataset)
-
 
     seq_len_list = np.array([len(seq) for seq in dataset.data.y])
     print('Target seqence less or equal to {} is {}%.'.format(args.max_seq_len, np.sum(seq_len_list <= args.max_seq_len) / len(seq_len_list)))
@@ -174,8 +172,6 @@ def main():
     #     decoded_seq = decode_arr_to_seq(data.y_arr[0], idx2vocab)
     #     print(decoded_seq)
     #     print('')
-
-    # exit(-1)
 
     ## test augment_edge
     # data = dataset[2]
