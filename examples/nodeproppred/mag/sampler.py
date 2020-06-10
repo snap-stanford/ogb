@@ -244,9 +244,7 @@ class RGCN(torch.nn.Module):
 
 
 device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
-device = torch.device(device)
 
-device = 'cuda'
 model = RGCN(128, args.hidden_channels, dataset.num_classes, args.num_layers,
              args.dropout, num_nodes_dict, list(x_dict.keys()),
              len(edge_index_dict.keys())).to(device)
