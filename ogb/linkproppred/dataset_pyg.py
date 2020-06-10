@@ -116,36 +116,7 @@ if __name__ == "__main__":
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-biokg")
     split_edge = pyg_dataset.get_edge_split()
     print(pyg_dataset[0])
-    print(pyg_dataset[0].edge_index)
-    print(pyg_dataset[0].num_nodes)
-    print(split_edge['train'].keys())
-    print(split_edge['test'].keys())
-
-    for key, item in split_edge['train'].items():
-        print(key)
-        if isinstance(item, torch.Tensor):
-            print(item.shape)
-        else:
-            print(len(item))
-
-    print("")
-
-    for key, item in split_edge['valid'].items():
-        print(key)
-        if isinstance(item, torch.Tensor):
-            print(item.shape)
-        else:
-            print(len(item))
-
-    print("")
-
-    for key, item in split_edge['test'].items():
-        print(key)
-        if isinstance(item, torch.Tensor):
-            print(item.shape)
-        else:
-            print(len(item))
-
+    exit(-1)
 
     pyg_dataset = PygLinkPropPredDataset(name = "ogbl-ddi")
     split_edge = pyg_dataset.get_edge_split()

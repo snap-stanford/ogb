@@ -12,4 +12,4 @@ num tasks,112,1,1,1,1
 split,species,sales_ranking,time,time,time
 task type,binary classification,multiclass classification,multiclass classification,multiclass classification,multiclass classification
 url,https://snap.stanford.edu/ogb/data/nodeproppred/proteinfunc.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip,https://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip,https://snap.stanford.edu/ogb/data/nodeproppred/mag.zip,https://snap.stanford.edu/ogb/data/nodeproppred/papers100M.zip
-version,1,1,1,0,1
+version,1,1,1,1,1
