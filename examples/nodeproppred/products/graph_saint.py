@@ -124,7 +124,7 @@ def main():
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.5)
-    parser.add_argument('--batch_size', type=int, default=8000)
+    parser.add_argument('--batch_size', type=int, default=20000)
     parser.add_argument('--walk_length', type=int, default=3)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--num_steps', type=int, default=30)
