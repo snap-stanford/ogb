@@ -24,6 +24,7 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
     '''
 
     print('Loading necessary files...')
+    print('This might take a while.')
     # loading necessary files
     try:
         edge = pd.read_csv(osp.join(raw_dir, "edge.csv.gz"), compression="gzip", header = None).values.T.astype(np.int64) # (2, num_edge) numpy array
@@ -176,6 +177,7 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
     '''
 
     print('Loading necessary files...')
+    print('This might take a while.')
 
     # loading necessary files
     try:
