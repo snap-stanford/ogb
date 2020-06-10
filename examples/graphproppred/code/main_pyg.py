@@ -117,7 +117,7 @@ def main():
 
     ### automatic dataloading and splitting
     # add augment_edge and target entransformation
-    dataset = PygGraphPropPredDataset(name = args.dataset, pre_transform = augment_edge)
+    dataset = PygGraphPropPredDataset(name = args.dataset)
 
 
     seq_len_list = np.array([len(seq) for seq in dataset.data.y])
