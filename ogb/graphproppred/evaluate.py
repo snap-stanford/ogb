@@ -132,10 +132,10 @@ class Evaluator:
             desc += "each row corresponds to one graph.\n"
         elif self.eval_metric == "F1":
             desc += "{\"seq_ref\": seq_ref, \"seq_pred\": seq_pred}\n"
-            desc += "- seq_ref: list of list of strings\n"
-            desc += "- seq_pred: list of list of strings\n"
-            desc += "where seq_ref stores the reference sequence of tokens,\n"
-            desc += "where seq_pred stores the predicted sequence of tokens.\n"
+            desc += "- seq_ref: a list of lists of strings\n"
+            desc += "- seq_pred: a list of lists of strings\n"
+            desc += "where seq_ref stores the reference sequences of sub-tokens, and\n"
+            desc += "seq_pred stores the predicted sequences of sub-tokens.\n"
         else:
             raise ValueError("Undefined eval metric %s " % (self.eval_metric))
 

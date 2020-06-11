@@ -103,7 +103,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
         data_list = read_csv_graph_pyg(self.raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
-        if self.task_type == "sequence prediction":
+        if self.task_type == "subtoken prediction":
             graph_label_notparsed = pd.read_csv(osp.join(self.raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
             graph_label = [str(graph_label_notparsed[i][0]).split(' ') for i in range(len(graph_label_notparsed))]
 

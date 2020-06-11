@@ -50,12 +50,12 @@ class DglGraphPropPredDataset(object):
         raw_dir = osp.join(self.root, 'raw')
         pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
-        if self.task_type == 'sequence prediction':
+        if self.task_type == 'subtoken prediction':
             target_sequence_file_path = osp.join(processed_dir, 'target_sequence')
 
         if os.path.exists(pre_processed_file_path):
 
-            if self.task_type == "sequence prediction":
+            if self.task_type == "subtoken prediction":
                 self.graphs, _ = load_graphs(pre_processed_file_path)
                 self.labels = torch.load(target_sequence_file_path)
 
@@ -96,7 +96,7 @@ class DglGraphPropPredDataset(object):
             graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
 
-            if self.task_type == "sequence prediction":
+            if self.task_type == "subtoken prediction":
                 # the downloaded labels are initially joined by ' '
                 labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
                 # need to split each element into subtokens

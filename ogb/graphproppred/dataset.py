@@ -84,7 +84,7 @@ class GraphPropPredDataset(object):
             self.graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
 
-            if self.task_type == 'sequence prediction':
+            if self.task_type == 'subtoken prediction':
                 labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
                 # need to split each element into subtokens
                 self.labels = [str(labels_joined[i][0]).split(' ') for i in range(len(labels_joined))]
