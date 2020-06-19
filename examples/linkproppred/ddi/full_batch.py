@@ -303,7 +303,8 @@ def main():
         model.reset_parameters()
         predictor.reset_parameters()
         optimizer = torch.optim.Adam(
-            list(emb.parameters()) + list(predictor.parameters()), lr=args.lr)
+            list(model.parameters()) + list(emb.parameters()) +
+            list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, predictor, emb.weight, adj, data.edge_index,
