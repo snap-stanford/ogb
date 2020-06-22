@@ -74,9 +74,6 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
             else:
                 feat_name = key
 
-            for triplet in graph[feat_name].keys():
-                dgl_hetero_graph.edges[triplet].data[feat_name] = torch.from_numpy(graph[feat_name][triplet])
-
             for nodetype in graph[feat_name].keys():
                 dgl_hetero_graph.nodes[nodetype].data[feat_name] = torch.from_numpy(graph[feat_name][nodetype])
 
