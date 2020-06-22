@@ -22,14 +22,12 @@ class GCNConv(torch.nn.Module):
         self.out_channels = out_channels
 
         self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.root_weight = Parameter(torch.Tensor(in_channels, out_channels))
         self.bias = Parameter(torch.Tensor(out_channels))
 
         self.reset_parameters()
 
     def reset_parameters(self):
         glorot(self.weight)
-        glorot(self.root_weight)
         zeros(self.bias)
 
     def forward(self, x, adj):
@@ -303,7 +301,8 @@ def main():
         model.reset_parameters()
         predictor.reset_parameters()
         optimizer = torch.optim.Adam(
-            list(emb.parameters()) + list(predictor.parameters()), lr=args.lr)
+            list(model.parameters()) + list(emb.parameters()) +
+            list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, predictor, emb.weight, adj, data.edge_index,

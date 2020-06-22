@@ -21,14 +21,12 @@ class GCNConv(torch.nn.Module):
         self.out_channels = out_channels
 
         self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.root_weight = Parameter(torch.Tensor(in_channels, out_channels))
         self.bias = Parameter(torch.Tensor(out_channels))
 
         self.reset_parameters()
 
     def reset_parameters(self):
         glorot(self.weight)
-        glorot(self.root_weight)
         zeros(self.bias)
 
     def forward(self, x, adj):
@@ -307,8 +305,8 @@ def main():
                          args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                results = test(model, predictor, x, adj, split_edge,
-                               evaluator, args.batch_size)
+                results = test(model, predictor, x, adj, split_edge, evaluator,
+                               args.batch_size)
                 for key, result in results.items():
                     loggers[key].add_result(run, result)
 
