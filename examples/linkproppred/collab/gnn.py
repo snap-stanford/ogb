@@ -244,7 +244,7 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
-    parser.add_argument('--lr', type=float, default=0.01)
+    parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--eval_steps', type=int, default=1)
     parser.add_argument('--runs', type=int, default=10)
@@ -271,7 +271,6 @@ def main():
                     args.num_layers, args.dropout).to(device)
 
         # Pre-compute GCN normalization.
-        adj = adj.set_value(None)
         adj = adj.set_diag()
         deg = adj.sum(dim=1)
         deg_inv_sqrt = deg.pow(-0.5)
