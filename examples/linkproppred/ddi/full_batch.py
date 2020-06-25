@@ -164,6 +164,11 @@ def train(model, predictor, x, adj, edge_index, split_edge, optimizer,
 
         loss = pos_loss + neg_loss
         loss.backward()
+
+        torch.nn.utils.clip_grad_norm_(x, 1.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(predictor.parameters(), 1.0)
+
         optimizer.step()
 
         num_examples = pos_out.size(0)
@@ -246,8 +251,8 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--lr', type=float, default=0.005)
+    parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--eval_steps', type=int, default=5)
     parser.add_argument('--runs', type=int, default=10)
     args = parser.parse_args()
