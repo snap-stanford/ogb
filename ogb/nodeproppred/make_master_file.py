@@ -52,8 +52,8 @@ dataset_dict[name]['is hetero'] = False
 ### add meta-information about paper venue prediction task
 name = "ogbn-mag"
 dataset_dict[name] = {"num tasks": 1, "num classes": 349, "eval metric": "acc", "task type": "multiclass classification"}
-dataset_dict[name]["download_name"] = "mag"
-dataset_dict[name]["version"] = 1
+dataset_dict[name]["download_name"] = "mag_v2"
+dataset_dict[name]["version"] = 2
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 dataset_dict[name]["add_inverse_edge"] = False 
 dataset_dict[name]["has_node_attr"] = True
