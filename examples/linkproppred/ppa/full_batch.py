@@ -163,6 +163,10 @@ def train(model, predictor, x, adj, split_edge, optimizer, batch_size):
 
         loss = pos_loss + neg_loss
         loss.backward()
+
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(predictor.parameters(), 1.0)
+
         optimizer.step()
 
         num_examples = pos_out.size(0)
