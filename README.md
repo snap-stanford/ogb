@@ -32,8 +32,8 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.2.0.**
-The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.0).
+**If you have previously installed ogb, please make sure you update the version to 1.2.1.**
+The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.1).
 
 #### Requirements
  - Python>=3.5
@@ -54,7 +54,7 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.2.0". Otherwise, please update the version by
+# This should print "1.2.1". Otherwise, please update the version by
 pip install -U ogb
 ```
 
@@ -64,10 +64,10 @@ You can also install OGB from source. This is recommended if you want to contrib
 ```bash
 git clone https://github.com/snap-stanford/ogb
 cd ogb
-python setup.py install
+pip install -e .
 ```
 
-## Example
+## Package Usage
 We highlight two key features of OGB, namely, (1) easy-to-use data loaders, and (2) standardized evaluators.
 #### (1) Data loaders
 We prepare easy-to-use PyTorch Geometric and DGL data loaders. We handle dataset downloading as well as standardized dataset splitting.
