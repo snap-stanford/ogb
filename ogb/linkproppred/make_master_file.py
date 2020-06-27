@@ -22,7 +22,7 @@ dataset_dict[name]['is hetero'] = False
 
 ### add meta-information about author collaboration prediction task
 name = "ogbl-collab"
-dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
+dataset_dict[name] = {"eval metric": "hits@50", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "collab"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"
@@ -67,7 +67,7 @@ dataset_dict[name]['is hetero'] = False
 
 ### add meta-information about drug drug interaction prediction task
 name = "ogbl-ddi"
-dataset_dict[name] = {"eval metric": "hits@10", "task type": "link prediction"}
+dataset_dict[name] = {"eval metric": "hits@20", "task type": "link prediction"}
 dataset_dict[name]["download_name"] = "ddi"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/linkproppred/"+dataset_dict[name]["download_name"]+".zip"

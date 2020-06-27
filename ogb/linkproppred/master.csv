@@ -3,7 +3,7 @@ add_inverse_edge,True,True,False,False,True,False
 additional edge files,None,"edge_weight,edge_year",None,edge_reltype,None,edge_reltype
 additional node files,None,None,node_year,None,None,None
 download_name,ppassoc,collab,citation,wikikg,ddi,biokg
-eval metric,hits@100,hits@10,mrr,mrr,hits@10,mrr
+eval metric,hits@100,hits@50,mrr,mrr,hits@20,mrr
 has_edge_attr,False,False,False,False,False,False
 has_node_attr,True,True,True,False,False,False
 is hetero,False,False,False,False,False,True
