@@ -1,36 +1,14 @@
 import argparse
 
 import torch
-from torch.nn import Parameter
 import torch.nn.functional as F
 
-from torch_sparse import SparseTensor
-from torch_geometric.utils import to_undirected
-from torch_geometric.nn.inits import glorot, zeros
+import torch_geometric.transforms as T
+from torch_geometric.nn import GCNConv, SAGEConv
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
-
-
-class GCNConv(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(GCNConv, self).__init__()
-
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.bias = Parameter(torch.Tensor(out_channels))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.weight)
-        zeros(self.bias)
-
-    def forward(self, x, adj):
-        return adj @ x @ self.weight
 
 
 class GCN(torch.nn.Module):
@@ -39,13 +17,14 @@ class GCN(torch.nn.Module):
         super(GCN, self).__init__()
 
         self.convs = torch.nn.ModuleList()
-        self.convs.append(GCNConv(in_channels, hidden_channels))
+        self.convs.append(GCNConv(in_channels, hidden_channels, cached=True))
         self.bns = torch.nn.ModuleList()
         self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
         for _ in range(num_layers - 2):
-            self.convs.append(GCNConv(hidden_channels, hidden_channels))
+            self.convs.append(
+                GCNConv(hidden_channels, hidden_channels, cached=True))
             self.bns.append(torch.nn.BatchNorm1d(hidden_channels))
-        self.convs.append(GCNConv(hidden_channels, out_channels))
+        self.convs.append(GCNConv(hidden_channels, out_channels, cached=True))
 
         self.dropout = dropout
 
@@ -55,38 +34,14 @@ class GCN(torch.nn.Module):
         for bn in self.bns:
             bn.reset_parameters()
 
-    def forward(self, x, adj):
+    def forward(self, x, adj_t):
         for i, conv in enumerate(self.convs[:-1]):
-            x = conv(x, adj)
+            x = conv(x, adj_t)
             x = self.bns[i](x)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, adj)
+        x = self.convs[-1](x, adj_t)
         return x.log_softmax(dim=-1)
-
-
-class SAGEConv(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(SAGEConv, self).__init__()
-
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.root_weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.bias = Parameter(torch.Tensor(out_channels))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.weight)
-        glorot(self.root_weight)
-        zeros(self.bias)
-
-    def forward(self, x, adj):
-        out = adj.matmul(x, reduce="mean") @ self.weight
-        out = out + x @ self.root_weight + self.bias
-        return out
 
 
 class SAGE(torch.nn.Module):
@@ -109,22 +64,22 @@ class SAGE(torch.nn.Module):
         for conv in self.convs:
             conv.reset_parameters()
 
-    def forward(self, x, adj):
+    def forward(self, x, adj_t):
         for i, conv in enumerate(self.convs[:-1]):
-            x = conv(x, adj)
+            x = conv(x, adj_t)
             x = self.bns[i](x)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, adj)
+        x = self.convs[-1](x, adj_t)
         return x.log_softmax(dim=-1)
 
 
-def train(model, x, adj, y_true, train_idx, optimizer):
+def train(model, data, train_idx, optimizer):
     model.train()
 
     optimizer.zero_grad()
-    out = model(x, adj)[train_idx]
-    loss = F.nll_loss(out, y_true.squeeze(1)[train_idx])
+    out = model(data.x, data.adj_t)[train_idx]
+    loss = F.nll_loss(out, data.y.squeeze(1)[train_idx])
     loss.backward()
     optimizer.step()
 
@@ -132,22 +87,22 @@ def train(model, x, adj, y_true, train_idx, optimizer):
 
 
 @torch.no_grad()
-def test(model, x, adj, y_true, split_idx, evaluator):
+def test(model, data, split_idx, evaluator):
     model.eval()
 
-    out = model(x, adj)
+    out = model(data.x, data.adj_t)
     y_pred = out.argmax(dim=-1, keepdim=True)
 
     train_acc = evaluator.eval({
-        'y_true': y_true[split_idx['train']],
+        'y_true': data.y[split_idx['train']],
         'y_pred': y_pred[split_idx['train']],
     })['acc']
     valid_acc = evaluator.eval({
-        'y_true': y_true[split_idx['valid']],
+        'y_true': data.y[split_idx['valid']],
         'y_pred': y_pred[split_idx['valid']],
     })['acc']
     test_acc = evaluator.eval({
-        'y_true': y_true[split_idx['test']],
+        'y_true': data.y[split_idx['test']],
         'y_pred': y_pred[split_idx['test']],
     })['acc']
 
@@ -171,33 +126,24 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-arxiv')
-    split_idx = dataset.get_idx_split()
+    dataset = PygNodePropPredDataset(name='ogbn-arxiv',
+                                     transform=T.ToSparseTensor())
 
     data = dataset[0]
+    data.adj_t = data.adj_t.to_symmetric()
+    data = data.to(device)
 
-    x = data.x.to(device)
-    y_true = data.y.to(device)
+    split_idx = dataset.get_idx_split()
     train_idx = split_idx['train'].to(device)
 
-    edge_index = data.edge_index.to(device)
-    edge_index = to_undirected(edge_index, data.num_nodes)
-    adj = SparseTensor(row=edge_index[0], col=edge_index[1])
-
     if args.use_sage:
-        model = SAGE(data.x.size(-1), args.hidden_channels,
+        model = SAGE(data.num_features, args.hidden_channels,
                      dataset.num_classes, args.num_layers,
                      args.dropout).to(device)
     else:
-        model = GCN(data.x.size(-1), args.hidden_channels, dataset.num_classes,
-                    args.num_layers, args.dropout).to(device)
-
-        # Pre-compute GCN normalization.
-        adj = adj.set_diag()
-        deg = adj.sum(dim=1).to(torch.float)
-        deg_inv_sqrt = deg.pow(-0.5)
-        deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
-        adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
+        model = GCN(data.num_features, args.hidden_channels,
+                    dataset.num_classes, args.num_layers,
+                    args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbn-arxiv')
     logger = Logger(args.runs, args)
@@ -206,8 +152,8 @@ def main():
         model.reset_parameters()
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
-            loss = train(model, x, adj, y_true, train_idx, optimizer)
-            result = test(model, x, adj, y_true, split_idx, evaluator)
+            loss = train(model, data, train_idx, optimizer)
+            result = test(model, data, split_idx, evaluator)
             logger.add_result(run, result)
 
             if epoch % args.log_steps == 0:
