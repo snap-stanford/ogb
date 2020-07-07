@@ -1,36 +1,16 @@
 import argparse
 
 import torch
-from torch.nn import Parameter
 import torch.nn.functional as F
 
 from torch_sparse import SparseTensor
 from torch_scatter import scatter
-from torch_geometric.nn.inits import glorot, zeros
+import torch_geometric.transforms as T
+from torch_geometric.nn import GCNConv, SAGEConv
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
 from logger import Logger
-
-
-class GCNConv(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(GCNConv, self).__init__()
-
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.bias = Parameter(torch.Tensor(out_channels))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.weight)
-        zeros(self.bias)
-
-    def forward(self, x, adj):
-        return adj @ x @ self.weight
 
 
 class GCN(torch.nn.Module):
@@ -39,10 +19,13 @@ class GCN(torch.nn.Module):
         super(GCN, self).__init__()
 
         self.convs = torch.nn.ModuleList()
-        self.convs.append(GCNConv(in_channels, hidden_channels))
+        self.convs.append(
+            GCNConv(in_channels, hidden_channels, normalize=False))
         for _ in range(num_layers - 2):
-            self.convs.append(GCNConv(hidden_channels, hidden_channels))
-        self.convs.append(GCNConv(hidden_channels, out_channels))
+            self.convs.append(
+                GCNConv(hidden_channels, hidden_channels, normalize=False))
+        self.convs.append(
+            GCNConv(hidden_channels, out_channels, normalize=False))
 
         self.dropout = dropout
 
@@ -50,37 +33,13 @@ class GCN(torch.nn.Module):
         for conv in self.convs:
             conv.reset_parameters()
 
-    def forward(self, x, adj):
+    def forward(self, x, adj_t):
         for conv in self.convs[:-1]:
-            x = conv(x, adj)
+            x = conv(x, adj_t)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, adj)
+        x = self.convs[-1](x, adj_t)
         return x
-
-
-class SAGEConv(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(SAGEConv, self).__init__()
-
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.root_weight = Parameter(torch.Tensor(in_channels, out_channels))
-        self.bias = Parameter(torch.Tensor(out_channels))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        glorot(self.weight)
-        glorot(self.root_weight)
-        zeros(self.bias)
-
-    def forward(self, x, adj):
-        out = adj.matmul(x, reduce="mean") @ self.weight
-        out = out + x @ self.root_weight + self.bias
-        return out
 
 
 class SAGE(torch.nn.Module):
@@ -100,22 +59,22 @@ class SAGE(torch.nn.Module):
         for conv in self.convs:
             conv.reset_parameters()
 
-    def forward(self, x, adj):
+    def forward(self, x, adj_t):
         for conv in self.convs[:-1]:
-            x = conv(x, adj)
+            x = conv(x, adj_t)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.convs[-1](x, adj)
+        x = self.convs[-1](x, adj_t)
         return x
 
 
-def train(model, x, adj, y_true, train_idx, optimizer):
+def train(model, data, train_idx, optimizer):
     model.train()
     criterion = torch.nn.BCEWithLogitsLoss()
 
     optimizer.zero_grad()
-    out = model(x, adj)[train_idx]
-    loss = criterion(out, y_true[train_idx].to(torch.float))
+    out = model(data.x, data.adj_t)[train_idx]
+    loss = criterion(out, data.y[train_idx].to(torch.float))
     loss.backward()
     optimizer.step()
 
@@ -123,21 +82,21 @@ def train(model, x, adj, y_true, train_idx, optimizer):
 
 
 @torch.no_grad()
-def test(model, x, adj, y_true, split_idx, evaluator):
+def test(model, data, split_idx, evaluator):
     model.eval()
 
-    y_pred = model(x, adj)
+    y_pred = model(data.x, data.adj_t)
 
     train_rocauc = evaluator.eval({
-        'y_true': y_true[split_idx['train']],
+        'y_true': data.y[split_idx['train']],
         'y_pred': y_pred[split_idx['train']],
     })['rocauc']
     valid_rocauc = evaluator.eval({
-        'y_true': y_true[split_idx['valid']],
+        'y_true': data.y[split_idx['valid']],
         'y_pred': y_pred[split_idx['valid']],
     })['rocauc']
     test_rocauc = evaluator.eval({
-        'y_true': y_true[split_idx['test']],
+        'y_true': data.y[split_idx['test']],
         'y_pred': y_pred[split_idx['test']],
     })['rocauc']
 
@@ -145,7 +104,7 @@ def test(model, x, adj, y_true, split_idx, evaluator):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBN-Proteins (Full-Batch)')
+    parser = argparse.ArgumentParser(description='OGBN-Proteins (GNN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--use_sage', action='store_true')
@@ -162,32 +121,33 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-proteins')
-    split_idx = dataset.get_idx_split()
+    dataset = PygNodePropPredDataset(name='ogbn-proteins',
+                                     transform=T.ToSparseTensor())
     data = dataset[0]
 
-    x = scatter(data.edge_attr, data.edge_index[0], dim=0,
-                dim_size=data.num_nodes, reduce='mean').to(device)
+    # Move edge features to node features.
+    data.x = data.adj_t.mean(dim=1)
+    data.adj_t.set_value_(None)
 
-    y_true = data.y.to(device)
+    split_idx = dataset.get_idx_split()
     train_idx = split_idx['train'].to(device)
 
-    edge_index = data.edge_index.to(device)
-    adj = SparseTensor(row=edge_index[0], col=edge_index[1])
-
     if args.use_sage:
-        model = SAGE(x.size(-1), args.hidden_channels, 112, args.num_layers,
-                     args.dropout).to(device)
+        model = SAGE(data.num_features, args.hidden_channels, 112,
+                     args.num_layers, args.dropout).to(device)
     else:
-        model = GCN(x.size(-1), args.hidden_channels, 112, args.num_layers,
-                    args.dropout).to(device)
+        model = GCN(data.num_features, args.hidden_channels, 112,
+                    args.num_layers, args.dropout).to(device)
 
         # Pre-compute GCN normalization.
-        adj = adj.set_diag()
-        deg = adj.sum(dim=1).to(torch.float)
+        adj_t = data.adj_t.set_diag()
+        deg = adj_t.sum(dim=1).to(torch.float)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
-        adj = deg_inv_sqrt.view(-1, 1) * adj * deg_inv_sqrt.view(1, -1)
+        adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
+        data.adj_t = adj_t
+
+    data = data.to(device)
 
     evaluator = Evaluator(name='ogbn-proteins')
     logger = Logger(args.runs, args)
@@ -196,10 +156,10 @@ def main():
         model.reset_parameters()
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         for epoch in range(1, 1 + args.epochs):
-            loss = train(model, x, adj, y_true, train_idx, optimizer)
+            loss = train(model, data, train_idx, optimizer)
 
             if epoch % args.eval_steps == 0:
-                result = test(model, x, adj, y_true, split_idx, evaluator)
+                result = test(model, data, split_idx, evaluator)
                 logger.add_result(run, result)
 
                 if epoch % args.log_steps == 0:
