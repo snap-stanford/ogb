@@ -3,10 +3,11 @@
 This repository includes the following example scripts:
 
 * **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/mlp.py)**: Full-batch MLP training based on product features and optional Node2Vec features (`--use_node_embedding`). For training with Node2Vec features, this script requires node embeddings be saved in `embedding.pt`. To generate them, please run `python node2vec.py`.
-* **[Full-batch GCN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/full_batch.py)**: Full-batch GNN training using either the GCN or GraphSAGE operator (`--use_sage`). This script will require large amounts of GPU memory.
-* **[Cluster-GCN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/cluster_gcn.py)**: Mini-batch GCN training using the Cluster-GCN algorithm. Cluster-GCN examples require PyTorch Geometric >= 1.4.3.
-* **[GraphSAINT](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/graph_saint.py)**: Mini-batch GCN training using the GraphSAINT algorithm. GraphSAINT examples require PyTorch Geometric master.
-* **[SIGN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/sign.py)**: Training using pre-computed GNN representations using Scalable Inception Graph Neural Networks (SIGN). SIGN examples require PyTorch Geometric master.
+* **[GNN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/gnn.py)**: Full-batch GNN training using either the GCN or GraphSAGE operator (`--use_sage`), requires `torch_geometric>=1.6.0`. This script will consume large amounts of GPU memory.
+* **[Cluster-GCN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/cluster_gcn.py)**: Mini-batch GCN training using the Cluster-GCN algorithm, requires `torch-geometric>= 1.4.3`.
+* **[NeighborSampler](https://github.com/rusty1s/pytorch_geometric/blob/master/examples/ogbn_products_sage.py)**: Mini-batch GNN training using neighbor sampling, requires `torch-geometric>=1.5.0`.
+* **[GraphSAINT](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/graph_saint.py)**: Mini-batch GCN training using the GraphSAINT algorithm, requires `torch-geometric>=1.5.0`.
+* **[SIGN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/sign.py)**: Training using pre-computed GNN representations using Scalable Inception Graph Neural Networks (SIGN), requires `torch-geometric>=1.5.0`.
 
 ## Training & Evaluation
 
