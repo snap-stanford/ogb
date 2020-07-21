@@ -114,7 +114,7 @@ def train(model, predictor, data, split_edge, optimizer, batch_size):
 
         # Just do some trivial random sampling.
         edge = torch.randint(0, data.num_nodes, edge.size(), dtype=torch.long,
-                             device=data.x.device)
+                             device=h.device)
 
         neg_out = predictor(h[edge[0]], h[edge[1]])
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
@@ -140,11 +140,11 @@ def test(model, predictor, data, split_edge, evaluator, batch_size):
 
     h = model(data.x, data.adj_t)
 
-    pos_train_edge = split_edge['train']['edge'].to(data.x.device)
-    pos_valid_edge = split_edge['valid']['edge'].to(data.x.device)
-    neg_valid_edge = split_edge['valid']['edge_neg'].to(data.x.device)
-    pos_test_edge = split_edge['test']['edge'].to(data.x.device)
-    neg_test_edge = split_edge['test']['edge_neg'].to(data.x.device)
+    pos_train_edge = split_edge['train']['edge'].to(h.device)
+    pos_valid_edge = split_edge['valid']['edge'].to(h.device)
+    neg_valid_edge = split_edge['valid']['edge_neg'].to(h.device)
+    pos_test_edge = split_edge['test']['edge'].to(h.device)
+    neg_test_edge = split_edge['test']['edge_neg'].to(h.device)
 
     pos_train_preds = []
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size):
