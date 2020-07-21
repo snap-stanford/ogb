@@ -4,9 +4,9 @@ This repository includes the following example scripts.
 
 * **[sgc.py](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/papers100M/sgc.py)**: Simplified Graph Convolution (SGC) pre-processing on CPU. This will produce `sgc_dict.pt` that saves SGC features and labels for a subset of nodes that are associated with target labels. Requires more than 100GB CPU memory. Takes about a few hours to complete.
 * **[node2vec.py](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/papers100M/node2vec.py)**: Node2vec training on CPU. This will produce `data_dict.pt` that saves features and labels for a subset of nodes that are associated with target labels. Requires more than 100GB CPU memory. Each epoch takes about a few weeks.
-* **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/papers100M/mlp.py)**: Mini-batch MLP training on GPU based on paper features and optional Node2Vec features (`--use_node_embedding`) or SGC features (`--use_sgc_embedding`). 
+* **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/papers100M/mlp.py)**: Mini-batch MLP training on GPU based on paper features and optional Node2Vec features (`--use_node_embedding`) or SGC features (`--use_sgc_embedding`).
 
-Note that the graph is huge: the size of the downloaded file is 57GB, and the size of the Pytorch geometric graph object is 79GB (which takes a while to be generated and saved).
+Note that the graph is huge: the size of the downloaded file is 57GB, and the size of the Pytorch Geometric graph object is 79GB (which takes a while to be generated and saved).
 Please ensure you have sufficient memory and storage before running the scripts.
 
 
