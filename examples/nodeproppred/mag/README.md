@@ -7,7 +7,9 @@ This repository includes the following example scripts:
 * **[R-GCN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/mag/rgcn.py)**: Full-batch R-GCN training on the complete heterogeneous graph. This script will consume about 14GB of GPU memory [requires `torch_geometric>=1.4.3`].
 * **[Cluster-GCN](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/mag/cluster_gcn.py)**: Mini-batch R-GCN training using the Cluster-GCN algorithm [requires `torch-geometric>= 1.4.3`].
 * **[NeighborSampler](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/mag/sampler.py)**: Mini-batch R-GCN training using neighbor sampling [requires `torch-geometric>=1.5.0`].
-* **[GraphSAINT](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/products/graph_saint.py)**: Mini-batch R-GCN training using the GraphSAINT algorithm [requires `torch-geometric>=1.5.0`].
+* **[GraphSAINT](https://github.com/snap-stanford/ogb/blob/master/examples/nodeproppred/mag/graph_saint.py)**: Mini-batch R-GCN training using the GraphSAINT algorithm [requires `torch-geometric>=1.5.0`].
+
+For the R-GCN implementation, we use distinct trainable node embeddings for all node types except for paper nodes.
 
 ## Training & Evaluation
 
