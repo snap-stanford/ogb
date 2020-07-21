@@ -2,8 +2,8 @@
 
 This repository includes the following example scripts:
 
-* **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/ppa/mlp.py)**: Full-batch MLP training based on Node2Vec features. This script requires node embeddings be saved in `embedding.pt`. To generate them, please run `python node2vec.py`.
-* **[Full-batch GCN](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/ppa/full_batch.py)**: Full-batch GNN training using either the GCN or GraphSAGE operator (`--use_sage`).
+* **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/ppa/mlp.py)**: Full-batch MLP training based on Node2Vec features. This script requires node embeddings be saved in `embedding.pt`. To generate them, please run `python node2vec.py` [requires `torch-geometric>=1.5.0`].
+* **[GNN](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/ppa/gnn.py)**: Full-batch GNN training using either the GCN or GraphSAGE operator (`--use_sage`) [requires `torch-geometric>=1.6.0`].
 * **[Matrix Factorization](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/ppa/mf.py)**: Full-batch Matrix Factorization training.
 
 ## Training & Evaluation
