@@ -33,7 +33,8 @@ setup(name='ogb',
         'scikit-learn>=0.20.0',
         'pandas>=0.24.0',
         'six>=1.12.0',
-        'urllib3>=1.24.0'
+        'urllib3>=1.24.0',
+        'outdated>=0.2.0'
       ],
       license='MIT',
       packages=find_packages(exclude=['dataset', 'examples', 'docs']),
