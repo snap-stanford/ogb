@@ -93,7 +93,7 @@ class LinkPropPredDataset(object):
                 self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
 
             print('Saving...')
-            torch.save(self.graph, pre_processed_file_path)
+            torch.save(self.graph, pre_processed_file_path, pickle_protocol=4)
 
     def get_edge_split(self, split_type = None):
         if split_type is None:

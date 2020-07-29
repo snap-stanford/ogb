@@ -92,7 +92,7 @@ class GraphPropPredDataset(object):
                 self.labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
 
             print('Saving...')
-            torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path)
+            torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
 
     def get_idx_split(self, split_type = None):
@@ -131,16 +131,17 @@ class GraphPropPredDataset(object):
 
 if __name__ == "__main__":
     dataset = GraphPropPredDataset(name = "ogbg-code")
-    target_list = np.array([len(label) for label in dataset.labels])
-    print(np.sum(target_list == 1)/ float(len(target_list)))
-    print(np.sum(target_list == 2)/ float(len(target_list)))
-    print(np.sum(target_list == 3)/ float(len(target_list)))
+    # target_list = np.array([len(label) for label in dataset.labels])
+    # print(np.sum(target_list == 1)/ float(len(target_list)))
+    # print(np.sum(target_list == 2)/ float(len(target_list)))
+    # print(np.sum(target_list == 3)/ float(len(target_list)))
 
-    from collections import Counter
-    print(Counter(target_list))
+    # from collections import Counter
+    # print(Counter(target_list))
 
     print(dataset.num_classes)
     split_index = dataset.get_idx_split()
+    print(split_index)
     # print(dataset)
     # print(dataset[2])
     # print(split_index["train"])

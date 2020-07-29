@@ -99,7 +99,7 @@ class NodePropPredDataset(object):
                 self.labels = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression="gzip", header = None).values
 
             print('Saving...')
-            torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path)
+            torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
 
     def get_idx_split(self, split_type = None):
