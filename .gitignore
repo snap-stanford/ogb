@@ -8,3 +8,8 @@ dataset/
 *.DS_Store
 *.pt
 *.so
+*trial*
+*.ipynb
+*.sh
+*analyze*
+*random.py
