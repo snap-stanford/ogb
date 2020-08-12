@@ -6,7 +6,7 @@ os.environ['OUTDATED_IGNORE'] = '1'
 from outdated import check_outdated  # noqa
 
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 
 def check():
