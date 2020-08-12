@@ -43,6 +43,7 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
  - pandas>=0.24.0
  - urllib3>=1.24.0
  - scikit-learn>=0.20.0
+ - outdated>=0.2.0
 
  **Note:** `torch-geometric>=1.5.0` is recommended to run our [example code](https://github.com/snap-stanford/ogb/tree/master/examples).
 
