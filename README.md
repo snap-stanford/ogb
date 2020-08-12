@@ -45,7 +45,7 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
  - scikit-learn>=0.20.0
  - outdated>=0.2.0
 
- **Note:** `torch-geometric>=1.5.0` is recommended to run our [example code](https://github.com/snap-stanford/ogb/tree/master/examples).
+ **Note:** `torch-geometric>=1.6.0` is recommended to run our [example code](https://github.com/snap-stanford/ogb/tree/master/examples).
 
 #### Pip install
 The recommended way to install OGB is using Python's package manager pip:
