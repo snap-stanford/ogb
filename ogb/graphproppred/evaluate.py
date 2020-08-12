@@ -1,4 +1,4 @@
-from sklearn.metrics import auc, roc_auc_score, average_precision_score
+from sklearn.metrics import roc_auc_score, average_precision_score
 import pandas as pd
 import os
 import numpy as np
