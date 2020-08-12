@@ -9,8 +9,8 @@ dataset_dict = {}
 dataset_dict["ogbg-molbace"] = {"num tasks": 1, "eval metric": "rocauc", "download_name": "bace"}
 dataset_dict["ogbg-molbbbp"] = {"num tasks": 1, "eval metric": "rocauc", "download_name": "bbbp"}
 dataset_dict["ogbg-molclintox"] = {"num tasks": 2, "eval metric": "rocauc", "download_name": "clintox"}
-dataset_dict["ogbg-molmuv"] = {"num tasks": 17, "eval metric": "prcauc", "download_name": "muv"}
-dataset_dict["ogbg-molpcba"] = {"num tasks": 128, "eval metric": "prcauc", "download_name": "pcba"}
+dataset_dict["ogbg-molmuv"] = {"num tasks": 17, "eval metric": "ap", "download_name": "muv"}
+dataset_dict["ogbg-molpcba"] = {"num tasks": 128, "eval metric": "ap", "download_name": "pcba"}
 dataset_dict["ogbg-molsider"] = {"num tasks": 27, "eval metric": "rocauc", "download_name": "sider"}
 dataset_dict["ogbg-moltox21"] = {"num tasks": 12, "eval metric": "rocauc", "download_name": "tox21"}
 dataset_dict["ogbg-moltoxcast"] = {"num tasks": 617, "eval metric": "rocauc", "download_name": "toxcast"}
@@ -19,9 +19,6 @@ dataset_dict["ogbg-molesol"] = {"num tasks": 1, "eval metric": "rmse", "download
 dataset_dict["ogbg-molfreesolv"] = {"num tasks": 1, "eval metric": "rmse", "download_name": "freesolv"}
 dataset_dict["ogbg-mollipo"] = {"num tasks": 1, "eval metric": "rmse", "download_name": "lipophilicity"}
 dataset_dict["ogbg-molchembl"] = {"num tasks": 1310, "eval metric": "rocauc", "download_name": "chembl"}
-# dataset_dict["ogbg-molsars"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "sars"}
-# dataset_dict["ogbg-molecoli"] = {"num tasks": 1, "eval metric": "rocauc", "download_name": "ecoli"}
-# dataset_dict["ogbg-molsars2"] = {"num tasks": 1, "eval metric": "prcauc", "download_name": "pseudomonas"}
 
 mol_dataset_list = list(dataset_dict.keys())
 

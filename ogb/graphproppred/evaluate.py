@@ -1,4 +1,4 @@
-from sklearn.metrics import auc, precision_recall_curve, roc_auc_score
+from sklearn.metrics import auc, roc_auc_score, average_precision_score
 import pandas as pd
 import os
 import numpy as np
@@ -26,7 +26,7 @@ class Evaluator:
 
 
     def _parse_and_check_input(self, input_dict):
-        if self.eval_metric == "rocauc" or self.eval_metric == 'prcauc' or self.eval_metric == "rmse" or self.eval_metric == "acc":
+        if self.eval_metric == "rocauc" or self.eval_metric == 'ap' or self.eval_metric == "rmse" or self.eval_metric == "acc":
             if not "y_true" in input_dict:
                 RuntimeError("Missing key of y_true")
             if not "y_pred" in input_dict:
@@ -90,9 +90,9 @@ class Evaluator:
         if self.eval_metric == "rocauc":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_rocauc(y_true, y_pred)
-        if self.eval_metric == 'prcauc':
+        if self.eval_metric == 'ap':
             y_true, y_pred = self._parse_and_check_input(input_dict)
-            return self._eval_prcauc(y_true, y_pred)
+            return self._eval_ap(y_true, y_pred)
         elif self.eval_metric == "rmse":
             y_true, y_pred = self._parse_and_check_input(input_dict)
             return self._eval_rmse(y_true, y_pred)
@@ -108,7 +108,7 @@ class Evaluator:
     @property
     def expected_input_format(self):
         desc = "==== Expected input format of Evaluator for {}\n".format(self.name)
-        if self.eval_metric == "rocauc" or self.eval_metric == "prcauc":
+        if self.eval_metric == "rocauc" or self.eval_metric == "ap":
             desc += "{\"y_true\": y_true, \"y_pred\": y_pred}\n"
             desc += "- y_true: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
             desc += "- y_pred: numpy ndarray or torch tensor of shape (num_graph, num_task)\n"
@@ -147,9 +147,9 @@ class Evaluator:
         if self.eval_metric == "rocauc":
             desc += "{\"rocauc\": rocauc}\n"
             desc += "- rocauc (float): ROC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
-        elif self.eval_metric == "prcauc":
-            desc += "{\"prcauc\": prcauc}\n"
-            desc += "- prcauc (float): PRC-AUC score averaged across {} task(s)\n".format(self.num_tasks)
+        elif self.eval_metric == "ap":
+            desc += "{\"ap\": ap}\n"
+            desc += "- ap (float): Average Precision (AP) score averaged across {} task(s)\n".format(self.num_tasks)
         elif self.eval_metric == "rmse":
             desc += "{\"rmse\": rmse}\n"
             desc += "- rmse (float): root mean squared error averaged across {} task(s)\n".format(self.num_tasks)
@@ -184,26 +184,26 @@ class Evaluator:
         return {"rocauc": sum(rocauc_list)/len(rocauc_list)}
 
 
-    def _eval_prcauc(self, y_true, y_pred):
+    def _eval_ap(self, y_true, y_pred):
         """
-            compute ROC-AUC averaged across tasks
+            compute Average Precision (AP) averaged across tasks
         """
 
-        prcauc_list = []
+        ap_list = []
 
         for i in range(y_true.shape[1]):
             #AUC is only defined when there is at least one positive data.
             if np.sum(y_true[:,i] == 1) > 0 and np.sum(y_true[:,i] == 0) > 0:
                 # ignore nan values
                 is_labeled = y_true[:,i] == y_true[:,i]
-                precision, recall, _ = precision_recall_curve(y_true[is_labeled,i], y_pred[is_labeled,i])
-                prc_auc = auc(recall, precision)
-                prcauc_list.append(prc_auc)
+                ap = average_precision_score(y_true[is_labeled,i], y_pred[is_labeled,i])
 
-        if len(prcauc_list) == 0:
-            raise RuntimeError("No positively labeled data available. Cannot compute PRC-AUC.")
+                ap_list.append(ap)
 
-        return {"prcauc": sum(prcauc_list)/len(prcauc_list)}
+        if len(ap_list) == 0:
+            raise RuntimeError("No positively labeled data available. Cannot compute Average Precision.")
+
+        return {"ap": sum(ap_list)/len(ap_list)}
 
     def _eval_rmse(self, y_true, y_pred):
         """
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     result = evaluator.eval(input_dict)
     print(result)
 
-    exit(-1)
+    # exit(-1)
 
     evaluator = Evaluator("ogbg-molpcba")
     print(evaluator.expected_input_format)
