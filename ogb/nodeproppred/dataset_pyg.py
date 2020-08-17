@@ -52,6 +52,10 @@ class PygNodePropPredDataset(InMemoryDataset):
 
         path = osp.join(self.root, "split", split_type)
 
+        # short-cut if split_dict.pt exists
+        if os.path.isfile(os.path.join(path, 'split_dict.pt')):
+            return torch.load(os.path.join(path, 'split_dict.pt'))
+
         if self.is_hetero:
             train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
             for nodetype in train_idx_dict.keys():

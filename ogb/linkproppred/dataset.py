@@ -101,6 +101,10 @@ class LinkPropPredDataset(object):
             
         path = osp.join(self.root, "split", split_type)
 
+        # short-cut if split_dict.pt exists
+        if os.path.isfile(os.path.join(path, 'split_dict.pt')):
+            return torch.load(os.path.join(path, 'split_dict.pt'))
+
         train = torch.load(osp.join(path, "train.pt"))
         valid = torch.load(osp.join(path, "valid.pt"))
         test = torch.load(osp.join(path, "test.pt"))
