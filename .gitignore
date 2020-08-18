@@ -13,3 +13,6 @@ dataset/
 *.sh
 *analyze*
 *random.py
+*RELEASE_*
+*.csv.gz
+*.zip
