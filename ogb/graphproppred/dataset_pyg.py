@@ -10,9 +10,9 @@ from ogb.io.read_graph_pyg import read_csv_graph_pyg
 
 class PygGraphPropPredDataset(InMemoryDataset):
     def __init__(self, name, root = "dataset", transform=None, pre_transform = None):
-        self.name = name ## original name, e.g., ogbg-mol-tox21
-        self.dir_name = "_".join(name.split("-")) + "_pyg" ## replace hyphen with underline, e.g., ogbg_mol_tox21_pyg
-
+        self.name = name ## original name, e.g., ogbg-molhiv
+        
+        self.dir_name = "_".join(name.split("-")) + "_pyg" ## replace hyphen with underline, e.g., ogbg_molhiv_pyg
         self.original_root = root
         self.root = osp.join(root, self.dir_name)
 

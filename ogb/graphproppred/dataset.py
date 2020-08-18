@@ -7,12 +7,17 @@ from ogb.io.read_graph_raw import read_csv_graph_raw
 import torch
 
 class GraphPropPredDataset(object):
-    def __init__(self, name, root = "dataset"):
-        self.name = name ## original name, e.g., ogbg-mol-tox21
-        self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbg_mol_tox21
+    def __init__(self, name, root = "dataset", dir_path = None):
+        self.name = name ## original name, e.g., ogbg-molhiv
 
-        self.original_root = root
-        self.root = osp.join(root, self.dir_name)
+        if dir_path is None:
+            self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbg_molhiv
+            self.original_root = root
+            self.root = osp.join(root, self.dir_name)
+        else:
+            self.dir_name = dir_path
+            self.original_root = ''
+            self.root = dir_path
 
         self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
         if not self.name in self.meta_info:

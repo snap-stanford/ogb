@@ -6,12 +6,17 @@ from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw, 
 import torch
 
 class NodePropPredDataset(object):
-    def __init__(self, name, root = "dataset"):
+    def __init__(self, name, root = "dataset", dir_path = None):
         self.name = name ## original name, e.g., ogbn-proteins
-        self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbn_proteins
-
-        self.original_root = root
-        self.root = osp.join(root, self.dir_name)
+        
+        if dir_path is None:
+            self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbn_proteins
+            self.original_root = root
+            self.root = osp.join(root, self.dir_name)
+        else:
+            self.dir_name = dir_path
+            self.original_root = ''
+            self.root = dir_path
 
         self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
         if not self.name in self.meta_info:

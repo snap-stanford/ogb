@@ -7,12 +7,17 @@ import torch
 import numpy as np
 
 class LinkPropPredDataset(object):
-    def __init__(self, name, root = "dataset"):
+    def __init__(self, name, root = "dataset", dir_path = None):
         self.name = name ## original name, e.g., ogbl-ppa
-        self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbl_ppa
-
-        self.original_root = root
-        self.root = osp.join(root, self.dir_name)
+        
+        if dir_path is None:
+            self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbl_ppa
+            self.original_root = root
+            self.root = osp.join(root, self.dir_name)
+        else:
+            self.dir_name = dir_path
+            self.original_root = ''
+            self.root = dir_path
 
         self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
         if not self.name in self.meta_info:

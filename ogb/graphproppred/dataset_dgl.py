@@ -11,9 +11,9 @@ from ogb.io.read_graph_dgl import read_csv_graph_dgl
 class DglGraphPropPredDataset(object):
     """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
     def __init__(self, name, root = "dataset"):
-        self.name = name ## original name, e.g., ogbg-mol-tox21
-        self.dir_name = "_".join(name.split("-")) + "_dgl" ## replace hyphen with underline, e.g., ogbg_mol_tox21_dgl
-
+        self.name = name ## original name, e.g., ogbg-molhiv
+        
+        self.dir_name = "_".join(name.split("-")) + "_dgl" ## replace hyphen with underline, e.g., ogbg_molhiv_dgl
         self.original_root = root
         self.root = osp.join(root, self.dir_name)
 
