@@ -103,19 +103,21 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
 def read_bin_graph_pyg(raw_dir, add_inverse_edge = False):
     graph, labels = read_bin_graph_raw(raw_dir, add_inverse_edge)
 
+    print('Converting graphs into PyG objects...')
+
     g = Data()
     g.num_nodes = graph["num_nodes"]
     g.edge_index = torch.from_numpy(graph["edge_index"])
     del graph["num_nodes"]
     del graph["edge_index"]
 
-    if graph["edge_feat"] is not None:
-        del graph["edge_feat"]
-        g.edge_attr = torch.from_numpy(graph["edge_feat"])
-
-    if graph["node_feat"] is not None:
+    if "node_feat" in graph:
         g.x = torch.from_numpy(graph["node_feat"])
         del graph["node_feat"]
+
+    if "edge_feat" in graph:
+        g.edge_attr = torch.from_numpy(graph["edge_feat"])
+        del graph["edge_feat"]
 
     for key, item in graph.items():
         g[key] = torch.from_numpy(item)

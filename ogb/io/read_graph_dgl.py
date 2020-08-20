@@ -95,9 +95,12 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
 def read_bin_graph_dgl(raw_dir, add_inverse_edge = False):
     graph, labels = read_bin_graph_raw(raw_dir, add_inverse_edge)
 
+    print('Converting graphs into DGL objects...')
+
     g = dgl.DGLGraph()
     g.add_nodes(graph["num_nodes"])
     g.add_edges(graph["edge_index"][0], graph["edge_index"][1])
+    del graph["num_nodes"]
     del graph["edge_index"]
 
     for key, item in graph.items():

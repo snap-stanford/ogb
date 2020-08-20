@@ -93,7 +93,7 @@ class NodePropPredDataset(object):
             if self.meta_info[self.name]["binary"] == "True":
                 self.graph, self.labels = read_bin_graph_raw(raw_dir, add_inverse_edge)
 
-            if self.is_hetero:
+            elif self.is_hetero:
                 self.graph = read_csv_heterograph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
                 self.labels = read_node_label_hetero(raw_dir)
 
