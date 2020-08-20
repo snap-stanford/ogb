@@ -8,6 +8,7 @@ import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_dgl import read_csv_graph_dgl, read_csv_heterograph_dgl
 from ogb.io.read_graph_raw import read_node_label_hetero, read_nodesplitidx_split_hetero
+from ogb.io.read_graph_dgl import read_bin_graph_dgl
 import pickle
 
 class DglNodePropPredDataset(object):
@@ -64,8 +65,9 @@ class DglNodePropPredDataset(object):
             ### check if the downloaded file exists
             has_necessary_file_simple = osp.exists(osp.join(self.root, "raw", "edge.csv.gz")) and (not self.is_hetero)
             has_necessary_file_hetero = osp.exists(osp.join(self.root, "raw", "triplet-type-list.csv.gz")) and self.is_hetero
+            has_binary_file = osp.exists(osp.join(self.root, "raw", "data.npz")) and self.meta_info[self.name]["binary"] == "True"
 
-            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero
+            has_necessary_file = has_necessary_file_simple or has_necessary_file_hetero or has_binary_file
             if not has_necessary_file:
                 url = self.meta_info[self.name]["url"]
                 if decide_download(url):
@@ -97,8 +99,17 @@ class DglNodePropPredDataset(object):
             else:
                 additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
 
+            if self.meta_info[self.name]["binary"] == "True":
+                graph, node_label = read_bin_graph_dgl(self.raw_dir, add_inverse_edge)
 
-            if self.is_hetero:
+                label_dict = {"labels": node_label}
+
+                save_graphs(pre_processed_file_path, graph, label_dict)
+
+                self.graph, label_dict = load_graphs(pre_processed_file_path)
+                self.labels = label_dict['labels']
+
+            elif self.is_hetero:
                 graph = read_csv_heterograph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
                 
                 label_dict = read_node_label_hetero(raw_dir)

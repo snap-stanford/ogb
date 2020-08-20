@@ -4,6 +4,7 @@ from torch_geometric.data import Data
 import os.path as osp
 import numpy as np
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw
+from ogb.io.read_graph_raw import read_bin_graph_raw
 from tqdm import tqdm
 
 def read_csv_graph_pyg(raw_dir, add_inverse_edge = True, additional_node_files = [], additional_edge_files = []):
@@ -97,6 +98,31 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
 
 
     return pyg_graph_list
+
+
+def read_bin_graph_pyg(raw_dir, add_inverse_edge = False):
+    graph, labels = read_bin_graph_raw(raw_dir, add_inverse_edge)
+
+    g = Data()
+    g.num_nodes = graph["num_nodes"]
+    g.edge_index = torch.from_numpy(graph["edge_index"])
+    del graph["num_nodes"]
+    del graph["edge_index"]
+
+    if graph["edge_feat"] is not None:
+        del graph["edge_feat"]
+        g.edge_attr = torch.from_numpy(graph["edge_feat"])
+
+    if graph["node_feat"] is not None:
+        g.x = torch.from_numpy(graph["node_feat"])
+        del graph["node_feat"]
+
+    for key, item in graph.items():
+        g[key] = torch.from_numpy(item)
+
+    g.y = torch.from_numpy(labels)
+
+    return g
 
 if __name__ == "__main__":
     pass

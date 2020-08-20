@@ -1,13 +1,14 @@
 ,ogbl-ppa,ogbl-collab,ogbl-citation,ogbl-wikikg,ogbl-ddi,ogbl-biokg
-add_inverse_edge,True,True,False,False,True,False
-additional edge files,None,"edge_weight,edge_year",None,edge_reltype,None,edge_reltype
-additional node files,None,None,node_year,None,None,None
-download_name,ppassoc,collab,citation,wikikg,ddi,biokg
 eval metric,hits@100,hits@50,mrr,mrr,hits@20,mrr
-has_edge_attr,False,False,False,False,False,False
-has_node_attr,True,True,True,False,False,False
-is hetero,False,False,False,False,False,True
-split,throughput,time,time,time,target,random
 task type,link prediction,link prediction,link prediction,KG completion,link prediction,KG completion
-url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip,https://snap.stanford.edu/ogb/data/linkproppred/citation.zip,https://snap.stanford.edu/ogb/data/linkproppred/wikikg.zip,https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip,https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip
+download_name,ppassoc,collab,citation,wikikg,ddi,biokg
 version,1,1,1,1,1,1
+url,https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip,https://snap.stanford.edu/ogb/data/linkproppred/collab.zip,https://snap.stanford.edu/ogb/data/linkproppred/citation.zip,https://snap.stanford.edu/ogb/data/linkproppred/wikikg.zip,https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip,https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip
+add_inverse_edge,True,True,False,False,True,False
+has_node_attr,True,True,True,False,False,False
+has_edge_attr,False,False,False,False,False,False
+split,throughput,time,time,time,target,random
+additional node files,None,None,node_year,None,None,None
+additional edge files,None,"edge_weight,edge_year",None,edge_reltype,None,edge_reltype
+is hetero,False,False,False,False,False,True
+binary,False,False,False,False,False,False

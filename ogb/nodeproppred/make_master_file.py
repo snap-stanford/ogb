@@ -19,6 +19,7 @@ dataset_dict[name]["split"] = "species"
 dataset_dict[name]["additional node files"] = 'species'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about product category prediction task
 name = "ogbn-products"
@@ -34,6 +35,7 @@ dataset_dict[name]["split"] = "sales_ranking"
 dataset_dict[name]["additional node files"] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about arxiv category prediction task
 name = "ogbn-arxiv"
@@ -48,6 +50,7 @@ dataset_dict[name]["split"] = "time"
 dataset_dict[name]["additional node files"] = 'node_year'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about paper venue prediction task
 name = "ogbn-mag"
@@ -62,11 +65,12 @@ dataset_dict[name]["split"] = "time"
 dataset_dict[name]["additional node files"] = 'node_year'
 dataset_dict[name]['additional edge files'] = 'edge_reltype'
 dataset_dict[name]['is hetero'] = True
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about paper category prediction in huge paper citation network
 name = "ogbn-papers100M"
 dataset_dict[name] = {"num tasks": 1, "num classes": 172, "eval metric": "acc", "task type": "multiclass classification"}
-dataset_dict[name]["download_name"] = "papers100M"
+dataset_dict[name]["download_name"] = "papers100M-bin"
 dataset_dict[name]["version"] = 1
 dataset_dict[name]["url"] = "https://snap.stanford.edu/ogb/data/nodeproppred/"+dataset_dict[name]["download_name"]+".zip"
 dataset_dict[name]["add_inverse_edge"] = False 
@@ -76,6 +80,7 @@ dataset_dict[name]["split"] = "time"
 dataset_dict[name]["additional node files"] = 'node_year'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = True
 
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 

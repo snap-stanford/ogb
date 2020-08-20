@@ -42,6 +42,7 @@ for nme in mol_dataset_list:
 
     dataset_dict[nme]["additional node files"] = 'None'
     dataset_dict[nme]['additional edge files'] = 'None'
+    dataset_dict[nme]['binary'] = False
 
     # if not nme == 'ogbg-molsars2':
     #     dataset_dict[nme]["split"] = "scaffold"
@@ -68,9 +69,10 @@ dataset_dict[name]["task type"] = "multiclass classification"
 dataset_dict[name]["num classes"] = 37
 dataset_dict[name]["additional node files"] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['binary'] = False
 
 
-### add ppi dataset (medium)
+### add code dataset (medium)
 name = "ogbg-code"
 dataset_dict[name] = {"eval metric": "F1"}
 dataset_dict[name]["download_name"] = "code"
@@ -85,6 +87,7 @@ dataset_dict[name]["task type"] = "subtoken prediction"
 dataset_dict[name]["num classes"] = -1
 dataset_dict[name]["additional node files"] = 'node_is_attributed,node_dfs_order,node_depth'
 dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['binary'] = False
 
 
 df = pd.DataFrame(dataset_dict)

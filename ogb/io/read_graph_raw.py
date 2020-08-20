@@ -427,6 +427,28 @@ def read_nodesplitidx_split_hetero(split_dir):
 
     return train_dict, valid_dict, test_dict
 
+
+def read_bin_graph_raw(raw_dir, add_inverse_edge = False):
+    print('Loading necessary files...')
+    print('This might take a while.')
+
+    data = np.load(osp.join(raw_dir, 'data.npz'))
+    graph = dict()
+    for key in list(data.keys()):
+        graph[key] = data[key]
+
+    label = np.load(osp.join(raw_dir, 'node-label.npz'))["node_label"]
+
+    print('Processing graphs...')
+
+    if add_inverse_edge:
+        duplicated_edge = np.repeat(graph["edge_index"], 2, axis = 1)
+        duplicated_edge[0, 1::2] = duplicated_edge[1,0::2]
+        duplicated_edge[1, 1::2] = duplicated_edge[0,0::2]
+        graph["edge_index"] = duplicated_edge
+
+    return graph, label
+
 if __name__ == "__main__":
     pass
 

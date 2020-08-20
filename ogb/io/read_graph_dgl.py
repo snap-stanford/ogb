@@ -4,6 +4,7 @@ import os.path as osp
 import numpy as np
 import dgl
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw
+from ogb.io.read_graph_raw import read_bin_graph_raw
 from tqdm import tqdm
 
 def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files = [], additional_edge_files = []):
@@ -90,6 +91,22 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
 
 
     return dgl_graph_list
+
+def read_bin_graph_dgl(raw_dir, add_inverse_edge = False):
+    graph, labels = read_bin_graph_raw(raw_dir, add_inverse_edge)
+
+    g = dgl.DGLGraph()
+    g.add_nodes(graph["num_nodes"])
+    g.add_edges(graph["edge_index"][0], graph["edge_index"][1])
+    del graph["edge_index"]
+
+    for key, item in graph.items():
+        if "node_" == key[:5]:
+            g.ndata[key[5:]] = torch.from_numpy(item)
+        if "edge_" == key[:5]:
+            g.edata[key[5:]] = torch.from_numpy(item)
+
+    return g, labels
 
 
 if __name__ == "__main__":
