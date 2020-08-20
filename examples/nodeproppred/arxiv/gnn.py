@@ -63,6 +63,8 @@ class SAGE(torch.nn.Module):
     def reset_parameters(self):
         for conv in self.convs:
             conv.reset_parameters()
+        for bn in self.bns:
+            bn.reset_parameters()
 
     def forward(self, x, adj_t):
         for i, conv in enumerate(self.convs[:-1]):
