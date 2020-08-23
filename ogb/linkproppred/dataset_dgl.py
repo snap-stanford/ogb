@@ -8,7 +8,6 @@ import dgl
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_dgl import read_csv_graph_dgl, read_csv_heterograph_dgl
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
-import pickle
 
 class DglLinkPropPredDataset(object):
     """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
@@ -51,12 +50,7 @@ class DglLinkPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'dgl_data_processed')
 
         if osp.exists(pre_processed_file_path):
-
-            if not self.is_hetero:
-                self.graph, _ = load_graphs(pre_processed_file_path)
-            else:
-                with open(pre_processed_file_path, 'rb') as f:
-                    self.graph = pickle.load(f)
+            self.graph, _ = load_graphs(pre_processed_file_path)
 
         else:
             ### check if the downloaded file exists
@@ -99,19 +93,13 @@ class DglLinkPropPredDataset(object):
             if self.is_hetero:
                 graph = read_csv_heterograph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-                with open(pre_processed_file_path, 'wb') as f:
-                    pickle.dump([graph], f)
-
-                with open(pre_processed_file_path, 'rb') as f:
-                    self.graph = pickle.load(f)
-
             else:
                 graph = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0]
 
-                print('Saving...')
-                save_graphs(pre_processed_file_path, graph, {})
+            print('Saving...')
+            save_graphs(pre_processed_file_path, graph, {})
 
-                self.graph, _ = load_graphs(pre_processed_file_path)
+            self.graph, _ = load_graphs(pre_processed_file_path)
 
     def get_edge_split(self, split_type = None):
         if split_type is None:
@@ -140,7 +128,7 @@ class DglLinkPropPredDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 if __name__ == "__main__":
-    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-biokg")
+    dgl_dataset = DglLinkPropPredDataset(name = "ogbl-collab")
     split_edge = dgl_dataset.get_edge_split()
     print(dgl_dataset[0])
     print(split_edge['train'].keys())

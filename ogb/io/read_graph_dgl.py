@@ -14,9 +14,7 @@ def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files =
     print('Converting graphs into DGL objects...')
     
     for graph in tqdm(graph_list):
-        g = dgl.DGLGraph()
-        g.add_nodes(graph['num_nodes'])
-        g.add_edges(graph['edge_index'][0], graph['edge_index'][1])
+        g = dgl.graph((graph['edge_index'][0], graph['edge_index'][1]), num_nodes = graph['num_nodes'])
 
         if graph['edge_feat'] is not None:
             g.edata['feat'] = torch.from_numpy(graph['edge_feat'])
@@ -50,7 +48,7 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
             edge_tuple = [(i, j) for i, j in zip(graph['edge_index_dict'][triplet][0], graph['edge_index_dict'][triplet][1])]
             g_dict[triplet] = edge_tuple
 
-        dgl_hetero_graph = dgl.heterograph(g_dict)
+        dgl_hetero_graph = dgl.heterograph(g_dict, num_nodes_dict = graph['num_nodes_dict'])
 
         if graph['edge_feat_dict'] is not None:
             for triplet in graph['edge_feat_dict'].keys():
