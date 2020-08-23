@@ -1,8 +1,8 @@
 ,ogbn-proteins,ogbn-products,ogbn-arxiv,ogbn-mag,ogbn-papers100M
 add_inverse_edge,True,True,False,False,False
 additional edge files,None,None,None,edge_reltype,None
-additional node files,species,None,node_year,node_year,node_year
-download_name,proteinfunc,products,arxiv,mag,papers100M
+additional node files,node_species,None,node_year,node_year,node_year
+download_name,proteins,products,arxiv,mag,papers100M
 eval metric,rocauc,acc,acc,acc,acc
 has_edge_attr,True,False,False,False,False
 has_node_attr,False,True,True,True,True
@@ -11,5 +11,5 @@ num classes,2,47,40,349,172
 num tasks,112,1,1,1,1
 split,species,sales_ranking,time,time,time
 task type,binary classification,multiclass classification,multiclass classification,multiclass classification,multiclass classification
-url,https://snap.stanford.edu/ogb/data/nodeproppred/proteinfunc.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip,https://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip,https://snap.stanford.edu/ogb/data/nodeproppred/mag.zip,https://snap.stanford.edu/ogb/data/nodeproppred/papers100M.zip
+url,https://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip,https://snap.stanford.edu/ogb/data/nodeproppred/products.zip,https://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip,https://snap.stanford.edu/ogb/data/nodeproppred/mag.zip,https://snap.stanford.edu/ogb/data/nodeproppred/papers100M.zip
 version,1,1,1,2,1

@@ -15,28 +15,20 @@ def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files =
     
     for graph in tqdm(graph_list):
         g = dgl.DGLGraph()
-        g.add_nodes(graph["num_nodes"])
-        g.add_edges(graph["edge_index"][0], graph["edge_index"][1])
+        g.add_nodes(graph['num_nodes'])
+        g.add_edges(graph['edge_index'][0], graph['edge_index'][1])
 
-        if graph["edge_feat"] is not None:
-            g.edata["feat"] = torch.from_numpy(graph["edge_feat"])
+        if graph['edge_feat'] is not None:
+            g.edata['feat'] = torch.from_numpy(graph['edge_feat'])
 
-        if graph["node_feat"] is not None:
-            g.ndata["feat"] = torch.from_numpy(graph["node_feat"])
+        if graph['node_feat'] is not None:
+            g.ndata['feat'] = torch.from_numpy(graph['node_feat'])
 
         for key in additional_node_files:
-            if 'node_' not in key:
-                feat_name = 'node_' + key
-            else:
-                feat_name = key
-            g.ndata[feat_name] = torch.from_numpy(graph[feat_name])
+            g.ndata[key[5:]] = torch.from_numpy(graph[key])
 
         for key in additional_edge_files:
-            if 'edge_' not in key:
-                feat_name = 'edge_' + key
-            else:
-                feat_name = key
-            g.edata[feat_name] = torch.from_numpy(graph[feat_name])
+            g.edata[key[5:]] = torch.from_numpy(graph[key])
 
         dgl_graph_list.append(g)
 
@@ -54,37 +46,27 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
         g_dict = {}
 
         # add edge connectivity
-        for triplet, edge_index in graph["edge_index_dict"].items():
-            edge_tuple = [(i, j) for i, j in zip(graph["edge_index_dict"][triplet][0], graph["edge_index_dict"][triplet][1])]
+        for triplet, edge_index in graph['edge_index_dict'].items():
+            edge_tuple = [(i, j) for i, j in zip(graph['edge_index_dict'][triplet][0], graph['edge_index_dict'][triplet][1])]
             g_dict[triplet] = edge_tuple
 
         dgl_hetero_graph = dgl.heterograph(g_dict)
 
-        if graph["edge_feat_dict"] is not None:
-            for triplet in graph["edge_feat_dict"].keys():
-                dgl_hetero_graph.edges[triplet].data["feat"] = torch.from_numpy(graph["edge_feat_dict"][triplet])
+        if graph['edge_feat_dict'] is not None:
+            for triplet in graph['edge_feat_dict'].keys():
+                dgl_hetero_graph.edges[triplet].data['feat'] = torch.from_numpy(graph['edge_feat_dict'][triplet])
 
-        if graph["node_feat_dict"] is not None:
-            for nodetype in graph["node_feat_dict"].keys():
-                dgl_hetero_graph.nodes[nodetype].data["feat"] = torch.from_numpy(graph["node_feat_dict"][nodetype])
+        if graph['node_feat_dict'] is not None:
+            for nodetype in graph['node_feat_dict'].keys():
+                dgl_hetero_graph.nodes[nodetype].data['feat'] = torch.from_numpy(graph['node_feat_dict'][nodetype])
 
         for key in additional_node_files:
-            if 'node_' not in key:
-                feat_name = 'node_' + key
-            else:
-                feat_name = key
-
-            for nodetype in graph[feat_name].keys():
-                dgl_hetero_graph.nodes[nodetype].data[feat_name] = torch.from_numpy(graph[feat_name][nodetype])
+            for nodetype in graph[key].keys():
+                dgl_hetero_graph.nodes[nodetype].data[key[5:]] = torch.from_numpy(graph[key][nodetype])
 
         for key in additional_edge_files:
-            if 'edge_' not in key:
-                feat_name = 'edge_' + key
-            else:
-                feat_name = key
-
-            for triplet in graph[feat_name].keys():
-                dgl_hetero_graph.edges[triplet].data[feat_name] = torch.from_numpy(graph[feat_name][triplet])
+            for triplet in graph[key].keys():
+                dgl_hetero_graph.edges[triplet].data[key[5:]] = torch.from_numpy(graph[key][triplet])
 
         dgl_graph_list.append(dgl_hetero_graph)
 
@@ -92,5 +74,5 @@ def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_
     return dgl_graph_list
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
