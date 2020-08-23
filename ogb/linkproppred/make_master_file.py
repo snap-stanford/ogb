@@ -19,6 +19,7 @@ dataset_dict[name]['split'] = 'throughput'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about author collaboration prediction task
 name = 'ogbl-collab'
@@ -34,6 +35,7 @@ dataset_dict[name]['split'] = 'time'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'edge_weight,edge_year'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about paper citation recommendation task
 name = 'ogbl-citation'
@@ -49,6 +51,7 @@ dataset_dict[name]['split'] = 'time'
 dataset_dict[name]['additional node files'] = 'node_year'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about wikidata knowledge graph completion task
 name = 'ogbl-wikikg'
@@ -64,6 +67,7 @@ dataset_dict[name]['split'] = 'time'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'edge_reltype'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about drug drug interaction prediction task
 name = 'ogbl-ddi'
@@ -79,6 +83,7 @@ dataset_dict[name]['split'] = 'target'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'
 dataset_dict[name]['is hetero'] = False
+dataset_dict[name]['binary'] = False
 
 ### add meta-information about biological knowledge graph completion task
 name = 'ogbl-biokg'
@@ -94,6 +99,7 @@ dataset_dict[name]['split'] = 'random'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'edge_reltype'
 dataset_dict[name]['is hetero'] = True
+dataset_dict[name]['binary'] = False
 
 df = pd.DataFrame(dataset_dict)
 # saving the dataframe 

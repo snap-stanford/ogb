@@ -2,6 +2,7 @@
 add_inverse_edge,True,True,False,False,False
 additional edge files,None,None,None,edge_reltype,None
 additional node files,node_species,None,node_year,node_year,node_year
+binary,False,False,False,False,True
 download_name,proteins,products,arxiv,mag,papers100M
 eval metric,rocauc,acc,acc,acc,acc
 has_edge_attr,True,False,False,False,False
