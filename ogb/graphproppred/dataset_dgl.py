@@ -9,20 +9,20 @@ from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_dgl import read_csv_graph_dgl
 
 class DglGraphPropPredDataset(object):
-    """Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset"""
-    def __init__(self, name, root = "dataset"):
+    '''Adapted from https://docs.dgl.ai/en/latest/_modules/dgl/data/chem/csv_dataset.html#CSVDataset'''
+    def __init__(self, name, root = 'dataset'):
         self.name = name ## original name, e.g., ogbg-molhiv
         
-        self.dir_name = "_".join(name.split("-")) + "_dgl" ## replace hyphen with underline, e.g., ogbg_molhiv_dgl
+        self.dir_name = '_'.join(name.split('-')) + '_dgl' ## replace hyphen with underline, e.g., ogbg_molhiv_dgl
         self.original_root = root
         self.root = osp.join(root, self.dir_name)
 
-        self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
+        self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col = 0)
         if not self.name in self.meta_info:
             print(self.name)
-            error_mssg = "Invalid dataset name {}.\n".format(self.name)
-            error_mssg += "Available datasets are as follows:\n"
-            error_mssg += "\n".join(self.meta_info.keys())
+            error_mssg = 'Invalid dataset name {}.\n'.format(self.name)
+            error_mssg += 'Available datasets are as follows:\n'
+            error_mssg += '\n'.join(self.meta_info.keys())
             raise ValueError(error_mssg)
 
         # check version
@@ -31,15 +31,15 @@ class DglGraphPropPredDataset(object):
         # If the dataset is not the newest version, notify this to the user. 
         if osp.isdir(self.root) and (not osp.exists(osp.join(self.root, 'RELEASE_v' + str(self.meta_info[self.name]['version']) + '.txt'))):
             print(self.name + ' has been updated.')
-            if input("Will you update the dataset now? (y/N)\n").lower() == "y":
+            if input('Will you update the dataset now? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.root)
 
-        self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
+        self.download_name = self.meta_info[self.name]['download_name'] ## name of downloaded file, e.g., tox21
 
-        self.num_tasks = int(self.meta_info[self.name]["num tasks"])
-        self.eval_metric = self.meta_info[self.name]["eval metric"]
-        self.task_type = self.meta_info[self.name]["task type"]
-        self.num_classes = self.meta_info[self.name]["num classes"]
+        self.num_tasks = int(self.meta_info[self.name]['num tasks'])
+        self.eval_metric = self.meta_info[self.name]['eval metric']
+        self.task_type = self.meta_info[self.name]['task type']
+        self.num_classes = self.meta_info[self.name]['num classes']
 
         super(DglGraphPropPredDataset, self).__init__()
 
@@ -55,7 +55,7 @@ class DglGraphPropPredDataset(object):
 
         if os.path.exists(pre_processed_file_path):
 
-            if self.task_type == "subtoken prediction":
+            if self.task_type == 'subtoken prediction':
                 self.graphs, _ = load_graphs(pre_processed_file_path)
                 self.labels = torch.load(target_sequence_file_path)
 
@@ -65,7 +65,7 @@ class DglGraphPropPredDataset(object):
 
         else:
             ### download
-            url = self.meta_info[self.name]["url"]
+            url = self.meta_info[self.name]['url']
             if decide_download(url):
                 path = download_url(url, self.original_root)
                 extract_zip(path, self.original_root)
@@ -77,28 +77,28 @@ class DglGraphPropPredDataset(object):
                     pass
                 shutil.move(osp.join(self.original_root, self.download_name), self.root)
             else:
-                print("Stop download.")
+                print('Stop download.')
                 exit(-1)
 
             ### preprocess
-            add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
+            add_inverse_edge = self.meta_info[self.name]['add_inverse_edge'] == 'True'
 
-            if self.meta_info[self.name]["additional node files"] == 'None':
+            if self.meta_info[self.name]['additional node files'] == 'None':
                 additional_node_files = []
             else:
-                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+                additional_node_files = self.meta_info[self.name]['additional node files'].split(',')
 
-            if self.meta_info[self.name]["additional edge files"] == 'None':
+            if self.meta_info[self.name]['additional edge files'] == 'None':
                 additional_edge_files = []
             else:
-                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+                additional_edge_files = self.meta_info[self.name]['additional edge files'].split(',')
 
             graphs = read_csv_graph_dgl(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
 
-            if self.task_type == "subtoken prediction":
+            if self.task_type == 'subtoken prediction':
                 # the downloaded labels are initially joined by ' '
-                labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                labels_joined = pd.read_csv(osp.join(raw_dir, 'graph-label.csv.gz'), compression='gzip', header = None).values
                 # need to split each element into subtokens
                 labels = [str(labels_joined[i][0]).split(' ') for i in range(len(labels_joined))]
 
@@ -111,11 +111,11 @@ class DglGraphPropPredDataset(object):
                 self.labels = torch.load(target_sequence_file_path)
 
             else:
-                labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                labels = pd.read_csv(osp.join(raw_dir, 'graph-label.csv.gz'), compression='gzip', header = None).values
 
                 has_nan = np.isnan(labels).any()
 
-                if "classification" in self.task_type:
+                if 'classification' in self.task_type:
                     if has_nan:
                         labels = torch.from_numpy(labels).to(torch.float32)
                     else:
@@ -134,22 +134,22 @@ class DglGraphPropPredDataset(object):
 
     def get_idx_split(self, split_type = None):
         if split_type is None:
-            split_type = self.meta_info[self.name]["split"]
+            split_type = self.meta_info[self.name]['split']
             
-        path = osp.join(self.root, "split", split_type)
+        path = osp.join(self.root, 'split', split_type)
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
             return torch.load(os.path.join(path, 'split_dict.pt'))
 
-        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
-        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
-        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+        train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
+        valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]
+        test_idx = pd.read_csv(osp.join(path, 'test.csv.gz'), compression='gzip', header = None).values.T[0]
 
-        return {"train": torch.tensor(train_idx, dtype = torch.long), "valid": torch.tensor(valid_idx, dtype = torch.long), "test": torch.tensor(test_idx, dtype = torch.long)}
+        return {'train': torch.tensor(train_idx, dtype = torch.long), 'valid': torch.tensor(valid_idx, dtype = torch.long), 'test': torch.tensor(test_idx, dtype = torch.long)}
 
     def __getitem__(self, idx):
-        """Get datapoint with index"""
+        '''Get datapoint with index'''
 
         if isinstance(idx, int):
             return self.graphs[idx], self.labels[idx]
@@ -164,12 +164,12 @@ class DglGraphPropPredDataset(object):
             'indices (got {}).'.format(type(idx).__name__))
 
     def __len__(self):
-        """Length of the dataset
+        '''Length of the dataset
         Returns
         -------
         int
             Length of Dataset
-        """
+        '''
         return len(self.graphs)
 
     def __repr__(self):  # pragma: no cover
@@ -186,16 +186,16 @@ def collate_dgl(samples):
     else:
         return batched_graph, labels
 
-if __name__ == "__main__":
-    dgl_dataset = DglGraphPropPredDataset(name = "ogbg-molhiv")
+if __name__ == '__main__':
+    dgl_dataset = DglGraphPropPredDataset(name = 'ogbg-molhiv')
     print(dgl_dataset.num_classes)
     split_index = dgl_dataset.get_idx_split()
     print(dgl_dataset)
     print(dgl_dataset[0])
     print(dgl_dataset[0][1].dtype)
-    print(dgl_dataset[split_index["train"]])
-    print(dgl_dataset[split_index["valid"]])
-    print(dgl_dataset[split_index["test"]])
+    print(dgl_dataset[split_index['train']])
+    print(dgl_dataset[split_index['valid']])
+    print(dgl_dataset[split_index['test']])
     # print(collate_dgl([dgl_dataset[0], dgl_dataset[1], dgl_dataset[2]]))
 
 

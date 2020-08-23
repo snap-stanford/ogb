@@ -15,14 +15,14 @@ def read_csv_graph_pyg(raw_dir, add_inverse_edge = True, additional_node_files =
 
     for graph in tqdm(graph_list):
         g = Data()
-        g.__num_nodes__ = graph["num_nodes"]
-        g.edge_index = torch.from_numpy(graph["edge_index"])
+        g.__num_nodes__ = graph['num_nodes']
+        g.edge_index = torch.from_numpy(graph['edge_index'])
 
-        if graph["edge_feat"] is not None:
-            g.edge_attr = torch.from_numpy(graph["edge_feat"])
+        if graph['edge_feat'] is not None:
+            g.edge_attr = torch.from_numpy(graph['edge_feat'])
 
-        if graph["node_feat"] is not None:
-            g.x = torch.from_numpy(graph["node_feat"])
+        if graph['node_feat'] is not None:
+            g.x = torch.from_numpy(graph['node_feat'])
 
         for key in additional_node_files:
             g[key] = torch.from_numpy(graph[key])
@@ -77,5 +77,5 @@ def read_csv_heterograph_pyg(raw_dir, add_inverse_edge = False, additional_node_
 
     return pyg_graph_list
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

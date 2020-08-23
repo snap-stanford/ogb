@@ -1,6 +1,7 @@
 import torch
 import pandas as pd
 import os
+import os.path as osp
 from datetime import date
 import shutil
 from tqdm import tqdm
@@ -28,8 +29,8 @@ class DatasetSaver(object):
         self.dataset_dir = '_'.join(dataset_name.split('-')[1:])
         self.dataset_prefix = dataset_name.split('-')[0] # specify the task category
 
-        if os.path.exists(self.dataset_dir):
-            if input(f"Found an existing directory at {self.dataset_dir}/. \nWill you remove it? (y/N)\n").lower() == "y":
+        if osp.exists(self.dataset_dir):
+            if input(f'Found an existing directory at {self.dataset_dir}/. \nWill you remove it? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.dataset_dir)
                 print('Removed existing directory')
             else:
@@ -38,12 +39,12 @@ class DatasetSaver(object):
 
 
         # make necessary dirs
-        self.raw_dir = os.path.join(self.dataset_dir, 'raw')
+        self.raw_dir = osp.join(self.dataset_dir, 'raw')
         os.makedirs(self.raw_dir, exist_ok=True)
-        os.makedirs(os.path.join(self.dataset_dir, 'processed'), exist_ok=True)
+        os.makedirs(osp.join(self.dataset_dir, 'processed'), exist_ok=True)
 
         # create release note
-        with open(os.path.join(self.dataset_dir, f'RELEASE_v{version}.txt'), 'w') as fw:
+        with open(osp.join(self.dataset_dir, f'RELEASE_v{version}.txt'), 'w') as fw:
             fw.write(f'# Release note for {self.dataset_name}\n\n### v{version}: {date.today()}')
 
         # check list
@@ -59,13 +60,91 @@ class DatasetSaver(object):
         self._zip_done = False
 
     def _save_graph_list_hetero(self, graph_list):
-        pass 
+        dict_keys = graph_list[0].keys()
+        # check necessary keys
+        if not 'edge_index_dict' in dict_keys:
+            raise RuntimeError('edge_index_dict needs to be provided in graph objects')
+        if not 'num_nodes_dict' in dict_keys:
+            raise RuntimeError('num_nodes_dict needs to be provided in graph objects')
 
-    def _save_graph_list_homo(self, graph_list):
-        if self.dataset_prefix == 'ogbn' or self.dataset_prefix == 'ogbl':
-            if len(graph_list) > 1:
-                raise RuntimeError('Multiple graphs not supported for node/link property prediction.')
+        print(dict_keys)
         
+        # extract entity types
+        ent_type_list = sorted([e for e in graph_list[0]['num_nodes_dict'].keys()])
+
+        # saving num_nodes_dict
+        print('Saving num_nodes_dict')
+        num_nodes_dict = {}
+        for ent_type in ent_type_list:
+            num_nodes_dict[ent_type] = np.array([graph['num_nodes_dict'][ent_type] for graph in graph_list]).astype(np.int64)
+        
+        print(num_nodes_dict)
+        # pd.DataFrame(num_nodes_dict).to_csv(osp.join(self.dataset_dir, 'raw', 'num-node-dict.csv.gz'), index = False, compression='gzip')
+        
+
+        # extract triplet types
+        triplet_type_list = sorted([(h, r, t) for (h, r, t) in graph_list[0]['edge_index_dict'].keys()])
+        print(triplet_type_list)
+
+        # saving edge_index_dict
+        print('Saving edge_index_dict')
+        num_edges_dict = {}
+        for head_type, rel_type, tail_type in triplet_type_list:
+            subdir = osp.join(self.dataset_dir, 'raw', 'relations', f'{head_type}___{rel_type}___{tail_type}')
+            os.makedirs(subdir, exist_ok = True)
+
+            edge = np.concatenate([graph['edge_index_dict'][(head_type, rel_type, tail_type)] for graph in graph_list], axis = 1).transpose().astype(np.int64)
+            num_edges_list = np.array([graph['edge_index_dict'][(head_type, rel_type, tail_type)].shape[1] for graph in graph_list]).astype(np.int64)
+            num_edges_dict[(head_type, rel_type, tail_type)] = num_edges_list
+
+            if edge.shape[1] != 2:
+                raise RuntimeError('edge_index must have shape (2, num_edges)')
+
+            # pd.DataFrame(edge).to_csv(osp.join(subdir, 'edge.csv.gz'), index=False, header = False, compression='gzip')
+            # pd.DataFrame(num_edges_list).to_csv(osp.join(subdir, 'num-edge-list.csv.gz'), index=False, header = False, compression='gzip')
+
+        additional_node_files = []
+        additional_edge_files = []
+
+        for key in dict_keys:
+            if key == 'edge_index_dict' or key == 'num_nodes_dict':
+                continue 
+            if graph_list[0][key] is None:
+                continue
+
+            print(f'Saving {key}')
+
+            if 'node_' in key:
+                subdir = osp.join(self.dataset_dir, 'raw', 'node-feat', ent_type)
+                os.makedirs(subdir, exist_ok = True)
+
+                if key == 'node_feat_dict':
+                    # iterate over entities with node_feat
+                    for ent_type, node_feat in graph_list[0][key].items():
+                        
+                        if ent_type not in num_nodes_dict:
+                            raise RuntimeError(f'node_feat_dict in heterogeneous graph object contains unknown entity type called {ent_type}.')
+                        
+                        # check num_nodes
+                        for i in range(len(graph_list)):
+                            if len(graph_list[i][key][ent_type]) != num_nodes_dict[ent_type][i]:
+                                raise RuntimeError(f'num_nodes mistmatches with {key}[{ent_type}]')
+                        
+                        # make sure saved in np.int64 or np.float32
+                        dtype = np.int64 if 'int' in str(graph_list[0][key][ent_type].dtype) else np.float32
+
+                        cat_feat = np.concatenate([graph[key][ent_type] for graph in graph_list], axis = 0).astype(dtype)
+                        pd.DataFrame(cat_feat).to_csv(osp.join(subdir, 'node-feat.csv.gz'), index=False, compression='gzip', header=False)
+
+                else:
+                    # (TODO) write this
+                    # additional_node_files.append(key)
+                    # pd.DataFrame(cat_feat).to_csv(osp.join(self.raw_dir, f'{key}.csv.gz'), index=False, compression='gzip', header=False)
+                    pass
+
+
+
+    def _save_graph_list_homo(self, graph_list):        
         dict_keys = graph_list[0].keys()
         # check necessary keys
         if not 'edge_index' in dict_keys:
@@ -75,6 +154,11 @@ class DatasetSaver(object):
 
         print(dict_keys)
 
+        # saving num_nodes
+        print('Saving num_nodes')
+        num_nodes_list = np.array([graph['num_nodes'] for graph in graph_list]).astype(np.int64)
+        pd.DataFrame(num_nodes_list).to_csv(osp.join(self.raw_dir, 'num-node-list.csv.gz'), index=False, compression='gzip', header=False)
+
         # saving edge_index
         print('Saving edge_index')
         edge = np.concatenate([graph['edge_index'] for graph in graph_list], axis = 1).transpose().astype(np.int64)
@@ -83,13 +167,8 @@ class DatasetSaver(object):
         if edge.shape[1] != 2:
             raise RuntimeError('edge_index must have shape (2, num_edges)')
 
-        pd.DataFrame(edge).to_csv(os.path.join(self.raw_dir, 'edge.csv.gz'), index=False, compression="gzip", header=False)
-        pd.DataFrame(num_edges_list).to_csv(os.path.join(self.raw_dir, 'num-edge-list.csv.gz'), index=False, compression="gzip", header=False)
-
-        # saving num_nodes
-        print('Saving num_nodes')
-        num_nodes_list = np.array([graph['num_nodes'] for graph in graph_list]).astype(np.int64)
-        pd.DataFrame(num_nodes_list).to_csv(os.path.join(self.raw_dir, 'num-node-list.csv.gz'), index=False, compression="gzip", header=False)
+        pd.DataFrame(edge).to_csv(osp.join(self.raw_dir, 'edge.csv.gz'), index=False, compression='gzip', header=False)
+        pd.DataFrame(num_edges_list).to_csv(osp.join(self.raw_dir, 'num-edge-list.csv.gz'), index=False, compression='gzip', header=False)
 
         additional_node_files = []
         additional_edge_files = []
@@ -112,10 +191,10 @@ class DatasetSaver(object):
 
                 cat_feat = np.concatenate([graph[key] for graph in graph_list], axis = 0).astype(dtype)
                 if key == 'node_feat':
-                    pd.DataFrame(cat_feat).to_csv(os.path.join(self.raw_dir, 'node-feat.csv.gz'), index=False, compression="gzip", header=False)
+                    pd.DataFrame(cat_feat).to_csv(osp.join(self.raw_dir, 'node-feat.csv.gz'), index=False, compression='gzip', header=False)
                 else:
                     additional_node_files.append(key)
-                    pd.DataFrame(cat_feat).to_csv(os.path.join(self.raw_dir, f'{key}.csv.gz'), index=False, compression="gzip", header=False)
+                    pd.DataFrame(cat_feat).to_csv(osp.join(self.raw_dir, f'{key}.csv.gz'), index=False, compression='gzip', header=False)
 
             elif 'edge_' in key:
                 # make sure saved in np.int64 or np.float32
@@ -127,10 +206,10 @@ class DatasetSaver(object):
 
                 cat_feat = np.concatenate([graph[key] for graph in graph_list], axis = 0).astype(dtype)
                 if key == 'edge_feat':
-                    pd.DataFrame(cat_feat).to_csv(os.path.join(self.raw_dir, 'edge-feat.csv.gz'), index=False, compression="gzip", header=False)
+                    pd.DataFrame(cat_feat).to_csv(osp.join(self.raw_dir, 'edge-feat.csv.gz'), index=False, compression='gzip', header=False)
                 else:
                     additional_edge_files.append(key)
-                    pd.DataFrame(cat_feat).to_csv(os.path.join(self.raw_dir, f'{key}.csv.gz'), index=False, compression="gzip", header=False)
+                    pd.DataFrame(cat_feat).to_csv(osp.join(self.raw_dir, f'{key}.csv.gz'), index=False, compression='gzip', header=False)
 
             else:
                 raise RuntimeError(f'Keys in graph object should start from either \'node_\' or \'edge_\', but \'{key}\' given.')
@@ -158,12 +237,12 @@ class DatasetSaver(object):
 
     def save_target_label(self, target_label):
         if not isinstance(target_label, np.ndarray):
-            raise ValueError(f"target label must be of type np.ndarray")
+            raise ValueError(f'target label must be of type np.ndarray')
             
         if self.dataset_prefix == 'ogbg':
-            pd.DataFrame(target_label).to_csv(os.path.join(self.raw_dir, 'graph-label.csv.gz'), index=False, compression="gzip", header=False)
+            pd.DataFrame(target_label).to_csv(osp.join(self.raw_dir, 'graph-label.csv.gz'), index=False, compression='gzip', header=False)
         elif self.dataset_prefix == 'ogbn':
-            pd.DataFrame(target_label).to_csv(os.path.join(self.raw_dir, 'node-label.csv.gz'), index=False, compression="gzip", header=False)
+            pd.DataFrame(target_label).to_csv(osp.join(self.raw_dir, 'node-label.csv.gz'), index=False, compression='gzip', header=False)
         elif self.dataset_prefix == 'ogbl':
             raise RuntimeError('Target labels do not need to be saved for link prediction dataset')
 
@@ -173,17 +252,20 @@ class DatasetSaver(object):
         if not all_numpy(graph_list):
             raise RuntimeError('graph_list must only contain list/dict of numpy arrays, int, or float')
 
+        if self.dataset_prefix == 'ogbn' or self.dataset_prefix == 'ogbl':
+            if len(graph_list) > 1:
+                raise RuntimeError('Multiple graphs not supported for node/link property prediction.')
+
         if self.is_hetero:
             self._save_graph_list_hetero(graph_list)
         else:
-            # (TODO) write this
             self._save_graph_list_homo(graph_list)
 
         self._save_graph_list_done = True
 
 
     def save_split(self, split_dict, split_name):
-        self.split_dir = os.path.join(self.dataset_dir, 'split', split_name)
+        self.split_dir = osp.join(self.dataset_dir, 'split', split_name)
         os.makedirs(self.split_dir, exist_ok=True)
         
         # verify input
@@ -199,20 +281,20 @@ class DatasetSaver(object):
 
         ## directly save split_dict
         ## compatible with ogb>=v1.2.3
-        torch.save(split_dict, os.path.join(self.split_dir, 'split_dict.pt'))
+        torch.save(split_dict, osp.join(self.split_dir, 'split_dict.pt'))
 
         self._save_split_done = True
 
     def copy_mapping_dir(self, mapping_dir):
-        target_mapping_dir = os.path.join(self.dataset_dir, 'mapping')
+        target_mapping_dir = osp.join(self.dataset_dir, 'mapping')
         os.makedirs(target_mapping_dir, exist_ok=True)
-        file_list = [f for f in os.listdir(mapping_dir) if os.path.isfile(os.path.join(mapping_dir, f))]
+        file_list = [f for f in os.listdir(mapping_dir) if osp.isfile(osp.join(mapping_dir, f))]
         if 'README.md' not in file_list:
             raise RuntimeError(f'README.md must be included in mapping_dir {mapping_dir}')
 
         # copy all the files in the mapping_dir to 
         for f in file_list:
-            shutil.copyfile(os.path.join(mapping_dir, f), os.path.join(target_mapping_dir, f))
+            shutil.copyfile(osp.join(mapping_dir, f), osp.join(target_mapping_dir, f))
 
         self._copy_mapping_dir_done = True
 
@@ -243,7 +325,8 @@ def test_datasetsaver():
     # test on graph classification
     # ogbg-molhiv
 
-    test_task = 'link'
+    ## (TODO) Test on heterogeneous graph
+    test_task = 'heteronode'
     
     if test_task == 'graph':
         from ogb.graphproppred import GraphPropPredDataset
@@ -264,53 +347,55 @@ def test_datasetsaver():
     else:
         raise ValueError('Invalid task category')
 
-    is_hetero = 'hetero' in test_task
     print(dataset[0])
-    if test_task == 'link':
+    if 'link' in test_task:
         print(dataset.get_edge_split())
     else:
         print(dataset.get_idx_split())
     
-    if test_task == 'graph':
+    if 'graph' in test_task:
         graph_list = dataset.graphs
     else:
         graph_list = [dataset.graph]
 
-    if test_task != 'link':
+    if 'link' not in test_task:
         label_list = dataset.labels
 
-    saver = DatasetSaver(dataset_name, is_hetero, version=1)
+    is_hetero = 'hetero' in test_task
+    version = 2 if dataset_name == 'ogbn-mag' else 1
+    saver = DatasetSaver(dataset_name, is_hetero, version=version)
+
     # saving graph objects
     saver.save_graph_list(graph_list)
     # saving target labels
-    if test_task != 'link':
+    if 'link' not in test_task:
         saver.save_target_label(label_list)
     # saving split
-    if test_task == 'link':
+    if 'link' in test_task:
         split_idx = dataset.get_edge_split()
     else:
         split_idx = dataset.get_idx_split()
     # second argument must be the name of the split
-    saver.save_split(split_idx, dataset.meta_info[dataset_name]["split"])
+    saver.save_split(split_idx, dataset.meta_info[dataset_name]['split'])
     # copying mapping dir
-    saver.copy_mapping_dir(f'dataset/{"_".join(dataset_name.split("-"))}/mapping/')
+    saver.copy_mapping_dir(f'dataset/{'_'.join(dataset_name.split('-'))}/mapping/')
     # zip
     saver.zip()
 
     print('Finished zipping!')
     print('Now testing.')
 
-    if test_task == 'graph':
+    if 'graph' in test_task:
         dataset = GraphPropPredDataset(dataset_name, dir_path = saver.dataset_dir)
-    elif test_task == 'node':
+    elif 'node' in test_task:
         dataset = NodePropPredDataset(dataset_name, dir_path = saver.dataset_dir)
-    elif test_task == 'link':
+    elif 'link' in test_task:
         dataset = LinkPropPredDataset(dataset_name, dir_path = saver.dataset_dir)
     else:
         raise ValueError('Invalid task category')
 
     print(dataset[0])
-    if test_task == 'link':
+    if 'link' in test_task:
         print(dataset.get_edge_split())
     else:
         print(dataset.get_idx_split())

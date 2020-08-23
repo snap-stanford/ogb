@@ -44,9 +44,9 @@ class BondEncoder(torch.nn.Module):
         return bond_embedding   
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from loader import GraphClassificationPygDataset
-    dataset = GraphClassificationPygDataset(name = "tox21")
+    dataset = GraphClassificationPygDataset(name = 'tox21')
     atom_enc = AtomEncoder(100)
     bond_enc = BondEncoder(100)
 

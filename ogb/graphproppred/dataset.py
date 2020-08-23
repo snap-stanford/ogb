@@ -7,11 +7,11 @@ from ogb.io.read_graph_raw import read_csv_graph_raw
 import torch
 
 class GraphPropPredDataset(object):
-    def __init__(self, name, root = "dataset", dir_path = None):
+    def __init__(self, name, root = 'dataset', dir_path = None):
         self.name = name ## original name, e.g., ogbg-molhiv
 
         if dir_path is None:
-            self.dir_name = "_".join(name.split("-")) ## replace hyphen with underline, e.g., ogbg_molhiv
+            self.dir_name = '_'.join(name.split('-')) ## replace hyphen with underline, e.g., ogbg_molhiv
             self.original_root = root
             self.root = osp.join(root, self.dir_name)
         else:
@@ -19,12 +19,12 @@ class GraphPropPredDataset(object):
             self.original_root = ''
             self.root = dir_path
 
-        self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), "master.csv"), index_col = 0)
+        self.meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col = 0)
         if not self.name in self.meta_info:
             print(self.name)
-            error_mssg = "Invalid dataset name {}.\n".format(self.name)
-            error_mssg += "Available datasets are as follows:\n"
-            error_mssg += "\n".join(self.meta_info.keys())
+            error_mssg = 'Invalid dataset name {}.\n'.format(self.name)
+            error_mssg += 'Available datasets are as follows:\n'
+            error_mssg += '\n'.join(self.meta_info.keys())
             raise ValueError(error_mssg)
 
         # check version
@@ -33,15 +33,15 @@ class GraphPropPredDataset(object):
         # If the dataset is not the newest version, notify this to the user. 
         if osp.isdir(self.root) and (not osp.exists(osp.join(self.root, 'RELEASE_v' + str(self.meta_info[self.name]['version']) + '.txt'))):
             print(self.name + ' has been updated.')
-            if input("Will you update the dataset now? (y/N)\n").lower() == "y":
+            if input('Will you update the dataset now? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.root)
 
-        self.download_name = self.meta_info[self.name]["download_name"] ## name of downloaded file, e.g., tox21
+        self.download_name = self.meta_info[self.name]['download_name'] ## name of downloaded file, e.g., tox21
 
-        self.num_tasks = int(self.meta_info[self.name]["num tasks"])
-        self.eval_metric = self.meta_info[self.name]["eval metric"]
-        self.task_type = self.meta_info[self.name]["task type"]
-        self.num_classes = self.meta_info[self.name]["num classes"]
+        self.num_tasks = int(self.meta_info[self.name]['num tasks'])
+        self.eval_metric = self.meta_info[self.name]['eval metric']
+        self.task_type = self.meta_info[self.name]['task type']
+        self.num_classes = self.meta_info[self.name]['num classes']
 
         super(GraphPropPredDataset, self).__init__()
 
@@ -58,7 +58,7 @@ class GraphPropPredDataset(object):
 
         else:
             ### download
-            url = self.meta_info[self.name]["url"]
+            url = self.meta_info[self.name]['url']
             if decide_download(url):
                 path = download_url(url, self.original_root)
                 extract_zip(path, self.original_root)
@@ -70,31 +70,31 @@ class GraphPropPredDataset(object):
                     pass
                 shutil.move(osp.join(self.original_root, self.download_name), self.root)
             else:
-                print("Stop download.")
+                print('Stop download.')
                 exit(-1)
 
             ### preprocess
-            add_inverse_edge = self.meta_info[self.name]["add_inverse_edge"] == "True"
+            add_inverse_edge = self.meta_info[self.name]['add_inverse_edge'] == 'True'
 
-            if self.meta_info[self.name]["additional node files"] == 'None':
+            if self.meta_info[self.name]['additional node files'] == 'None':
                 additional_node_files = []
             else:
-                additional_node_files = self.meta_info[self.name]["additional node files"].split(',')
+                additional_node_files = self.meta_info[self.name]['additional node files'].split(',')
 
-            if self.meta_info[self.name]["additional edge files"] == 'None':
+            if self.meta_info[self.name]['additional edge files'] == 'None':
                 additional_edge_files = []
             else:
-                additional_edge_files = self.meta_info[self.name]["additional edge files"].split(',')
+                additional_edge_files = self.meta_info[self.name]['additional edge files'].split(',')
 
             self.graphs = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
 
 
             if self.task_type == 'subtoken prediction':
-                labels_joined = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                labels_joined = pd.read_csv(osp.join(raw_dir, 'graph-label.csv.gz'), compression='gzip', header = None).values
                 # need to split each element into subtokens
                 self.labels = [str(labels_joined[i][0]).split(' ') for i in range(len(labels_joined))]
             else:
-                self.labels = pd.read_csv(osp.join(raw_dir, "graph-label.csv.gz"), compression="gzip", header = None).values
+                self.labels = pd.read_csv(osp.join(raw_dir, 'graph-label.csv.gz'), compression='gzip', header = None).values
 
             print('Saving...')
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
@@ -102,22 +102,22 @@ class GraphPropPredDataset(object):
 
     def get_idx_split(self, split_type = None):
         if split_type is None:
-            split_type = self.meta_info[self.name]["split"]
+            split_type = self.meta_info[self.name]['split']
             
-        path = osp.join(self.root, "split", split_type)
+        path = osp.join(self.root, 'split', split_type)
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
             return torch.load(os.path.join(path, 'split_dict.pt'))
 
-        train_idx = pd.read_csv(osp.join(path, "train.csv.gz"), compression="gzip", header = None).values.T[0]
-        valid_idx = pd.read_csv(osp.join(path, "valid.csv.gz"), compression="gzip", header = None).values.T[0]
-        test_idx = pd.read_csv(osp.join(path, "test.csv.gz"), compression="gzip", header = None).values.T[0]
+        train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
+        valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]
+        test_idx = pd.read_csv(osp.join(path, 'test.csv.gz'), compression='gzip', header = None).values.T[0]
 
-        return {"train": train_idx, "valid": valid_idx, "test": test_idx}
+        return {'train': train_idx, 'valid': valid_idx, 'test': test_idx}
 
     def __getitem__(self, idx):
-        """Get datapoint with index"""
+        '''Get datapoint with index'''
 
         if isinstance(idx, (int, np.integer)):
             return self.graphs[idx], self.labels[idx]
@@ -126,20 +126,20 @@ class GraphPropPredDataset(object):
             'Only integer is valid index (got {}).'.format(type(idx).__name__))
 
     def __len__(self):
-        """Length of the dataset
+        '''Length of the dataset
         Returns
         -------
         int
             Length of Dataset
-        """
+        '''
         return len(self.graphs)
 
     def __repr__(self):  # pragma: no cover
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 
-if __name__ == "__main__":
-    dataset = GraphPropPredDataset(name = "ogbg-code")
+if __name__ == '__main__':
+    dataset = GraphPropPredDataset(name = 'ogbg-code')
     # target_list = np.array([len(label) for label in dataset.labels])
     # print(np.sum(target_list == 1)/ float(len(target_list)))
     # print(np.sum(target_list == 2)/ float(len(target_list)))
@@ -153,8 +153,8 @@ if __name__ == "__main__":
     print(split_index)
     # print(dataset)
     # print(dataset[2])
-    # print(split_index["train"])
-    # print(split_index["valid"])
-    # print(split_index["test"])
+    # print(split_index['train'])
+    # print(split_index['valid'])
+    # print(split_index['test'])
 
 
