@@ -2,11 +2,13 @@ import os
 import logging
 from threading import Thread
 
-os.environ['OUTDATED_IGNORE'] = '1'
-from outdated import check_outdated  # noqa
-
-
 __version__ = '1.2.2'
+
+try:
+    os.environ['OUTDATED_IGNORE'] = '1'
+    from outdated import check_outdated  # noqa
+except ImportError:
+    check_outdated = None
 
 
 def check():
@@ -20,5 +22,6 @@ def check():
         pass
 
 
-thread = Thread(target=check)
-thread.start()
+if check_outdated is not None:
+    thread = Thread(target=check)
+    thread.start()
