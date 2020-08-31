@@ -32,8 +32,8 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.2.1.**
-The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.1).
+**If you have previously installed ogb, please make sure you update the version to 1.2.2.**
+The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.2).
 
 #### Requirements
  - Python>=3.5
@@ -43,8 +43,9 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
  - pandas>=0.24.0
  - urllib3>=1.24.0
  - scikit-learn>=0.20.0
+ - outdated>=0.2.0
 
- **Note:** `torch-geometric>=1.5.0` is recommended to run our [example code](https://github.com/snap-stanford/ogb/tree/master/examples).
+ **Note:** `torch-geometric>=1.6.0` is recommended to run our [example code](https://github.com/snap-stanford/ogb/tree/master/examples).
 
 #### Pip install
 The recommended way to install OGB is using Python's package manager pip:
@@ -53,8 +54,8 @@ pip install ogb
 ```
 
 ```bash
-python -c 'import ogb; print(ogb.__version__)'
-# This should print '1.2.1'. Otherwise, please update the version by
+python -c "import ogb; print(ogb.__version__)"
+# This should print "1.2.2". Otherwise, please update the version by
 pip install -U ogb
 ```
 
