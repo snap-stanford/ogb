@@ -24,7 +24,7 @@ Create `graph_list`, storing your graph objects, and call `saver.save_graph_list
 
 Graph objects are dictionaries containing the following keys.
 ### Homogeneous graph:
-- `edge_index` (necessary): `numpy.ndarray` of shape `(2, num_edges)`. Includes bidirectional edges explicitly if graphs are undirected.
+- `edge_index` (necessary): `numpy.ndarray` of shape `(2, num_edges)`. Please include bidirectional edges explicitly if graphs are undirected.
 - `num_nodes` (necessary): `int`, denoting the number of nodes in the graph.
 - `node_feat` (optional): `numpy.ndarray` of shape `(num_nodes, node_feat_dim)`.
 - `edge_feat` (optional): `numpy.ndarray` of shape `(num_edges, edge_feat_dim)`. 
