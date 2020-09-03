@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 ### reading raw files from a directory.
 ### for homogeneous graph
-def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files = [], additional_edge_files = []):
+def read_csv_graph_raw(raw_dir, add_inverse_edge = False, additional_node_files = [], additional_edge_files = []):
     '''
     raw_dir: path to the raw directory
     add_inverse_edge (bool): whether to add inverse edge or not
@@ -133,6 +133,85 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = True, additional_node_files =
 
         graph['num_nodes'] = num_node
         num_node_accum += num_node
+
+        graph_list.append(graph)
+
+    return graph_list
+
+
+### reading raw files from a directory.
+### npz ver
+### for homogeneous graph
+def read_binary_graph_raw(raw_dir, add_inverse_edge = False):
+    '''
+    raw_dir: path to the raw directory
+    add_inverse_edge (bool): whether to add inverse edge or not
+
+    return: graph_list, which is a list of graphs.
+    Each graph is a dictionary, containing edge_index, edge_feat, node_feat, and num_nodes
+    edge_feat and node_feat are optional: if a graph does not contain it, we will have None.
+
+    raw_dir must contain data.npz
+    - edge_index
+    - num_nodes_list
+    - num_edges_list
+    - node_** (optional, node_feat is the default node features)
+    - edge_** (optional, edge_feat is the default edge features)
+    '''
+
+    if add_inverse_edge:
+        raise RuntimeError('add_inverse_edge is depreciated in read_binary')
+
+    print('Loading necessary files...')
+    print('This might take a while.')
+    data_dict = np.load(osp.join(raw_dir, 'data.npz'))
+
+    edge_index = data_dict['edge_index']
+    num_nodes_list = data_dict['num_nodes_list']
+    num_edges_list = data_dict['num_edges_list']
+
+    # storing node and edge features
+    node_dict = {}
+    edge_dict = {}
+
+    for key in list(data_dict.keys()):
+        if key == 'edge_index' or key == 'num_nodes_list' or key == 'num_edges_list':
+            continue
+
+        if key[:5] == 'node_':
+            node_dict[key] = data_dict[key]
+        elif key[:5] == 'edge_':
+            edge_dict[key] = data_dict[key]
+        else:
+            raise RuntimeError(f"Keys in graph object should start from either \'node_\' or \'edge_\', but found \'{key}\'.")
+
+    graph_list = []
+    num_nodes_accum = 0
+    num_edges_accum = 0
+
+    print('Processing graphs...')
+    for num_nodes, num_edges in tqdm(zip(num_nodes_list, num_edges_list), total=len(num_nodes_list)):
+
+        graph = dict()
+
+        graph['edge_index'] = edge_index[:, num_edges_accum:num_edges_accum+num_edges]
+
+        for key, feat in edge_dict.items():
+            graph[key] = feat[num_edges_accum:num_edges_accum+num_edges]
+
+        if 'edge_feat' not in graph:
+            graph['edge_feat'] =  None
+
+        for key, feat in node_dict.items():
+            graph[key] = feat[num_nodes_accum:num_nodes_accum+num_nodes]
+
+        if 'node_feat' not in graph:
+            graph['node_feat'] = None
+
+        graph['num_nodes'] = num_nodes
+
+        num_edges_accum += num_edges
+        num_nodes_accum += num_nodes
 
         graph_list.append(graph)
 
@@ -383,6 +462,154 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
         graph_list.append(graph)
 
     return graph_list
+
+
+def read_binary_heterograph_raw(raw_dir, add_inverse_edge = False):
+    '''
+    raw_dir: path to the raw directory
+    add_inverse_edge (bool): whether to add inverse edge or not
+
+    return: graph_list, which is a list of heterogeneous graphs.
+    Each graph is a dictionary, containing the following keys:
+    - edge_index_dict
+        edge_index_dict[(head, rel, tail)] = edge_index for (head, rel, tail)
+
+    - edge_feat_dict
+        edge_feat_dict[(head, rel, tail)] = edge_feat for (head, rel, tail)
+
+    - node_feat_dict
+        node_feat_dict[nodetype] = node_feat for nodetype
+    
+    - num_nodes_dict
+        num_nodes_dict[nodetype] = num_nodes for nodetype
+    
+    * edge_feat_dict and node_feat_dict are optional: if a graph does not contain it, we will simply have None.
+
+    We can also have additional node/edge features. For example,
+    - edge_**
+    - node_**
+    
+    '''
+
+    if add_inverse_edge:
+        raise RuntimeError('add_inverse_edge is depreciated in read_binary')
+
+    print('Loading necessary files...')
+    print('This might take a while.')
+
+    # loading necessary files
+    try:
+        num_nodes_dict = read_npz_dict(osp.join(raw_dir, 'num_nodes_dict.npz'))
+        tmp = read_npz_dict(osp.join(raw_dir, 'num_edges_dict.npz'))
+        num_edges_dict = {tuple(key.split('___')): tmp[key] for key in tmp.keys()}
+        del tmp
+        tmp = read_npz_dict(osp.join(raw_dir, 'edge_index_dict.npz'))
+        edge_index_dict = {tuple(key.split('___')): tmp[key] for key in tmp.keys()}
+        del tmp
+        
+        ent_type_list = sorted(list(num_nodes_dict.keys()))
+        triplet_type_list = sorted(list(num_edges_dict.keys()))
+
+        num_graphs = len(num_nodes_dict[ent_type_list[0]])
+
+    except FileNotFoundError:
+        raise RuntimeError('No necessary file')
+
+    # storing node and edge features
+    # mapping from the name of the features to feat_dict
+    node_feat_dict_dict = {}
+    edge_feat_dict_dict = {}
+
+    for filename in os.listdir(raw_dir):
+        if '.npz' not in filename:
+            continue
+        if filename in ['num_nodes_dict.npz', 'num_edges_dict.npz', 'edge_index_dict.npz']:
+            continue
+
+        # do not read target label information here
+        if '-label.npz' in filename:
+            continue
+
+        feat_name = filename.split('.')[0]
+
+        if 'node_' in feat_name:
+            feat_dict = read_npz_dict(osp.join(raw_dir, filename))
+            node_feat_dict_dict[feat_name] = feat_dict
+        elif 'edge_' in feat_name:
+            tmp = read_npz_dict(osp.join(raw_dir, filename))
+            feat_dict = {tuple(key.split('___')): tmp[key] for key in tmp.keys()}
+            del tmp
+            edge_feat_dict_dict[feat_name] = feat_dict
+        else:
+            raise RuntimeError(f"Keys in graph object should start from either \'node_\' or \'edge_\', but found \'{feat_name}\'.")
+
+    graph_list = []
+    num_nodes_accum_dict = {ent_type: 0 for ent_type in ent_type_list}
+    num_edges_accum_dict = {triplet: 0 for triplet in triplet_type_list}
+
+    print('Processing graphs...')
+    for i in tqdm(range(num_graphs)):
+
+        graph = dict()
+
+        ### set up default atribute
+        graph['edge_index_dict'] = {}
+        graph['num_nodes_dict'] = {}
+
+        for feat_name in node_feat_dict_dict.keys():
+            graph[feat_name] = {}
+
+        for feat_name in edge_feat_dict_dict.keys():
+            graph[feat_name] = {}
+
+        if not 'edge_feat_dict' in graph:
+            graph['edge_feat_dict'] = None
+
+        if not 'node_feat_dict' in graph:
+            graph['node_feat_dict'] = None
+
+        ### handling edge
+        for triplet in triplet_type_list:
+            edge_index = edge_index_dict[triplet]
+            num_edges = num_edges_dict[triplet][i]
+            num_edges_accum = num_edges_accum_dict[triplet]
+
+            ### add edge_index
+            graph['edge_index_dict'][triplet] = edge_index[:, num_edges_accum:num_edges_accum+num_edges]
+
+            ### add edge feature
+            for feat_name in edge_feat_dict_dict.keys():
+                if triplet in  edge_feat_dict_dict[feat_name]:
+                    feat = edge_feat_dict_dict[feat_name][triplet]
+                    graph[feat_name][triplet] = feat[num_edges_accum : num_edges_accum + num_edges]
+
+            num_edges_accum_dict[triplet] += num_edges
+
+        ### handling node
+        for ent_type in ent_type_list:
+            num_nodes = num_nodes_dict[ent_type][i]
+            num_nodes_accum = num_nodes_accum_dict[ent_type]
+
+            ### add node feature
+            for feat_name in node_feat_dict_dict.keys():
+                if ent_type in node_feat_dict_dict[feat_name]:
+                    feat = node_feat_dict_dict[feat_name][ent_type]
+                    graph[feat_name][ent_type] = feat[num_nodes_accum : num_nodes_accum + num_nodes]
+
+            graph['num_nodes_dict'][ent_type] = num_nodes
+            num_nodes_accum_dict[ent_type] += num_nodes
+
+        graph_list.append(graph)
+
+    return graph_list
+
+def read_npz_dict(path):
+    tmp = np.load(path)
+    dict = {}
+    for key in tmp.keys():
+        dict[key] = tmp[key]
+    del tmp
+    return dict
 
 def read_node_label_hetero(raw_dir):
     df = pd.read_csv(osp.join(raw_dir, 'nodetype-has-label.csv.gz'))

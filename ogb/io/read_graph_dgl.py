@@ -3,12 +3,18 @@ import torch
 import os.path as osp
 import numpy as np
 import dgl
-from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw
+from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw, read_binary_graph_raw, read_binary_heterograph_raw
 from tqdm import tqdm
 
-def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files = [], additional_edge_files = []):
+def read_graph_dgl(raw_dir, add_inverse_edge = False, additional_node_files = [], additional_edge_files = [], binary=False):
 
-    graph_list = read_csv_graph_raw(raw_dir, add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+    if binary:
+        # npz
+        graph_list = read_binary_graph_raw(raw_dir, add_inverse_edge)
+    else:
+        # csv
+        graph_list = read_csv_graph_raw(raw_dir, add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+        
     dgl_graph_list = []
 
     print('Converting graphs into DGL objects...')
@@ -33,9 +39,15 @@ def read_csv_graph_dgl(raw_dir, add_inverse_edge = True, additional_node_files =
     return dgl_graph_list
 
 
-def read_csv_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_files = [], additional_edge_files = []):
+def read_heterograph_dgl(raw_dir, add_inverse_edge = False, additional_node_files = [], additional_edge_files = [], binary=False):
 
-    graph_list = read_csv_heterograph_raw(raw_dir, add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+    if binary:
+        # npz
+        graph_list = read_binary_heterograph_raw(raw_dir, add_inverse_edge)
+    else:
+        # csv
+        graph_list = read_csv_heterograph_raw(raw_dir, add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)
+
     dgl_graph_list = []
 
     print('Converting graphs into DGL objects...')
