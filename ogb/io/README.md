@@ -33,7 +33,7 @@ Graph objects are dictionaries containing the following keys.
 - `edge_index_dict` (necessary): Dictionary mapping triplets `(head type, relation type, tail type)` to `edge_index`
 - `num_nodes_dict` (necessary): Dictionary mapping `entity type` to `num_nodes`.
 - `node_feat_dict` (optional): Dictionary mapping `entity type` to `node_feat`.
-- `edge_feat_dict` (optional): Dictionary mapping `entity type` to `edge_feat`.
+- `edge_feat_dict` (optional): Dictionary mapping `(head type, relation type, tail type)` to `edge_feat`.
 
 ```python
 # generate random graphs with node and edge features
