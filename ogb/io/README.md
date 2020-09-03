@@ -94,12 +94,12 @@ Save task information by calling `saver.save_task_info(task_type = 'classificati
 saver.save_task_info(task_type = 'classification', eval_metric = 'acc', num_classes = num_classes)
 ```
  
-## 7. Get meta information dictionary
+## 7. Getting meta information dictionary
 ```python
 meta_dict = saver.get_meta_dict()
 ```
 
-## 8. Test the dataset object
+## 8. Testing the dataset object
 Test the OGB dataset object to confirm it is working as you expect. You can similarly test Pytorch Geometric and DGL dataset objects.
 ```python
 from ogb.graphproppred import GraphPropPredDataset
@@ -110,11 +110,11 @@ print(dataset[0])
 print(dataset.get_idx_split())
 ```
 
-## 9. Zip and clean up
+## 9. Zipping and cleaning up
 ```python
 saver.zip()
 saver.cleanup()
 ```
 
-## 10. Send us two files
+## 10. Sending us two files
 In this example, under `submission_ogbg_toy/`, you will find two files `meta_dict.pt` and `toy.zip`. Please send them to us.
