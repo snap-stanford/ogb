@@ -5,7 +5,7 @@ The `DatasetSaver` class allows external contributors to prepare their datasets 
 Below is the quick example of how to use `DatasetSaver` class, where we focus on graph property prediction datasets.
 Please follow the steps below **in the exact order** to generate final dataset files.
 
-## 0. Constructor
+## 1. Constructor
 Create a constructor of `DatasetSaver`. `dataset_name` needs to follow OGB convention and start from either `ogbn-`, `ogbl-`, or `ogbg-`. `is_hetero` is `True` for heterogeneous graphs, and `version` indicates the dataset version.
 ```python
 from ogb.io import DatasetSaver
@@ -18,7 +18,7 @@ dataset_name = 'ogbg-toy'
 saver = DatasetSaver(dataset_name = dataset_name, is_hetero = False, version = 1)
 ```
 
-## 1. Saving graph list
+## 2. Saving graph list
 
 Create `graph_list`, storing your graph objects, and call `saver.save_graph_list(graph_list)`. 
 
