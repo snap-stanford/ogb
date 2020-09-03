@@ -110,11 +110,11 @@ print(dataset[0])
 print(dataset.get_idx_split())
 ```
 
-## 10. Zip and clean up
+## 9. Zip and clean up
 ```python
 saver.zip()
 saver.cleanup()
 ```
 
-## 11. Send us two files
+## 10. Send us two files
 In this example, under `submission_ogbg_toy/`, you will find two files `meta_dict.pt` and `toy.zip`. Please send them to us.
