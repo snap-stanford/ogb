@@ -89,7 +89,8 @@ saver.copy_mapping_dir(mapping_path)
 ```
 
 ## 6. Saving task information
-Save task information by calling `saver.save_task_info(task_type = 'classification', eval_metric = 'acc', num_classes = num_classes)`.
+Save task information by calling `saver.save_task_info(task_type, eval_metric, num_classes = num_classes)`.
+`eval_metric` is used to call `Evaluator` (c.f. [here](https://github.com/snap-stanford/ogb/blob/master/ogb/graphproppred/evaluate.py)). You can reuse one of the existing metrics, or you can implement your own by creating a pull request.
 ```python
 saver.save_task_info(task_type = 'classification', eval_metric = 'acc', num_classes = num_classes)
 ```
