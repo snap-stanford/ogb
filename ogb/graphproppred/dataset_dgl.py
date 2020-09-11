@@ -22,7 +22,13 @@ class DglGraphPropPredDataset(object):
         self.name = name ## original name, e.g., ogbg-molhiv
         
         if meta_dict is None:
-            self.dir_name = '_'.join(name.split('-')) + '_dgl' ## replace hyphen with underline, e.g., ogbg_hiv_dgl
+            self.dir_name = '_'.join(name.split('-')) 
+            
+            # check if previously-downloaded folder exists.
+            # If so, use that one.
+            if osp.exists(osp.join(root, self.dir_name + '_dgl')):
+                self.dir_name = self.dir_name + '_dgl'
+
             self.original_root = root
             self.root = osp.join(root, self.dir_name)
             

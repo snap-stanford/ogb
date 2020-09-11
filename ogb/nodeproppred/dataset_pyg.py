@@ -22,7 +22,13 @@ class PygNodePropPredDataset(InMemoryDataset):
         self.name = name ## original name, e.g., ogbn-proteins
 
         if meta_dict is None:
-            self.dir_name = '_'.join(name.split('-')) + '_pyg' ## replace hyphen with underline, e.g., ogbn_proteins_pyg
+            self.dir_name = '_'.join(name.split('-')) 
+            
+            # check if previously-downloaded folder exists.
+            # If so, use that one.
+            if osp.exists(osp.join(root, self.dir_name + '_pyg')):
+                self.dir_name = self.dir_name + '_pyg'
+
             self.original_root = root
             self.root = osp.join(root, self.dir_name)
             
