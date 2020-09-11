@@ -62,6 +62,11 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False, additional_node_files 
     additional_node_info = {}   
     for additional_file in additional_node_files:
         assert(additional_file[:5] == 'node_')
+
+        # hack for ogbn-proteins
+        if additional_file == 'node_species' and osp.exists(osp.join(raw_dir, 'species.csv.gz')):
+            os.rename(osp.join(raw_dir, 'species.csv.gz'), osp.join(raw_dir, 'node_species.csv.gz'))
+
         temp = pd.read_csv(osp.join(raw_dir, additional_file + '.csv.gz'), compression='gzip', header = None).values
 
         if 'int' in str(temp.dtype):
@@ -322,7 +327,7 @@ def read_csv_heterograph_raw(raw_dir, add_inverse_edge = False, additional_node_
 
         for nodetype in nodetype_list:
             subdir = osp.join(raw_dir, 'node-feat', nodetype)
-            
+
             try:
                 node_feat = pd.read_csv(osp.join(subdir, additional_file + '.csv.gz'), compression='gzip', header = None).values
                 if 'int' in str(node_feat.dtype):
