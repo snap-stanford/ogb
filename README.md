@@ -1,5 +1,5 @@
-<p align="center">
-  <img width="40%" src="https://snap-stanford.github.io/ogb-web/assets/img/OGB_rectangle.png" />
+<p align='center'>
+  <img width='40%' src='https://snap-stanford.github.io/ogb-web/assets/img/OGB_rectangle.png' />
 </p>
 
 --------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data loaders, and evaluators for graph machine learning. Datasets cover a variety of graph machine learning tasks and real-world applications.
 The OGB data loaders are fully compatible with popular graph deep learning frameworks, including [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/) and [Deep Graph Library (DGL)](https://www.dgl.ai/). They provide automatic dataset downloading, standardized dataset splits, and unified performance evaluation.
 
-<p align="center">
-  <img width="80%" src="https://snap-stanford.github.io/ogb-web/assets/img/ogb_overview.png" />
+<p align='center'>
+  <img width='80%' src='https://snap-stanford.github.io/ogb-web/assets/img/ogb_overview.png' />
 </p>
 
 OGB aims to provide graph datasets that cover important graph machine learning tasks, diverse dataset scale, and rich domains.
@@ -24,8 +24,8 @@ OGB aims to provide graph datasets that cover important graph machine learning t
 
 **Rich domains:** Graph datasets come from diverse domains ranging from scientific ones to social/information networks, and also include heterogeneous knowledge graphs. 
 
-<p align="center">
-  <img width="70%" src="https://snap-stanford.github.io/ogb-web/assets/img/dataset_overview.png" />
+<p align='center'>
+  <img width='70%' src='https://snap-stanford.github.io/ogb-web/assets/img/dataset_overview.png' />
 </p>
 
 OGB is an on-going effort, and we are planning to increase our coverage in the future.
@@ -38,7 +38,7 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
 #### Requirements
  - Python>=3.5
  - PyTorch>=1.2
- - DGL>=0.4.1 or torch-geometric>=1.3.1
+ - DGL>=0.5.0 or torch-geometric>=1.6.0
  - Numpy>=1.16.0
  - pandas>=0.24.0
  - urllib3>=1.24.0
@@ -77,12 +77,12 @@ Below, on PyTorch Geometric, we see that a few lines of code is sufficient to pr
 from ogb.graphproppred import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
-dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
+dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv')
 
 split_idx = dataset.get_idx_split() 
-train_loader = DataLoader(dataset[split_idx["train"]], batch_size=32, shuffle=True)
-valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=32, shuffle=False)
-test_loader = DataLoader(dataset[split_idx["test"]], batch_size=32, shuffle=False)
+train_loader = DataLoader(dataset[split_idx['train']], batch_size=32, shuffle=True)
+valid_loader = DataLoader(dataset[split_idx['valid']], batch_size=32, shuffle=False)
+test_loader = DataLoader(dataset[split_idx['test']], batch_size=32, shuffle=False)
 ```
 
 #### (2) Evaluators
@@ -91,12 +91,12 @@ The standardized evaluation protocol allows researchers to reliably compare thei
 ```python
 from ogb.graphproppred import Evaluator
 
-evaluator = Evaluator(name = "ogbg-molhiv")
+evaluator = Evaluator(name = 'ogbg-molhiv')
 # You can learn the input and output format specification of the evaluator as follows.
 # print(evaluator.expected_input_format) 
 # print(evaluator.expected_output_format) 
-input_dict = {"y_true": y_true, "y_pred": y_pred}
-result_dict = evaluator.eval(input_dict) # E.g., {"rocauc": 0.7321}
+input_dict = {'y_true': y_true, 'y_pred': y_pred}
+result_dict = evaluator.eval(input_dict) # E.g., {'rocauc': 0.7321}
 ```
 
 ## Citing OGB
