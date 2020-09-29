@@ -65,7 +65,7 @@ class PygNodePropPredDataset(InMemoryDataset):
         self.is_hetero = self.meta_info['is hetero'] == 'True'
         self.binary = self.meta_info['binary'] == 'True'
 
-        super(PygNodePropPredDataset, self).__init__(self.root, transform)
+        super(PygNodePropPredDataset, self).__init__(self.root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     def get_idx_split(self, split_type = None):

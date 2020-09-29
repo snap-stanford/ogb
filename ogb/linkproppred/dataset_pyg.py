@@ -61,7 +61,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         self.is_hetero = self.meta_info['is hetero'] == 'True'
         self.binary = self.meta_info['binary'] == 'True'
 
-        super(PygLinkPropPredDataset, self).__init__(self.root, transform)
+        super(PygLinkPropPredDataset, self).__init__(self.root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     def get_edge_split(self, split_type = None):
