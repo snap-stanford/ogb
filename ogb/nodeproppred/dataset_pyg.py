@@ -189,7 +189,7 @@ class PygNodePropPredDataset(InMemoryDataset):
             else:
                 data.y = torch.from_numpy(node_label).to(torch.float32)
 
-        data if self.pre_transform is None else self.pre_transform(data)
+        data = data if self.pre_transform is None else self.pre_transform(data)
 
         print('Saving...')
         torch.save(self.collate([data]), self.processed_paths[0])
