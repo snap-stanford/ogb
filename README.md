@@ -36,7 +36,7 @@ You can install OGB using Python's package manager `pip`.
 The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.3).
 
 #### Requirements
- - Python>=3.5
+ - Python>=3.6
  - PyTorch>=1.2
  - DGL>=0.5.0 or torch-geometric>=1.6.0
  - Numpy>=1.16.0
