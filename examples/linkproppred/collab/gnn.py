@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
+from torch_sparse import SparseTensor
 import torch_geometric.transforms as T
 from torch_geometric.nn import GCNConv, SAGEConv
 
@@ -162,6 +163,8 @@ def test(model, predictor, data, split_edge, evaluator, batch_size):
         neg_valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
     neg_valid_pred = torch.cat(neg_valid_preds, dim=0)
 
+    h = model(data.x, data.full_adj_t)
+
     pos_test_preds = []
     for perm in DataLoader(range(pos_test_edge.size(0)), batch_size):
         edge = pos_test_edge[perm].t()
@@ -200,6 +203,7 @@ def main():
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--use_sage', action='store_true')
+    parser.add_argument('--dynamic', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -216,11 +220,22 @@ def main():
 
     dataset = PygLinkPropPredDataset(name='ogbl-collab')
     data = dataset[0]
+    edge_index = data.edge_index
     data.edge_weight = data.edge_weight.view(-1).to(torch.float)
     data = T.ToSparseTensor()(data)
-    data = data.to(device)
 
     split_edge = dataset.get_edge_split()
+
+    # Use training + validation edges for inference on test set.
+    if args.dynamic:
+        val_edge_index = split_edge['valid']['edge'].t()
+        full_edge_index = torch.cat([edge_index, val_edge_index], dim=-1)
+        data.full_adj_t = SparseTensor.from_edge_index(full_edge_index).t()
+        data.full_adj_t = data.full_adj_t.to_symmetric()
+    else:
+        data.full_adj_t = data.adj_t
+
+    data = data.to(device)
 
     if args.use_sage:
         model = SAGE(data.num_features, args.hidden_channels,
