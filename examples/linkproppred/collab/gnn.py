@@ -203,7 +203,7 @@ def main():
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--use_sage', action='store_true')
-    parser.add_argument('--dynamic', action='store_true')
+    parser.add_argument('--use_valedges_as_input', action='store_true')
     parser.add_argument('--num_layers', type=int, default=3)
     parser.add_argument('--hidden_channels', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.0)
@@ -227,7 +227,7 @@ def main():
     split_edge = dataset.get_edge_split()
 
     # Use training + validation edges for inference on test set.
-    if args.dynamic:
+    if args.use_valedges_as_input:
         val_edge_index = split_edge['valid']['edge'].t()
         full_edge_index = torch.cat([edge_index, val_edge_index], dim=-1)
         data.full_adj_t = SparseTensor.from_edge_index(full_edge_index).t()
