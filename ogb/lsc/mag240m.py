@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Dict
 
 import os
 import shutil
@@ -7,12 +7,18 @@ import os.path as osp
 import torch
 import numpy as np
 
-from ogb.utils.url import decide_download, download_url, extract_zip
+from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 
 class MAG240mDataset(object):
-    url = 'https://snap.stanford.edu/ogb/data/lsc/mag240m.zip'
     version = 0
+    url = 'https://snap.stanford.edu/ogb/data/lsc/mag240m.zip'
+
+    __rels__ = {
+        ('author', 'paper'): 'writes',
+        ('author', 'institution'): 'affliated_with',
+        ('paper', 'paper'): 'cites',
+    }
 
     def __init__(self, root: str = 'dataset'):
         if isinstance(root, str):
@@ -59,31 +65,67 @@ class MAG240mDataset(object):
     def num_classes(self) -> int:
         return self.__meta__['num_classes']
 
-    def get_idx_split(self, split: Optional[str] = None):
+    def get_idx_split(
+        self, split: Optional[str] = None
+    ) -> Union[Dict[str, np.ndarray], np.ndarray]:
         return self.__split__ if split is None else self.__split__[split]
 
     @property
-    def paper_feat(self):
+    def paper_feat(self) -> np.ndarray:
         path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
         return np.load(path, mmap_mode='r')
 
     @property
-    def paper_label(self):
+    def paper_label(self) -> np.ndarray:
         path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
         return np.load(path, mmap_mode='r')
 
     @property
-    def paper_year(self):
+    def paper_year(self) -> np.ndarray:
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         return np.load(path, mmap_mode='r')
 
-    def edge_index(self, src: str, rel: str, dst: str):
+    def edge_index(self, id1: str, id2: str,
+                   id3: Optional[str] = None) -> np.ndarray:
+        src = id1
+        rel, dst = (id3, id2) if id3 is None else (id2, id3)
+        rel = self.__rels__[(src, dst)] if rel is None else rel
         name = f'{src}___{rel}___{dst}'
         path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
         return np.load(path, mmap_mode='r')
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
+
+
+class MAG240mEvaluator:
+    def eval(self, input_dict):
+        assert 'y_pred' in input_dict and 'y_true' in input_dict
+
+        y_pred, y_true = input_dict['y_pred'], input_dict['y_true']
+
+        if not isinstance(y_pred, torch.Tensor):
+            y_pred = torch.from_numpy(y_pred)
+        if not isinstance(y_true, torch.Tensor):
+            y_true = torch.from_numpy(y_true)
+
+        assert (y_true.numel() == y_pred.numel())
+        assert (y_true.dim() == y_pred.dim() == 1)
+
+        return {'acc': int((y_true == y_pred).sum()) / y_true.numel()}
+
+    def save_test_submission(self, input_dict, dir_path):
+        assert 'y_pred' in input_dict
+        y_pred = input_dict['y_pred']
+        assert y_pred.shape == (146818, )
+
+        if isinstance(y_pred, torch.Tensor):
+            y_pred = y_pred.cpu().numpy()
+        y_pred = y_pred.astype(np.short)
+
+        makedirs(dir_path)
+        filename = osp.join(dir_path, 'y_pred_mag240m')
+        np.savez_compressed(filename, y_pred=y_pred)
 
 
 if __name__ == '__main__':
@@ -96,10 +138,12 @@ if __name__ == '__main__':
     split_dict = dataset.get_idx_split()
     print(split_dict['train'].shape)
     print(split_dict['valid'].shape)
+    print('-----------------')
     print(split_dict['test'].shape)
 
     print(dataset.paper_feat.shape)
     print(dataset.paper_year.shape)
     print(dataset.paper_year[:100])
+    print(dataset.edge_index('author', 'paper').shape)
     print(dataset.edge_index('author', 'writes', 'paper').shape)
     print(dataset.edge_index('author', 'writes', 'paper')[:, :10])
