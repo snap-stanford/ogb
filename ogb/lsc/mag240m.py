@@ -92,7 +92,7 @@ class MAG240mDataset(object):
         rel = self.__rels__[(src, dst)] if rel is None else rel
         name = f'{src}___{rel}___{dst}'
         path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
-        return np.load(path, mmap_mode='r')
+        return np.load(path)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
@@ -147,3 +147,14 @@ if __name__ == '__main__':
     print(dataset.edge_index('author', 'paper').shape)
     print(dataset.edge_index('author', 'writes', 'paper').shape)
     print(dataset.edge_index('author', 'writes', 'paper')[:, :10])
+    print('-----------------')
+
+    train_idx = dataset.get_idx_split('train')
+    val_idx = dataset.get_idx_split('valid')
+    test_idx = dataset.get_idx_split('test')
+    print(dataset.paper_label[train_idx][:10])
+    print(dataset.paper_label[val_idx][:10])
+    print(dataset.paper_label[test_idx][:10])
+    print(dataset.paper_year[train_idx][:10])
+    print(dataset.paper_year[val_idx][:10])
+    print(dataset.paper_year[test_idx][:10])
