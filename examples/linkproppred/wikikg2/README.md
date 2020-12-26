@@ -1,4 +1,4 @@
-# ogbl-wikikg
+# ogbl-wikikg2
 
 This code includes implementation of TransE, DistMult, ComplEx and RotatE with OGB evaluator. It is based on this [repository](https://github.com/DeepGraphLearning/KnowledgeGraphEmbedding).
 
