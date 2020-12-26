@@ -20,7 +20,7 @@ class PyGPCQM4MDataset(InMemoryDataset):
         self.folder = osp.join(root, 'pcqm4m')
         self.download_name = 'pcqm4m-folder'
         self.version = 1
-        self.url = f'https://snap.stanford.edu/ogb/data/lsc/{self.download_name}.zip'
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
