@@ -1,5 +1,7 @@
 # ogbl-citation2
 
+**Note (Dec 25, 2020)**: `ogbl-citation` is deprecated since negative samples used in validation and test sets are found to be quite biased (i.e., half of the nodes are never sampled as negative examples). `ogbl-citation2` fixes this issue while retaining everyelse the same. The leaderboard results of `ogbl-citation` and `ogbl-citation2` are *not* comparable. 
+
 This repository includes the following example scripts:
 
 * **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/citation/mlp.py)**: Full-batch MLP training based on paper features and optional Node2Vec features (`--use_node_embedding`). For training with Node2Vec features, this script requires node embeddings be saved in `embedding.pt`. To generate them, please run `python node2vec.py` [requires `torch-geometric>= 1.5.0`].
