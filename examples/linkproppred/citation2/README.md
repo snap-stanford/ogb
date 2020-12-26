@@ -1,4 +1,4 @@
-# ogbl-citation
+# ogbl-citation2
 
 This repository includes the following example scripts:
 

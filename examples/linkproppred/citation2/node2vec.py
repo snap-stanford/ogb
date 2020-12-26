@@ -12,7 +12,7 @@ def save_embedding(model):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-Citation (Node2Vec)')
+    parser = argparse.ArgumentParser(description='OGBL-Citation2 (Node2Vec)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--embedding_dim', type=int, default=128)
     parser.add_argument('--walk_length', type=int, default=40)
@@ -27,7 +27,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygLinkPropPredDataset(name='ogbl-citation')
+    dataset = PygLinkPropPredDataset(name='ogbl-citation2')
     data = dataset[0]
     data.edge_index = to_undirected(data.edge_index, data.num_nodes)
 
@@ -37,7 +37,7 @@ def main():
 
     loader = model.loader(batch_size=args.batch_size, shuffle=True,
                           num_workers=4)
-    optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=args.lr)
 
     model.train()
     for epoch in range(1, args.epochs + 1):
