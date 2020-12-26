@@ -23,7 +23,7 @@ class PositiveLinkNeighborSampler(NeighborSampler):
     def sample(self, edge_idx):
         if not isinstance(edge_idx, torch.Tensor):
             edge_idx = torch.tensor(edge_idx)
-        row, col, _ = self.adj.coo()
+        row, col, _ = self.adj_t.coo()
         batch = torch.cat([row[edge_idx], col[edge_idx]], dim=0)
         return super(PositiveLinkNeighborSampler, self).sample(batch)
 
@@ -35,7 +35,7 @@ class NegativeLinkNeighborSampler(NeighborSampler):
               self).__init__(edge_index, sizes, edge_idx, num_nodes, **kwargs)
 
     def sample(self, edge_idx):
-        num_nodes = self.adj.sparse_size(0)
+        num_nodes = self.adj_t.sparse_size(0)
         batch = torch.randint(0, num_nodes, (2 * len(edge_idx), ),
                               dtype=torch.long)
         return super(NegativeLinkNeighborSampler, self).sample(batch)
