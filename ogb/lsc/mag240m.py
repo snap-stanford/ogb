@@ -10,9 +10,9 @@ import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 
-class MAG240mDataset(object):
+class MAG240MDataset(object):
     version = 0
-    url = 'https://snap.stanford.edu/ogb/data/lsc/mag240m.zip'
+    url = 'http://ogb-data.stanford.edu/data/lsc/mag240m.zip'
 
     __rels__ = {
         ('author', 'paper'): 'writes',
@@ -27,7 +27,7 @@ class MAG240mDataset(object):
         self.dir = osp.join(root, 'mag240m')
 
         if not osp.exists(osp.join(self.dir, f'RELEASE_v{self.version}.txt')):
-            print('MAG240m dataset has been updated.')
+            print('MAG240M dataset has been updated.')
             if input('Will you update the dataset now? (y/N)\n') == 'y':
                 shutil.rmtree(osp.join(self.dir))
 
@@ -98,7 +98,7 @@ class MAG240mDataset(object):
         return f'{self.__class__.__name__}()'
 
 
-class MAG240mEvaluator:
+class MAG240MEvaluator:
     def eval(self, input_dict):
         assert 'y_pred' in input_dict and 'y_true' in input_dict
 
@@ -129,7 +129,7 @@ class MAG240mEvaluator:
 
 
 if __name__ == '__main__':
-    dataset = MAG240mDataset('/data/datasets/OGB/mag240m')
+    dataset = MAG240MDataset('/data/datasets/OGB/mag240m')
     print(dataset)
     print(dataset.num_papers)
     print(dataset.num_authors)
