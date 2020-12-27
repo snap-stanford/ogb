@@ -283,7 +283,9 @@ def main():
                       f'Valid: {valid_mrr:.4f}, '
                       f'Test: {test_mrr:.4f}')
 
+        print('Neighborsampling')
         logger.print_statistics(run)
+    print('Neighborsampling')
     logger.print_statistics()
 
 

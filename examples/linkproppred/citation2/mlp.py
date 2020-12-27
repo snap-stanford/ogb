@@ -171,7 +171,9 @@ def main():
                           f'Valid: {valid_mrr:.4f}, '
                           f'Test: {test_mrr:.4f}')
 
+        print('Node2vec' if args.use_node_embedding else 'MLP')
         logger.print_statistics(run)
+    print('Node2vec' if args.use_node_embedding else 'MLP')
     logger.print_statistics()
 
 

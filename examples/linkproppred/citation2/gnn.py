@@ -253,8 +253,9 @@ def main():
                           f'Valid: {valid_mrr:.4f}, '
                           f'Test: {test_mrr:.4f}')
 
+        print('GraphSAGE' if args.use_sage else 'GCN')
         logger.print_statistics(run)
-
+    print('GraphSAGE' if args.use_sage else 'GCN')
     logger.print_statistics()
 
 

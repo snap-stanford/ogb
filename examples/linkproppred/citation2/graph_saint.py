@@ -210,30 +210,45 @@ def main():
     evaluator = Evaluator(name='ogbl-citation2')
     logger = Logger(args.runs, args)
 
-    for run in range(args.runs):
+    run_idx = 0
+
+    while run_idx < args.runs:
         model.reset_parameters()
         predictor.reset_parameters()
         optimizer = torch.optim.Adam(
             list(model.parameters()) + list(predictor.parameters()),
             lr=args.lr)
+
+        run_success = True
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, predictor, loader, optimizer, device)
-            print(f'Run: {run + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
+            print(f'Run: {run_idx + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
+            if loss > 2.:
+                run_success = False
+                logger.reset(run_idx)
+                print('Learning failed. Rerun...')
+                break
 
             if epoch > 49 and epoch % args.eval_steps == 0:
                 result = test(model, predictor, data, split_edge, evaluator,
                               batch_size=64 * 1024, device=device)
-                logger.add_result(run, result)
+                logger.add_result(run_idx, result)
 
                 train_mrr, valid_mrr, test_mrr = result
-                print(f'Run: {run + 1:02d}, '
+                print(f'Run: {run_idx + 1:02d}, '
                       f'Epoch: {epoch:02d}, '
                       f'Loss: {loss:.4f}, '
                       f'Train: {train_mrr:.4f}, '
                       f'Valid: {valid_mrr:.4f}, '
                       f'Test: {test_mrr:.4f}')
 
-        logger.print_statistics(run)
+
+        print('GraphSAINT')
+        if run_success:
+            logger.print_statistics(run_idx)
+            run_idx += 1
+
+    print('GraphSAINT')
     logger.print_statistics()
 
 
