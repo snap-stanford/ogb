@@ -11,23 +11,21 @@ from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 
 class WikiKG90MDataset(object):
-    version = 0
-    url = 'https://snap.stanford.edu/ogb/data/lsc/wikikg90m-folder.zip'
 
     def __init__(self, root: str = 'dataset'):
         self.original_root = root
-        self.folder = osp.join(root, 'wikikg90m-folder')
+        self.folder = osp.join(root, 'wikikg90m')
         self.download_name = 'wikikg90m-folder'
         self.version = 1
         self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
         self.processed_dir = osp.join(self.folder, 'processed')
 
-        # if not osp.exists(osp.join(self.dir, f'RELEASE_v{self.version}.txt')):
-        #     print('WikiKG90M dataset has been updated.')
-        #     if input('Will you update the dataset now? (y/N)\n') == 'y':
-        #         shutil.rmtree(osp.join(self.dir))
+        if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
+            print('WikiKG90M dataset has been updated.')
+            if input('Will you update the dataset now? (y/N)\n') == 'y':
+                shutil.rmtree(osp.join(self.folder))
 
-        # self.download()
+        self.download()
         self.__meta__ = torch.load(osp.join(self.folder, 'meta.pt'))
 
         # training triplet
@@ -45,18 +43,19 @@ class WikiKG90MDataset(object):
         self._test_dict = None
 
     def download(self):
-        if decide_download(self.url):
-            path = download_url(self.url, self.original_root)
-            extract_zip(path, self.original_root)
-            os.unlink(path)
-            try:
-                shutil.rmtree(self.folder)
-            except:
-                pass
-            shutil.move(osp.join(self.original_root, self.download_name), self.folder)
-        else:
-            print('Stop download.')
-            exit(-1)
+        if not osp.exists(self.folder):
+            if decide_download(self.url):
+                path = download_url(self.url, self.original_root)
+                extract_zip(path, self.original_root)
+                os.unlink(path)
+                try:
+                    shutil.rmtree(self.folder)
+                except:
+                    pass
+                shutil.move(osp.join(self.original_root, self.download_name), self.folder)
+            else:
+                print('Stop download.')
+                exit(-1)
 
     @property
     def num_entities(self) -> int:
@@ -278,19 +277,19 @@ class WikiKG90MEvaluator:
         np.savez_compressed(filename, t_pred_top10=t_pred_top10, h_pred_top10=h_pred_top10)
 
 if __name__ == '__main__':
-    dataset = WikiKG90MDataset('/dfs/scratch1/weihuahu/ogb-lsc/datasets/wikikg90m')
+    dataset = WikiKG90MDataset()
     print(dataset)
-    # print(dataset.num_entities)
-    # print(dataset.entity_feat)
-    # print(dataset.entity_feat.shape)
-    # print(dataset.num_relations)
-    # print(dataset.relation_feat)
-    # print(dataset.relation_feat.shape)
-    # print(dataset.train_hrt)
-    # print(dataset.valid_dict)
-    # print(dataset.test_dict)
-    # print(dataset.valid_dict['t,r->h']['h_correct_index'].max())
-    # print(dataset.valid_dict['t,r->h']['h_correct_index'].min())
+    print(dataset.num_entities)
+    print(dataset.entity_feat)
+    print(dataset.entity_feat.shape)
+    print(dataset.num_relations)
+    print(dataset.relation_feat)
+    print(dataset.relation_feat.shape)
+    print(dataset.train_hrt)
+    print(dataset.valid_dict)
+    print(dataset.test_dict)
+    print(dataset.valid_dict['t,r->h']['h_correct_index'].max())
+    print(dataset.valid_dict['t,r->h']['h_correct_index'].min())
 
     evaluator = WikiKG90MEvaluator()
 
