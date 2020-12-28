@@ -3,7 +3,7 @@ from ogb.utils.features import (allowable_features, atom_to_feature_vector,
 from rdkit import Chem
 import numpy as np
 
-def mol_to_data_obj(smiles_string):
+def smiles2graph(smiles_string):
     """
     Converts SMILES string to graph Data object
     :input: SMILES string (str)
@@ -55,5 +55,5 @@ def mol_to_data_obj(smiles_string):
 
 
 if __name__ == '__main__':
-    graph = mol_to_data_obj('O1C=C[C@H]([C@H]1O2)c3c2cc(OC)c4c3OC(=O)C5=C4CCC(=O)5')
+    graph = smiles2graph('O1C=C[C@H]([C@H]1O2)c3c2cc(OC)c4c3OC(=O)C5=C4CCC(=O)5')
     print(graph)

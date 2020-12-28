@@ -43,8 +43,12 @@ The last three datasets (`ogbg-molesol`, `ogbg-molfreesolv`, `ogbg-mollipo`) are
 
 ## Converting SMILES string into OGB graph object
 Molecules are typically represented as [SMILES strings](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system).
-[`smiles2graph.py`](https://github.com/snap-stanford/ogb/blob/master/examples/graphproppred/mol/smiles2graph.py) is a script that converts a SMILES string into a graph object that is fully compatible with the OGB molecule datasets. 
-This code can be used when one wants to perform transfer learning from external molecular datasets.
+OGB package provides the utility to transform the SMILES string into a graph object that is fully compatible with the OGB molecule datasets. This can be used when one wants to perform transfer learning from external molecular datasets.
+
+```python
+from ogb.utils import smiles2graph
+graph = smiles2graph('O1C=C[C@H]([C@H]1O2)c3c2cc(OC)c4c3OC(=O)C5=C4CCC(=O)5')
+```
 
 ## References
 [1] Wu, Z., Ramsundar, B., Feinberg, E. N., Gomes, J., Geniesse, C., Pappu, A. S., ... & Pande, V. (2018). MoleculeNet: a benchmark for molecular machine learning. Chemical science, 9(2), 513-530.

@@ -232,7 +232,7 @@ class Evaluator:
         if type_info == 'torch':
             y_pred = torch.cat([y_pred_pos.view(-1,1), y_pred_neg], dim = 1)
             argsort = torch.argsort(y_pred, dim = 1, descending = True)
-            ranking_list = (argsort == 0).nonzero()
+            ranking_list = torch.nonzero(argsort == 0)
             ranking_list = ranking_list[:, 1] + 1
             hits1_list = (ranking_list <= 1).to(torch.float)
             hits3_list = (ranking_list <= 3).to(torch.float)
@@ -262,17 +262,19 @@ class Evaluator:
 
 if __name__ == '__main__':
     ### hits case
-    evaluator = Evaluator(name = 'ogbl-ddi')
-    print(evaluator.expected_input_format)
-    print(evaluator.expected_output_format)
-    # y_true = np.random.randint(2, size = (100,))
-    y_pred_pos = torch.tensor(np.random.randn(100,))
-    y_pred_neg = torch.tensor(np.random.randn(100,))
-    input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
-    result = evaluator.eval(input_dict)
-    print(result)
+    # evaluator = Evaluator(name = 'ogbl-ddi')
+    # print(evaluator.expected_input_format)
+    # print(evaluator.expected_output_format)
+    # # y_true = np.random.randint(2, size = (100,))
+    # y_pred_pos = torch.tensor(np.random.randn(100,))
+    # y_pred_neg = torch.tensor(np.random.randn(100,))
+    # input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
+    # result = evaluator.eval(input_dict)
+    # print(result)
 
-    evaluator = Evaluator(name = 'ogbl-wikikg')
+    torch.manual_seed(0)
+    np.random.seed(0)
+    evaluator = Evaluator(name = 'ogbl-wikikg2')
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     # y_true = np.random.randint(2, size = (100,))

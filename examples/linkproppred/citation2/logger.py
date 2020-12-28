@@ -11,6 +11,10 @@ class Logger(object):
         assert run >= 0 and run < len(self.results)
         self.results[run].append(result)
 
+    def reset(self, run):
+        assert run >= 0 and run < len(self.results)
+        self.results[run] = []
+
     def print_statistics(self, run=None):
         if run is not None:
             result = torch.tensor(self.results[run])
@@ -32,6 +36,7 @@ class Logger(object):
                 best_results.append((train1, valid, train2, test))
 
             best_result = torch.tensor(best_results)
+            print(best_result)
 
             print(f'All runs:')
             r = best_result[:, 0]

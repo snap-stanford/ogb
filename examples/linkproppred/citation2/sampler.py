@@ -23,7 +23,7 @@ class PositiveLinkNeighborSampler(NeighborSampler):
     def sample(self, edge_idx):
         if not isinstance(edge_idx, torch.Tensor):
             edge_idx = torch.tensor(edge_idx)
-        row, col, _ = self.adj.coo()
+        row, col, _ = self.adj_t.coo()
         batch = torch.cat([row[edge_idx], col[edge_idx]], dim=0)
         return super(PositiveLinkNeighborSampler, self).sample(batch)
 
@@ -35,7 +35,7 @@ class NegativeLinkNeighborSampler(NeighborSampler):
               self).__init__(edge_index, sizes, edge_idx, num_nodes, **kwargs)
 
     def sample(self, edge_idx):
-        num_nodes = self.adj.sparse_size(0)
+        num_nodes = self.adj_t.sparse_size(0)
         batch = torch.randint(0, num_nodes, (2 * len(edge_idx), ),
                               dtype=torch.long)
         return super(NegativeLinkNeighborSampler, self).sample(batch)
@@ -204,7 +204,7 @@ def test(model, predictor, x, subgraph_loader, split_edge, evaluator,
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-Citation (NS)')
+    parser = argparse.ArgumentParser(description='OGBL-Citation2 (NS)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--num_workers', type=int, default=12)
@@ -222,7 +222,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygLinkPropPredDataset(name='ogbl-citation')
+    dataset = PygLinkPropPredDataset(name='ogbl-citation2')
     split_edge = dataset.get_edge_split()
     data = dataset[0]
     edge_index = to_undirected(data.edge_index, data.num_nodes)
@@ -256,7 +256,7 @@ def main():
     predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 
-    evaluator = Evaluator(name='ogbl-citation')
+    evaluator = Evaluator(name='ogbl-citation2')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
@@ -283,7 +283,9 @@ def main():
                       f'Valid: {valid_mrr:.4f}, '
                       f'Test: {test_mrr:.4f}')
 
+        print('Neighborsampling')
         logger.print_statistics(run)
+    print('Neighborsampling')
     logger.print_statistics()
 
 
