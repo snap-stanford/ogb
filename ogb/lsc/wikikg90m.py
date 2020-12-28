@@ -16,7 +16,7 @@ class WikiKG90MDataset(object):
         self.original_root = root
         self.folder = osp.join(root, 'wikikg90m')
         self.download_name = 'wikikg90m-folder'
-        self.version = 1
+        self.version = 0
         self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
         self.processed_dir = osp.join(self.folder, 'processed')
 
