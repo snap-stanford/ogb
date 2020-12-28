@@ -1,4 +1,6 @@
-# ogbl-citation
+# ogbl-citation2
+
+**Note (Dec 25, 2020)**: `ogbl-citation` is deprecated since negative samples used in validation and test sets are found to be quite biased (i.e., half of the nodes are never sampled as negative examples). `ogbl-citation2` fixes this issue while retaining everyelse the same. The leaderboard results of `ogbl-citation` and `ogbl-citation2` are *not* comparable. 
 
 This repository includes the following example scripts:
 

@@ -105,7 +105,7 @@ def test(predictor, x, split_edge, evaluator, batch_size):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-Citation (MLP)')
+    parser = argparse.ArgumentParser(description='OGBL-Citation2 (MLP)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--use_node_embedding', action='store_true')
@@ -123,7 +123,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygLinkPropPredDataset(name='ogbl-citation')
+    dataset = PygLinkPropPredDataset(name='ogbl-citation2')
     split_edge = dataset.get_edge_split()
     data = dataset[0]
 
@@ -145,7 +145,7 @@ def main():
     predictor = LinkPredictor(x.size(-1), args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 
-    evaluator = Evaluator(name='ogbl-citation')
+    evaluator = Evaluator(name='ogbl-citation2')
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
@@ -171,7 +171,9 @@ def main():
                           f'Valid: {valid_mrr:.4f}, '
                           f'Test: {test_mrr:.4f}')
 
+        print('Node2vec' if args.use_node_embedding else 'MLP')
         logger.print_statistics(run)
+    print('Node2vec' if args.use_node_embedding else 'MLP')
     logger.print_statistics()
 
 

@@ -38,9 +38,10 @@ dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = False
 
 ### add meta-information about paper citation recommendation task
-name = 'ogbl-citation'
+### ogbl-citation is depreciated due to the negative sample bug (Dec 25, 2020)
+name = 'ogbl-citation2'
 dataset_dict[name] = {'eval metric': 'mrr', 'task type': 'link prediction'}
-dataset_dict[name]['download_name'] = 'citation'
+dataset_dict[name]['download_name'] = 'citation-v2'
 dataset_dict[name]['version'] = 1
 dataset_dict[name]['url'] = 'https://snap.stanford.edu/ogb/data/linkproppred/'+dataset_dict[name]['download_name']+'.zip'
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
@@ -54,9 +55,10 @@ dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = False
 
 ### add meta-information about wikidata knowledge graph completion task
-name = 'ogbl-wikikg'
+### ogbl-wikikg is depreciated due to the negative sample bug (Dec 25, 2020)
+name = 'ogbl-wikikg2'
 dataset_dict[name] = {'eval metric': 'mrr', 'task type': 'KG completion'}
-dataset_dict[name]['download_name'] = 'wikikg'
+dataset_dict[name]['download_name'] = 'wikikg-v2'
 dataset_dict[name]['version'] = 1
 dataset_dict[name]['url'] = 'https://snap.stanford.edu/ogb/data/linkproppred/'+dataset_dict[name]['download_name']+'.zip'
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
