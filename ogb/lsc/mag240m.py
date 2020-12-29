@@ -129,7 +129,7 @@ class MAG240MEvaluator:
 
 
 if __name__ == '__main__':
-    dataset = MAG240MDataset('/data/datasets/OGB/mag240m')
+    dataset = MAG240MDataset()
     print(dataset)
     print(dataset.num_papers)
     print(dataset.num_authors)
