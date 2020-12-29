@@ -1,6 +1,6 @@
 # ogbl-citation2
 
-**Note (Dec 25, 2020)**: `ogbl-citation` is deprecated since negative samples used in validation and test sets are found to be quite biased (i.e., half of the nodes are never sampled as negative examples). `ogbl-citation2` fixes this issue while retaining everyelse the same. The leaderboard results of `ogbl-citation` and `ogbl-citation2` are *not* comparable. 
+**Note (Dec 29, 2020)**: `ogbl-citation` is deprecated because negative samples used in validation and test sets are found to be quite biased (i.e., half of the entity nodes are never sampled as negative examples). `ogbl-citation2` (available from `ogb>=1.2.4` ) fixes this issue while retaining everyelse the same. The leaderboard results of `ogbl-citation` and `ogbl-citation2` are *not* comparable. 
 
 This repository includes the following example scripts:
 
