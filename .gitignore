@@ -21,3 +21,6 @@ dataset/
 *.npy
 **/convert.py
 **/mapping/README.md
+**.json
+**/checkpoint
+**/events.out.*
