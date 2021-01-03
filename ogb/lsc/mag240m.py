@@ -26,7 +26,8 @@ class MAG240MDataset(object):
         self.root = root
         self.dir = osp.join(root, 'mag240m')
 
-        if osp.isdir(self.dir) and (not osp.exists(osp.join(self.dir, f'RELEASE_v{self.version}.txt'))):
+        if osp.isdir(self.dir) and (not osp.exists(
+                osp.join(self.dir, f'RELEASE_v{self.version}.txt'))):
             print('MAG240M dataset has been updated.')
             if input('Will you update the dataset now? (y/N)\n') == 'y':
                 shutil.rmtree(osp.join(self.dir))
