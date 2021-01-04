@@ -21,6 +21,7 @@ class PyGPCQM4MDataset(InMemoryDataset):
         self.download_name = 'pcqm4m-folder'
         self.version = 1
         self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
+        self._use_smiles = False
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
@@ -53,6 +54,18 @@ class PyGPCQM4MDataset(InMemoryDataset):
         else:
             print('Stop download.')
             exit(-1)
+
+    def get_smiles_and_label(self, idx):
+        assert isinstance(idx, (int))
+        
+        if self._use_smiles is False:
+            # loading data
+            data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
+            self.smiles_list = list(data_df['smiles'])
+            self.label = list(data_df['homolumogap'])
+            self._use_smiles = True
+            
+        return self.smiles_list[idx], self.label[idx]
 
     def process(self):
         data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
