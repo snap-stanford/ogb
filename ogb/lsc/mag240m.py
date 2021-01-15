@@ -16,7 +16,7 @@ class MAG240MDataset(object):
 
     __rels__ = {
         ('author', 'paper'): 'writes',
-        ('author', 'institution'): 'affliated_with',
+        ('author', 'institution'): 'affiliated_with',
         ('paper', 'paper'): 'cites',
     }
 
