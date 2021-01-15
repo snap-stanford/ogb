@@ -77,14 +77,29 @@ class MAG240MDataset(object):
         return np.load(path, mmap_mode='r')
 
     @property
+    def all_paper_feat(self) -> np.ndarray:
+        path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
+        return np.load(path)
+
+    @property
     def paper_label(self) -> np.ndarray:
         path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
         return np.load(path, mmap_mode='r')
 
     @property
+    def all_paper_label(self) -> np.ndarray:
+        path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
+        return np.load(path)
+
+    @property
     def paper_year(self) -> np.ndarray:
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         return np.load(path, mmap_mode='r')
+
+    @property
+    def all_paper_year(self) -> np.ndarray:
+        path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
+        return np.load(path)
 
     def edge_index(self, id1: str, id2: str,
                    id3: Optional[str] = None) -> np.ndarray:
