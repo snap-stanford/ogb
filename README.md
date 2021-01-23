@@ -77,6 +77,7 @@ Below, on PyTorch Geometric, we see that a few lines of code is sufficient to pr
 from ogb.graphproppred import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
+# Download and process data at './dataset/ogbg_molhiv/'
 dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv')
 
 split_idx = dataset.get_idx_split() 
