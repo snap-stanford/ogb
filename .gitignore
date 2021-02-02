@@ -10,7 +10,7 @@ dataset/
 *.so
 *trial*
 *.ipynb
-*.sh
+#*.sh
 *analyze*
 *random.py
 *RELEASE_*
