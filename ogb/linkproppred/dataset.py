@@ -3,8 +3,7 @@
 import pandas as pd
 import shutil, os
 import os.path as osp
-from ogb.utils.pickle_util import dump_pickle, load_pickle
-from ogb.utils.torch_util import load_pt
+from ogb.utils.pickle_util import dump_pickle, load_pickle, load_torch_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw, read_binary_graph_raw, read_binary_heterograph_raw
 # import torch
@@ -152,9 +151,9 @@ class LinkPropPredDataset(object):
         # valid = torch.load(osp.join(path, 'valid.pt'))
         # test = torch.load(osp.join(path, 'test.pt'))
 
-        train = load_pt(osp.join(path, 'train.pt'))
-        valid = load_pt(osp.join(path, 'valid.pt'))
-        test = load_pt(osp.join(path, 'test.pt'))
+        train = load_torch_pt(osp.join(path, 'train.pt'))
+        valid = load_torch_pt(osp.join(path, 'valid.pt'))
+        test = load_torch_pt(osp.join(path, 'test.pt'))
 
         return {'train': train, 'valid': valid, 'test': test}
 

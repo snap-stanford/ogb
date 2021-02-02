@@ -4,8 +4,7 @@ import shutil, os
 import numpy as np
 import os.path as osp
 
-from ogb.utils.pickle_util import dump_pickle, load_pickle
-from ogb.utils.torch_util import load_pt
+from ogb.utils.pickle_util import dump_pickle, load_pickle, load_torch_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_binary_graph_raw
 # import torch
@@ -144,7 +143,7 @@ class GraphPropPredDataset(object):
 
         split_dict_path = os.path.join(path, 'split_dict.pt')
         if os.path.isfile(split_dict_path):
-            return load_pt(split_dict_path)
+            return load_torch_pt(split_dict_path)
 
         train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
         valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]

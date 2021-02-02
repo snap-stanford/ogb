@@ -2,8 +2,7 @@ import pandas as pd
 import shutil, os
 import os.path as osp
 
-from ogb.utils.pickle_util import load_pickle, dump_pickle
-from ogb.utils.torch_util import load_pt
+from ogb.utils.pickle_util import load_pickle, dump_pickle, load_torch_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw,\
                                     read_node_label_hetero, read_nodesplitidx_split_hetero,\
@@ -156,7 +155,7 @@ class NodePropPredDataset(object):
 
         split_dict_path = os.path.join(path, 'split_dict.pt')
         if os.path.isfile(split_dict_path):
-            return load_pt(split_dict_path)
+            return load_torch_pt(split_dict_path)
             
         if self.is_hetero:
             train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
