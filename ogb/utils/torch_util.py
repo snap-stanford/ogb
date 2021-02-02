@@ -7,7 +7,6 @@ import sys
 
 TORCH_PICKLE_MAGIC_NUMBER = 0x1950a86a20f9469cfc6c
 TORCH_PICKLE_PROTOCOL_VERSION = 1001
-STORAGE_KEY_SEPARATOR = ','
 
 
 def replace_numpy_with_torchtensor(obj):
@@ -54,34 +53,6 @@ def load_pt(pt_path):
     pickle_load_args = {}
     if sys.version_info >= (3, 0) and 'encoding' not in pickle_load_args.keys():
         pickle_load_args['encoding'] = 'utf-8'
-
-    # def persistent_load(saved_id):
-    #     assert isinstance(saved_id, tuple)
-    #     typename = _maybe_decode_ascii(saved_id[0])
-    #     data = saved_id[1:]
-    #
-    #     if typename == 'module':
-    #         # Ignore containers that don't have any sources saved
-    #         if all(data[1:]):
-    #             _check_container_source(*data)
-    #         return data[0]
-    #     elif typename == 'storage':
-    #         data_type, root_key, location, size, view_metadata = data
-    #         location = _maybe_decode_ascii(location)
-    #         if root_key not in deserialized_objects:
-    #             obj = data_type(size)
-    #             obj._torch_load_uninitialized = True
-    #             deserialized_objects[root_key] = restore_location(obj, location)
-    #         storage = deserialized_objects[root_key]
-    #         if view_metadata is not None:
-    #             view_key, offset, view_size = view_metadata
-    #             if view_key not in deserialized_objects:
-    #                 deserialized_objects[view_key] = storage[offset:offset + view_size]
-    #             return deserialized_objects[view_key]
-    #         else:
-    #             return storage
-    #     else:
-    #         raise RuntimeError("Unknown saved id type: %s" % saved_id[0])
 
     with open(pt_path, 'rb') as f:
 

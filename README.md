@@ -50,7 +50,9 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
 #### Pip install
 The recommended way to install OGB is using Python's package manager pip:
 ```bash
-pip install ogb
+pip install ogb # Install OGB Only
+
+pip install ogb[torch] # Install OGB with PyTorch
 ```
 
 ```bash
