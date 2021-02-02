@@ -1,5 +1,7 @@
-import torch
-import pandas as pd
+# coding=utf-8
+# import torch
+import pickle
+# import pandas as pd
 import os
 import os.path as osp
 from datetime import date
@@ -7,7 +9,7 @@ import shutil
 from tqdm import tqdm
 import numpy as np
 from ogb.io.read_graph_raw import read_binary_graph_raw, read_binary_heterograph_raw
-from ogb.utils.torch_util import all_numpy
+from ogb.utils.numpy_util import all_numpy
 
 class DatasetSaver(object):
     '''
@@ -406,7 +408,10 @@ class DatasetSaver(object):
 
         ## directly save split_dict
         ## compatible with ogb>=v1.2.3
-        torch.save(split_dict, osp.join(self.split_dir, 'split_dict.pt'))
+        # torch.save(split_dict, osp.join(self.split_dir, 'split_dict.pt'))
+
+        with open(osp.join(self.split_dir, 'split_dict.pt'), "wb") as f:
+            pickle.dump(split_dict, f, protocol=4)
 
         self.split_name = split_name
         self._save_split_done = True
@@ -467,7 +472,11 @@ class DatasetSaver(object):
         meta_dict['is hetero'] = str(self.is_hetero)
 
         # save meta-dict for submission
-        torch.save(meta_dict, self.meta_dict_path)
+        # torch.save(meta_dict, self.meta_dict_path)
+
+        with open(self.meta_dict_path, "wb") as f:
+            pickle.dump(meta_dict, f, protocol=4)
+
 
         self._get_meta_dict_done = 'True'
 

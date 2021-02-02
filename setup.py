@@ -26,8 +26,7 @@ setup(name='ogb',
       keywords=['pytorch', 'graph machine learning', 'graph representation learning', 'graph neural networks'],
       long_description=long_description,
       long_description_content_type='text/markdown',
-      install_requires = [
-        'torch>=1.2.0',
+      install_requires=[
         'numpy>=1.16.0',
         'tqdm>=4.29.0',
         'scikit-learn>=0.20.0',
@@ -36,8 +35,11 @@ setup(name='ogb',
         'urllib3>=1.24.0',
         'outdated>=0.2.0'
       ],
+      extras_require={
+          "torch": ["torch>=1.2.0"]
+      },
       license='MIT',
-      packages=find_packages(exclude=['dataset', 'examples', 'docs']),
+      packages=find_packages(exclude=['dataset', 'examples', 'docs', 'test']),
       package_data={'ogb': package_data_list},
       include_package_data=True,
       classifiers=[

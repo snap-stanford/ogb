@@ -1,10 +1,15 @@
+# coding=utf-8
+
 import pandas as pd
 import shutil, os
 import os.path as osp
+from ogb.utils.pickle_util import dump_pickle, load_pickle
+from ogb.utils.torch_util import load_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw, read_binary_graph_raw, read_binary_heterograph_raw
-import torch
-import numpy as np
+# import torch
+# import numpy as np
+
 
 class LinkPropPredDataset(object):
     def __init__(self, name, root = 'dataset', meta_dict = None):
@@ -64,7 +69,8 @@ class LinkPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            self.graph = torch.load(pre_processed_file_path, 'rb')
+            # self.graph = torch.load(pre_processed_file_path, 'rb')
+            self.graph = load_pickle(pre_processed_file_path)
 
         else:
             ### check download
@@ -123,7 +129,9 @@ class LinkPropPredDataset(object):
                     self.graph = read_csv_graph_raw(raw_dir, add_inverse_edge = add_inverse_edge, additional_node_files = additional_node_files, additional_edge_files = additional_edge_files)[0] # only a single graph
 
             print('Saving...')
-            torch.save(self.graph, pre_processed_file_path, pickle_protocol=4)
+
+            # torch.save(self.graph, pre_processed_file_path, pickle_protocol=4)
+            dump_pickle(self.graph, pre_processed_file_path)
 
     def get_edge_split(self, split_type = None):
         if split_type is None:
@@ -132,12 +140,21 @@ class LinkPropPredDataset(object):
         path = osp.join(self.root, 'split', split_type)
 
         # short-cut if split_dict.pt exists
-        if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+        # if os.path.isfile(os.path.join(path, 'split_dict.pt')):
+        #     return torch.load(os.path.join(path, 'split_dict.pt'))
 
-        train = torch.load(osp.join(path, 'train.pt'))
-        valid = torch.load(osp.join(path, 'valid.pt'))
-        test = torch.load(osp.join(path, 'test.pt'))
+        split_dict_path = os.path.join(path, 'split_dict.pt')
+        if os.path.isfile(split_dict_path):
+            return load_pickle(split_dict_path)
+
+
+        # train = torch.load(osp.join(path, 'train.pt'))
+        # valid = torch.load(osp.join(path, 'valid.pt'))
+        # test = torch.load(osp.join(path, 'test.pt'))
+
+        train = load_pt(osp.join(path, 'train.pt'))
+        valid = load_pt(osp.join(path, 'valid.pt'))
+        test = load_pt(osp.join(path, 'test.pt'))
 
         return {'train': train, 'valid': valid, 'test': test}
 

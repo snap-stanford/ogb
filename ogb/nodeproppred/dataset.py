@@ -1,16 +1,19 @@
 import pandas as pd
 import shutil, os
 import os.path as osp
+
+from ogb.utils.pickle_util import load_pickle, dump_pickle
+from ogb.utils.torch_util import load_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_csv_heterograph_raw,\
                                     read_node_label_hetero, read_nodesplitidx_split_hetero,\
                                         read_binary_graph_raw, read_binary_heterograph_raw
                                         
-import torch
+# import torch
 import numpy as np
 
 class NodePropPredDataset(object):
-    def __init__(self, name, root = 'dataset', meta_dict = None):
+    def __init__(self, name, root='dataset', meta_dict = None):
         '''
             - name (str): name of the dataset
             - root (str): root directory to store the dataset folder
@@ -67,7 +70,8 @@ class NodePropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            loaded_dict = torch.load(pre_processed_file_path)
+            # loaded_dict = torch.load(pre_processed_file_path)
+            loaded_dict = load_pickle(pre_processed_file_path)
             self.graph, self.labels = loaded_dict['graph'], loaded_dict['labels']
 
         else:
@@ -136,7 +140,8 @@ class NodePropPredDataset(object):
                     self.labels = pd.read_csv(osp.join(raw_dir, 'node-label.csv.gz'), compression='gzip', header = None).values
 
             print('Saving...')
-            torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
+            # torch.save({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
+            dump_pickle({'graph': self.graph, 'labels': self.labels}, pre_processed_file_path)
 
 
     def get_idx_split(self, split_type = None):
@@ -146,8 +151,12 @@ class NodePropPredDataset(object):
         path = osp.join(self.root, 'split', split_type)
 
         # short-cut if split_dict.pt exists
-        if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+        # if os.path.isfile(os.path.join(path, 'split_dict.pt')):
+        #     return torch.load(os.path.join(path, 'split_dict.pt'))
+
+        split_dict_path = os.path.join(path, 'split_dict.pt')
+        if os.path.isfile(split_dict_path):
+            return load_pt(split_dict_path)
             
         if self.is_hetero:
             train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)

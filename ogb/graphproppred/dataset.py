@@ -1,10 +1,15 @@
+# coding=utf-8
 import pandas as pd
 import shutil, os
 import numpy as np
 import os.path as osp
+
+from ogb.utils.pickle_util import dump_pickle, load_pickle
+from ogb.utils.torch_util import load_pt
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_raw import read_csv_graph_raw, read_binary_graph_raw
-import torch
+# import torch
+
 
 class GraphPropPredDataset(object):
     def __init__(self, name, root = 'dataset', meta_dict = None):
@@ -64,7 +69,8 @@ class GraphPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if os.path.exists(pre_processed_file_path):
-            loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            # loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            loaded_dict = load_pickle(pre_processed_file_path)
             self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
 
         else:
@@ -122,7 +128,8 @@ class GraphPropPredDataset(object):
                     self.labels = pd.read_csv(osp.join(raw_dir, 'graph-label.csv.gz'), compression='gzip', header = None).values
 
             print('Saving...')
-            torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
+            # torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
+            dump_pickle({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path)
 
 
     def get_idx_split(self, split_type = None):
@@ -132,8 +139,12 @@ class GraphPropPredDataset(object):
         path = osp.join(self.root, 'split', split_type)
 
         # short-cut if split_dict.pt exists
-        if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+        # if os.path.isfile(os.path.join(path, 'split_dict.pt')):
+        #     return torch.load(os.path.join(path, 'split_dict.pt'))
+
+        split_dict_path = os.path.join(path, 'split_dict.pt')
+        if os.path.isfile(split_dict_path):
+            return load_pt(split_dict_path)
 
         train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
         valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]
