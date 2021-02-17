@@ -154,33 +154,33 @@ class WikiKG90MDataset(object):
             Two test tasks: h,r->t and t,r->h
 
             - h,r->t: Given head and relation, predict target entities
-                - hr: np.ndarray of shape (num_validation_triplets, 2)
+                - hr: np.ndarray of shape (num_test_triplets, 2)
                       i-th row stores i-th (h,r)
-                - t_candidate: np.ndarray of shape (num_validation_triplets, 1001)
+                - t_candidate: np.ndarray of shape (num_test_triplets, 1001)
                       i-th row stores i-th candidates for the tail entities
                       * Using mmap_mode
 
             - t,r->h: Given tail and relation, predict head entities
-                - tr: np.ndarray of shape (num_validation_triplets, 2)
+                - tr: np.ndarray of shape (num_test_triplets, 2)
                       i-th row stores i-th (t,r)
-                - h_candidate: np.ndarray of shape (num_validation_triplets, 1001)
+                - h_candidate: np.ndarray of shape (num_test_triplets, 1001)
                       i-th row stores i-th candidates for the head entities
                       * Using mmap_mode
 
             * t_correct_index and h_correct_index are hidden
         '''
-        if self._valid_dict is None:
-            self._valid_dict = {}
+        if self._test_dict is None:
+            self._test_dict = {}
             # h, r -> t
-            self._valid_dict['h,r->t'] = {}
-            self._valid_dict['h,r->t']['hr'] = np.load(osp.join(self.processed_dir, 'test_hr.npy'))
-            self._valid_dict['h,r->t']['t_candidate'] = np.load(osp.join(self.processed_dir, 'test_t_candidate.npy'), mmap_mode='r')
+            self._test_dict['h,r->t'] = {}
+            self._test_dict['h,r->t']['hr'] = np.load(osp.join(self.processed_dir, 'test_hr.npy'))
+            self._test_dict['h,r->t']['t_candidate'] = np.load(osp.join(self.processed_dir, 'test_t_candidate.npy'), mmap_mode='r')
             # t, r -> h
-            self._valid_dict['t,r->h'] = {}
-            self._valid_dict['t,r->h']['tr'] = np.load(osp.join(self.processed_dir, 'test_tr.npy'))
-            self._valid_dict['t,r->h']['h_candidate'] = np.load(osp.join(self.processed_dir, 'test_h_candidate.npy'), mmap_mode='r')
+            self._test_dict['t,r->h'] = {}
+            self._test_dict['t,r->h']['tr'] = np.load(osp.join(self.processed_dir, 'test_tr.npy'))
+            self._test_dict['t,r->h']['h_candidate'] = np.load(osp.join(self.processed_dir, 'test_h_candidate.npy'), mmap_mode='r')
 
-        return self._valid_dict
+        return self._test_dict
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
