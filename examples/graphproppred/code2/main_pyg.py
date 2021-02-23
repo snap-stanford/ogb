@@ -85,7 +85,7 @@ def eval(model, device, loader, evaluator, arr_to_seq):
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-code data with Pytorch Geometrics')
+    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-code2 data with Pytorch Geometrics')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
     parser.add_argument('--gnn', type=str, default='gcn-virtual',
@@ -106,8 +106,8 @@ def main():
                         help='number of epochs to train (default: 30)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
-    parser.add_argument('--dataset', type=str, default="ogbg-code",
-                        help='dataset name (default: ogbg-code)')
+    parser.add_argument('--dataset', type=str, default="ogbg-code2",
+                        help='dataset name (default: ogbg-code2)')
 
     parser.add_argument('--filename', type=str, default="",
                         help='filename to output result (default: )')
