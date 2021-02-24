@@ -170,7 +170,7 @@ def decode_arr_to_seq(arr, idx2vocab):
     '''
 
 
-    eos_idx_list = (arr == len(idx2vocab) - 1).nonzero() # find the position of __EOS__ (the last vocab in idx2vocab)
+    eos_idx_list = torch.nonzero(arr == len(idx2vocab) - 1) # find the position of __EOS__ (the last vocab in idx2vocab)
     if len(eos_idx_list) > 0:
         clippted_arr = arr[: torch.min(eos_idx_list)] # find the smallest __EOS__
     else:

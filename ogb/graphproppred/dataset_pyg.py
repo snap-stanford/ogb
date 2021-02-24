@@ -167,27 +167,29 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
 
 if __name__ == '__main__':
-    pyg_dataset = PygGraphPropPredDataset(name = 'ogbg-molpcba')
-    print(pyg_dataset.num_classes)
-    split_index = pyg_dataset.get_idx_split()
-    print(pyg_dataset)
-    print(pyg_dataset[0])
-    print(pyg_dataset[0].y)
-    print(pyg_dataset[0].y.dtype)
-    print(pyg_dataset[0].edge_index)
-    print(pyg_dataset[split_index['train']])
-    print(pyg_dataset[split_index['valid']])
-    print(pyg_dataset[split_index['test']])
-
-    # pyg_dataset = PygGraphPropPredDataset(name = 'ogbg-code')
+    # pyg_dataset = PygGraphPropPredDataset(name = 'ogbg-molpcba')
     # print(pyg_dataset.num_classes)
     # split_index = pyg_dataset.get_idx_split()
     # print(pyg_dataset)
+    # print(pyg_dataset[0])
     # print(pyg_dataset[0].y)
+    # print(pyg_dataset[0].y.dtype)
     # print(pyg_dataset[0].edge_index)
     # print(pyg_dataset[split_index['train']])
     # print(pyg_dataset[split_index['valid']])
     # print(pyg_dataset[split_index['test']])
+
+    pyg_dataset = PygGraphPropPredDataset(name = 'ogbg-code2')
+    print(pyg_dataset.num_classes)
+    split_index = pyg_dataset.get_idx_split()
+    print(pyg_dataset[0])
+    # print(pyg_dataset[0].node_is_attributed)
+    print([pyg_dataset[i].x[1] for i in range(100)])
+    # print(pyg_dataset[0].y)
+    # print(pyg_dataset[0].edge_index)
+    print(pyg_dataset[split_index['train']])
+    print(pyg_dataset[split_index['valid']])
+    print(pyg_dataset[split_index['test']])
 
     # from torch_geometric.data import DataLoader
     # loader = DataLoader(pyg_dataset, batch_size=32, shuffle=True)

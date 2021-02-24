@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 
+MASK_TOKEN='_mask_'
+
 class OGB_ASTWalker(ast.NodeVisitor):
     def __init__(self):
         self.node_id = 0
@@ -30,7 +32,7 @@ class OGB_ASTWalker(ast.NodeVisitor):
         
         # encapsulate all node features in a dict
         self.nodes[node_name] = {'type': type(node).__name__,
-                                 'attribute': node_value,
+                                 'attribute': node_value.decode('UTF-8') if node_value is not None else node_value,
                                  'attributed': True if node_value != None else False,
                                  'depth': len(self.stack),
                                  'dfs_order': node_name}
@@ -48,14 +50,17 @@ class OGB_ASTWalker(ast.NodeVisitor):
         self.stack.pop()
 
 
-def py2graph_helper(code, attr2idx, type2idx):
+def py2graph_helper(code, attr2idx, type2idx, mask=True):
     '''
     Input: 
     code: code snippet
     
     Mappers: 
-    attr_mapping: mapping from attribute to integer idx
-    type_mapping: mapping from type to integer idx
+    - attr_mapping: mapping from attribute to integer idx
+    - type_mapping: mapping from type to integer idx
+
+    - mask (bool): whether to mask the method name or not. 
+    If we do method naming, we need to set it to True. Otherwise, there is data leakage.
     
     Output: OGB graph object
     '''
@@ -65,6 +70,13 @@ def py2graph_helper(code, attr2idx, type2idx):
     walker.visit(tree)
     
     ast_nodes, ast_edges = walker.nodes, walker.graph.edges()
+
+    method_name = ast_nodes[1]['attribute']
+    for idx, ast_node in ast_nodes.items():
+        if 'FunctionDef' in ast_node['type'] and ast_node['attribute'] == method_name:
+            ast_nodes[idx]['attribute'] = MASK_TOKEN
+
+    print(ast_nodes)
 
     data = dict()
     data['edge_index'] = np.array([[i, j] for i, j in ast_edges]).transpose()
@@ -84,7 +96,7 @@ def py2graph_helper(code, attr2idx, type2idx):
         typ = ast_nodes[i]['type'] if ast_nodes[i]['type'] in type2idx else '__UNK__'
         
         if ast_nodes[i]['attributed']:
-            attr = ast_nodes[i]['attribute'].decode('UTF-8') if ast_nodes[i]['attribute'].decode('UTF-8') in attr2idx else '__UNK__'
+            attr = ast_nodes[i]['attribute'] if ast_nodes[i]['attribute'] in attr2idx else '__UNK__'
         else:
             attr = '__NONE__'
             
@@ -107,15 +119,31 @@ def py2graph_helper(code, attr2idx, type2idx):
     
 def test_transform(py2graph):
     code = '''
-from ogb.graphproppred import PygGraphPropPredDataset
-from torch_geometric.data import DataLoader
+def train(model, device, loader, optimizer):
+    model.train()
 
-dataset = PygGraphPropPredDataset(name = "ogbg-molhiv")
+    loss_accum = 0
+    for step, batch in enumerate(tqdm(loader, desc="Iteration")):
+        batch = batch.to(device)
 
-split_idx = dataset.get_idx_split() 
-train_loader = DataLoader(dataset[split_idx["train"]], batch_size=32, shuffle=True)
-valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=32, shuffle=False)
-test_loader = DataLoader(dataset[split_idx["test"]], batch_size=32, shuffle=False)
+        if batch.x.shape[0] == 1 or batch.batch[-1] == 0:
+            pass
+        else:
+            pred_list = model(batch)
+            optimizer.zero_grad()
+
+            loss = 0
+            for i in range(len(pred_list)):
+                loss += multicls_criterion(pred_list[i].to(torch.float32), batch.y_arr[:,i])
+
+            loss = loss / len(pred_list)
+            
+            loss.backward()
+            optimizer.step()
+
+            loss_accum += loss.item()
+
+    print('Average training loss: {}'.format(loss_accum / (step + 1)))
 '''
 
     graph = py2graph(code)
@@ -133,7 +161,7 @@ xkcd loves Python
 
 
 if __name__ == "__main__":
-    mapping_dir = 'dataset/ogbg_code_pyg/mapping'
+    mapping_dir = 'dataset/ogbg_code2/mapping'
 
     attr_mapping = dict()
     type_mapping = dict()

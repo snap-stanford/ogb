@@ -85,7 +85,7 @@ def eval(model, device, loader, evaluator, arr_to_seq):
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-code data with Pytorch Geometrics')
+    parser = argparse.ArgumentParser(description='GNN baselines on ogbg-code2 data with Pytorch Geometrics')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
     parser.add_argument('--gnn', type=str, default='gcn-virtual',
@@ -102,16 +102,18 @@ def main():
                         help='dimensionality of hidden units in GNNs (default: 300)')
     parser.add_argument('--batch_size', type=int, default=128,
                         help='input batch size for training (default: 128)')
-    parser.add_argument('--epochs', type=int, default=30,
-                        help='number of epochs to train (default: 30)')
+    parser.add_argument('--epochs', type=int, default=25,
+                        help='number of epochs to train (default: 25)')
+    parser.add_argument('--random_split', action='store_true')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
-    parser.add_argument('--dataset', type=str, default="ogbg-code",
-                        help='dataset name (default: ogbg-code)')
+    parser.add_argument('--dataset', type=str, default="ogbg-code2",
+                        help='dataset name (default: ogbg-code2)')
 
     parser.add_argument('--filename', type=str, default="",
                         help='filename to output result (default: )')
     args = parser.parse_args()
+    print(args)
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
@@ -122,6 +124,19 @@ def main():
     print('Target seqence less or equal to {} is {}%.'.format(args.max_seq_len, np.sum(seq_len_list <= args.max_seq_len) / len(seq_len_list)))
 
     split_idx = dataset.get_idx_split()
+
+    if args.random_split:
+        print('Using random split')
+        perm = torch.randperm(len(dataset))
+        num_train, num_valid, num_test = len(split_idx['train']), len(split_idx['valid']), len(split_idx['test'])
+        split_idx['train'] = perm[:num_train]
+        split_idx['valid'] = perm[num_train:num_train+num_valid]
+        split_idx['test'] = perm[num_train+num_valid:]
+
+        assert(len(split_idx['train']) == num_train)
+        assert(len(split_idx['valid']) == num_valid)
+        assert(len(split_idx['test']) == num_test)
+
 
     # print(split_idx['train'])
     # print(split_idx['valid'])
@@ -194,6 +209,8 @@ def main():
     nodetypes_mapping = pd.read_csv(os.path.join(dataset.root, 'mapping', 'typeidx2type.csv.gz'))
     nodeattributes_mapping = pd.read_csv(os.path.join(dataset.root, 'mapping', 'attridx2attr.csv.gz'))
 
+    print(nodeattributes_mapping)
+
     ### Encoding node features into emb_dim vectors.
     ### The following three node features are used.
     # 1. node type
@@ -213,6 +230,8 @@ def main():
         raise ValueError('Invalid GNN type')
 
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    print(f'#Params: {sum(p.numel() for p in model.parameters())}')
 
     valid_curve = []
     test_curve = []

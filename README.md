@@ -32,8 +32,8 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.2.4.**
-The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.4).
+**If you have previously installed ogb, please make sure you update the version to 1.2.5.**
+The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.5).
 
 #### Requirements
  - Python>=3.6
@@ -55,7 +55,7 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.2.4". Otherwise, please update the version by
+# This should print "1.2.5". Otherwise, please update the version by
 pip install -U ogb
 ```
 
@@ -77,6 +77,7 @@ Below, on PyTorch Geometric, we see that a few lines of code is sufficient to pr
 from ogb.graphproppred import PygGraphPropPredDataset
 from torch_geometric.data import DataLoader
 
+# Download and process data at './dataset/ogbg_molhiv/'
 dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv')
 
 split_idx = dataset.get_idx_split() 
