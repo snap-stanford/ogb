@@ -55,7 +55,7 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.2.4". Otherwise, please update the version by
+# This should print "1.2.5". Otherwise, please update the version by
 pip install -U ogb
 ```
 
