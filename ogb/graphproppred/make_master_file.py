@@ -25,7 +25,7 @@ mol_dataset_list = list(dataset_dict.keys())
 for nme in mol_dataset_list:
     download_folder_name = dataset_dict[nme]['download_name']
     dataset_dict[nme]['version'] = 1
-    dataset_dict[nme]['url'] = 'https://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/' + download_folder_name + '.zip'
+    dataset_dict[nme]['url'] = 'http://snap.stanford.edu/ogb/data/graphproppred/csv_mol_download/' + download_folder_name + '.zip'
     dataset_dict[nme]['add_inverse_edge'] = True
     dataset_dict[nme]['data type'] = 'mol'
     dataset_dict[nme]['has_node_attr'] = True
@@ -53,7 +53,7 @@ name = 'ogbg-ppa'
 dataset_dict[name] = {'eval metric': 'acc'}
 dataset_dict[name]['download_name'] = 'ogbg_ppi_medium'
 dataset_dict[name]['version'] = 1
-dataset_dict[name]['url'] = 'https://snap.stanford.edu/ogb/data/graphproppred/' + dataset_dict[name]['download_name'] + '.zip'
+dataset_dict[name]['url'] = 'http://snap.stanford.edu/ogb/data/graphproppred/' + dataset_dict[name]['download_name'] + '.zip'
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]['add_inverse_edge'] = True 
 dataset_dict[name]['split'] = 'species'
@@ -72,7 +72,7 @@ name = 'ogbg-code2'
 dataset_dict[name] = {'eval metric': 'F1'}
 dataset_dict[name]['download_name'] = 'code2'
 dataset_dict[name]['version'] = 1
-dataset_dict[name]['url'] = 'https://snap.stanford.edu/ogb/data/graphproppred/' + dataset_dict[name]['download_name'] + '.zip'
+dataset_dict[name]['url'] = 'http://snap.stanford.edu/ogb/data/graphproppred/' + dataset_dict[name]['download_name'] + '.zip'
 dataset_dict[name]['add_inverse_edge'] = False 
 dataset_dict[name]['split'] = 'project'
 dataset_dict[name]['num tasks'] = 1
