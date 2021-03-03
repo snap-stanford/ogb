@@ -11,8 +11,8 @@ from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 
 class MAG240MDataset(object):
-    version = 0
-    url = 'http://ogb-data.stanford.edu/data/lsc/mag240m.zip'
+    version = 1
+    url = 'http://ogb-data.stanford.edu/data/lsc/mag240m_kddcup2021.zip'
 
     __rels__ = {
         ('author', 'paper'): 'writes',
@@ -24,7 +24,7 @@ class MAG240MDataset(object):
         if isinstance(root, str):
             root = osp.expanduser(osp.normpath(root))
         self.root = root
-        self.dir = osp.join(root, 'mag240m')
+        self.dir = osp.join(root, 'mag240m_kddcup2021')
 
         if osp.isdir(self.dir) and (not osp.exists(
                 osp.join(self.dir, f'RELEASE_v{self.version}.txt'))):

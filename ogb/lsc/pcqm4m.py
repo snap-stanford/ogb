@@ -17,8 +17,8 @@ class PyGPCQM4MDataset(InMemoryDataset):
 
         self.original_root = root
         self.smiles2graph = smiles2graph
-        self.folder = osp.join(root, 'pcqm4m')
-        self.download_name = 'pcqm4m-folder'
+        self.folder = osp.join(root, 'pcqm4m_kddcup2021')
+        self.download_name = 'pcqm4m_kddcup2021'
         self.version = 1
         self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
         self._use_smiles = False
@@ -161,9 +161,9 @@ class PCQM4MEvaluator:
         np.savez_compressed(filename, y_pred = y_pred)
 
 if __name__ == '__main__':
-    # dataset = PyGPCQM4MDataset()
-    # print(dataset[0])
-    # print(dataset.get_idx_split())
+    dataset = PyGPCQM4MDataset()
+    print(dataset[0])
+    print(dataset.get_idx_split())
 
     evaluator = PCQM4MEvaluator()
     y_true = torch.randn(100)
