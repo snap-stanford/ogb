@@ -67,7 +67,7 @@ def main():
 
     loader = model.loader(batch_size=args.batch_size, shuffle=True,
                           num_workers=4)
-    optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=args.lr)
 
     print('Saving data_dict before training...')
     save_data_dict(model, data, split_idx, save_file = filename)
