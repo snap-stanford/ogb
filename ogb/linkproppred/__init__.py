@@ -3,10 +3,10 @@ from .dataset import LinkPropPredDataset
 
 try:
     from .dataset_pyg import PygLinkPropPredDataset
-except ImportError:
-    pass
+except Exception as e:
+    print(e)
 
 try:
     from .dataset_dgl import DglLinkPropPredDataset
-except (ImportError, OSError):
-    pass
+except Exception as e:
+    print(e)

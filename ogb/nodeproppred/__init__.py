@@ -3,10 +3,10 @@ from .dataset import NodePropPredDataset
 
 try:
     from .dataset_pyg import PygNodePropPredDataset
-except ImportError:
-    pass
+except Exception as e:
+    print(e)
 
 try:
     from .dataset_dgl import DglNodePropPredDataset
-except (ImportError, OSError):
-    pass
+except Exception as e:
+    print(e)

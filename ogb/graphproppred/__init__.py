@@ -3,11 +3,11 @@ from .dataset import GraphPropPredDataset
 
 try:
     from .dataset_pyg import PygGraphPropPredDataset
-except ImportError:
-    pass
+except Exception as e:
+    print(e)
 
 try:
     from .dataset_dgl import DglGraphPropPredDataset
     from .dataset_dgl import collate_dgl
-except (ImportError, OSError):
-    pass
+except Exception as e:
+    print(e)
