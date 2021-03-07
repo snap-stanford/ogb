@@ -111,8 +111,6 @@ class WikiKG90MDataset(object):
     @property
     def valid_dict(self) -> Dict[str, Dict[str, np.ndarray]]:
         '''
-            Two validation tasks: h,r->t and t,r->h
-
             - h,r->t: Given head and relation, predict target entities
                 - hr: np.ndarray of shape (num_validation_triplets, 2)
                       i-th row stores i-th (h,r)
@@ -122,16 +120,6 @@ class WikiKG90MDataset(object):
                 - t_correct_index: np.ndarray of shape (num_validation_triplets,)
                       i-th row stores the index (0<= index < 1001) of the true tail entities
                       i.e., (h[i],r[i],t_candidate[i][t_correct_index[i]]) is the true triplet.
-
-            - t,r->h: Given tail and relation, predict head entities
-                - tr: np.ndarray of shape (num_validation_triplets, 2)
-                      i-th row stores i-th (t,r)
-                - h_candidate: np.ndarray of shape (num_validation_triplets, 1001)
-                      i-th row stores i-th candidates for the head entities
-                      * Using mmap_mode
-                - h_correct_index: np.ndarray of shape (num_validation_triplets,)
-                      i-th row stores the index (0<= index < 1001) of the true head entities
-                      i.e., (h_candidate[i][h_correct_index[i]],r[i],t[i]) is the true triplet.
         '''
         if self._valid_dict is None:
             self._valid_dict = {}
@@ -140,34 +128,17 @@ class WikiKG90MDataset(object):
             self._valid_dict['h,r->t']['hr'] = np.load(osp.join(self.processed_dir, 'val_hr.npy'))
             self._valid_dict['h,r->t']['t_candidate'] = np.load(osp.join(self.processed_dir, 'val_t_candidate.npy'), mmap_mode='r')
             self._valid_dict['h,r->t']['t_correct_index'] = np.load(osp.join(self.processed_dir, 'val_t_correct_index.npy'))
-            # t, r -> h
-            self._valid_dict['t,r->h'] = {}
-            self._valid_dict['t,r->h']['tr'] = np.load(osp.join(self.processed_dir, 'val_tr.npy'))
-            self._valid_dict['t,r->h']['h_candidate'] = np.load(osp.join(self.processed_dir, 'val_h_candidate.npy'), mmap_mode='r')
-            self._valid_dict['t,r->h']['h_correct_index'] = np.load(osp.join(self.processed_dir, 'val_h_correct_index.npy'))
-
         return self._valid_dict
 
     @property
     def test_dict(self) -> Dict[str, Dict[str, np.ndarray]]:
         '''
-            Two test tasks: h,r->t and t,r->h
-
             - h,r->t: Given head and relation, predict target entities
                 - hr: np.ndarray of shape (num_test_triplets, 2)
                       i-th row stores i-th (h,r)
                 - t_candidate: np.ndarray of shape (num_test_triplets, 1001)
                       i-th row stores i-th candidates for the tail entities
                       * Using mmap_mode
-
-            - t,r->h: Given tail and relation, predict head entities
-                - tr: np.ndarray of shape (num_test_triplets, 2)
-                      i-th row stores i-th (t,r)
-                - h_candidate: np.ndarray of shape (num_test_triplets, 1001)
-                      i-th row stores i-th candidates for the head entities
-                      * Using mmap_mode
-
-            * t_correct_index and h_correct_index are hidden
         '''
         if self._test_dict is None:
             self._test_dict = {}
@@ -175,10 +146,6 @@ class WikiKG90MDataset(object):
             self._test_dict['h,r->t'] = {}
             self._test_dict['h,r->t']['hr'] = np.load(osp.join(self.processed_dir, 'test_hr.npy'))
             self._test_dict['h,r->t']['t_candidate'] = np.load(osp.join(self.processed_dir, 'test_t_candidate.npy'), mmap_mode='r')
-            # t, r -> h
-            self._test_dict['t,r->h'] = {}
-            self._test_dict['t,r->h']['tr'] = np.load(osp.join(self.processed_dir, 'test_tr.npy'))
-            self._test_dict['t,r->h']['h_candidate'] = np.load(osp.join(self.processed_dir, 'test_h_candidate.npy'), mmap_mode='r')
 
         return self._test_dict
 
@@ -189,21 +156,17 @@ class WikiKG90MDataset(object):
 class WikiKG90MEvaluator:
     def eval(self, input_dict):
         '''
-            Format of input_dict storing the two tasks: hr->t, tr->h
-            - 'hr->t'
+            Format of input_dict:
+            - 'h,r->t'
                 - t_pred_top10: np.ndarray of shape (num_eval_triplets, 10)
                     each element must < 1001
                     (i,j) represents the j-th prediction for i-th triplet
                     Only top10 prediction is taken into account
                 - t_correct_index: np.ndarray of shape (num_eval_triplets,)
 
-             - 'tr->h'
-                - h_pred_top10: np.ndarray of shape (num_eval_triplets, 10)
-                - h_correct_index: np.ndarray of shape (num_eval_triplets,)
         '''
-        assert 'h,r->t' in input_dict and 't,r->h' in input_dict
-        assert 't_pred_top10' in input_dict['h,r->t'] and 't_correct_index' in input_dict['h,r->t']
-        assert 'h_pred_top10' in input_dict['t,r->h'] and 'h_correct_index' in input_dict['t,r->h']
+        assert 'h,r->t' in input_dict
+        assert ('t_pred_top10' in input_dict['h,r->t']) and ('t_correct_index' in input_dict['h,r->t'])
 
         # h,r->t
         t_pred_top10 = input_dict['h,r->t']['t_pred_top10']
@@ -217,23 +180,7 @@ class WikiKG90MEvaluator:
         assert (0 <= t_pred_top10).all() and (t_pred_top10 < 1001).all()
         assert (0 <= t_correct_index).all() and (t_correct_index < 1001).all()
 
-        # t,r->h
-        h_pred_top10 = input_dict['t,r->h']['h_pred_top10']
-        h_correct_index = input_dict['t,r->h']['h_correct_index']
-        if not isinstance(h_pred_top10, torch.Tensor):
-            h_pred_top10 = torch.from_numpy(h_pred_top10)
-        if not isinstance(h_correct_index, torch.Tensor):
-            h_correct_index = torch.from_numpy(h_correct_index)
-        assert h_pred_top10.shape[1] == 10 and len(h_pred_top10) == len(h_correct_index)
-        assert (0 <= h_pred_top10).all() and (h_pred_top10 < 1001).all()
-        assert (0 <= h_correct_index).all() and (h_correct_index < 1001).all()
-
-        assert(len(h_pred_top10) == len(t_pred_top10))
-
-        mrr_hr2t = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
-        mrr_tr2h = self._calculate_mrr(h_correct_index.to(h_pred_top10.device), h_pred_top10)
-
-        mrr = (mrr_hr2t + mrr_tr2h)/2
+        mrr = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
 
         return {'mrr': mrr}
 
@@ -254,27 +201,20 @@ class WikiKG90MEvaluator:
         return float(rr.mean().item())
 
     def save_test_submission(self, input_dict, dir_path):
-        assert 'h,r->t' in input_dict and 't,r->h' in input_dict
+        assert 'h,r->t' in input_dict
         assert 't_pred_top10' in input_dict['h,r->t']
-        assert 'h_pred_top10' in input_dict['t,r->h']
 
         t_pred_top10 = input_dict['h,r->t']['t_pred_top10']
-        h_pred_top10 = input_dict['t,r->h']['h_pred_top10']
 
         assert t_pred_top10.shape == (1359303, 10) and (0 <= t_pred_top10).all() and (t_pred_top10 < 1001).all()
-        assert h_pred_top10.shape == (1359303, 10) and (0 <= h_pred_top10).all() and (h_pred_top10 < 1001).all()
 
         if isinstance(t_pred_top10, torch.Tensor):
             t_pred_top10 = t_pred_top10.cpu().numpy()
         t_pred_top10 = t_pred_top10.astype(np.int16)
 
-        if isinstance(h_pred_top10, torch.Tensor):
-            h_pred_top10 = h_pred_top10.cpu().numpy()
-        h_pred_top10 = h_pred_top10.astype(np.int16)
-
         makedirs(dir_path)
-        filename = osp.join(dir_path, 'ht_pred_wikikg90m')
-        np.savez_compressed(filename, t_pred_top10=t_pred_top10, h_pred_top10=h_pred_top10)
+        filename = osp.join(dir_path, 't_pred_wikikg90m')
+        np.savez_compressed(filename, t_pred_top10=t_pred_top10)
 
 if __name__ == '__main__':
     dataset = WikiKG90MDataset()
@@ -288,37 +228,28 @@ if __name__ == '__main__':
     print(dataset.train_hrt)
     print(dataset.valid_dict)
     print(dataset.test_dict)
-    print(dataset.valid_dict['t,r->h']['h_correct_index'].max())
-    print(dataset.valid_dict['t,r->h']['h_correct_index'].min())
+    print(dataset.valid_dict['h,r->t']['t_correct_index'].max())
+    print(dataset.valid_dict['h,r->t']['t_correct_index'].min())
 
     evaluator = WikiKG90MEvaluator()
 
     valid_dict = dataset.valid_dict
     t_correct_index = valid_dict['h,r->t']['t_correct_index']
-    h_correct_index = valid_dict['t,r->h']['h_correct_index']
-
-    h_pred_top10 = np.random.randint(0,1001, size=(len(h_correct_index), 10))
     t_pred_top10 = np.random.randint(0,1001, size=(len(t_correct_index), 10))
 
     input_dict = {}
-    input_dict['h,r->t'] = {'t_correct_index': h_correct_index, 't_pred_top10': h_pred_top10}
-    input_dict['t,r->h'] = {'h_correct_index': t_correct_index, 'h_pred_top10': t_pred_top10}
+    input_dict['h,r->t'] = {'t_correct_index': t_correct_index, 't_pred_top10': t_pred_top10}
     result = evaluator.eval(input_dict)
     print(result)
 
     t_correct_index = torch.from_numpy(t_correct_index)
-    h_correct_index = torch.from_numpy(h_correct_index)
-
-    h_pred_top10 = torch.from_numpy(h_pred_top10)
     t_pred_top10 = torch.from_numpy(t_pred_top10)
 
     input_dict = {}
-    input_dict['h,r->t'] = {'t_correct_index': h_correct_index, 't_pred_top10': h_pred_top10}
-    input_dict['t,r->h'] = {'h_correct_index': t_correct_index, 'h_pred_top10': t_pred_top10}
+    input_dict['h,r->t'] = {'t_correct_index': t_correct_index, 't_pred_top10': t_pred_top10}
     result = evaluator.eval(input_dict)
     print(result)
 
     input_dict = {}
     input_dict['h,r->t'] = {'t_pred_top10': np.random.randint(0,1001, size = (1359303, 10))}
-    input_dict['t,r->h'] = {'h_pred_top10': np.random.randint(0,1001, size = (1359303, 10))}
     evaluator.save_test_submission(input_dict, 'result')
