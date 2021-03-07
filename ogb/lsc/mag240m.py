@@ -168,6 +168,7 @@ if __name__ == '__main__':
     train_idx = dataset.get_idx_split('train')
     val_idx = dataset.get_idx_split('valid')
     test_idx = dataset.get_idx_split('test')
+    print(len(train_idx) + len(val_idx) + len(test_idx))
     print(dataset.paper_label[train_idx][:10])
     print(dataset.paper_label[val_idx][:10])
     print(dataset.paper_label[test_idx][:10])
