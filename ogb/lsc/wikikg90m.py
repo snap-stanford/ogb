@@ -14,10 +14,10 @@ class WikiKG90MDataset(object):
 
     def __init__(self, root: str = 'dataset'):
         self.original_root = root
+
         self.folder = osp.join(root, 'wikikg90m_kddcup2021')
-        self.download_name = 'wikikg90m_kddcup2021'
         self.version = 1
-        self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/wikikg90m_kddcup2021.zip'
         self.processed_dir = osp.join(self.folder, 'processed')
 
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
@@ -48,11 +48,6 @@ class WikiKG90MDataset(object):
                 path = download_url(self.url, self.original_root)
                 extract_zip(path, self.original_root)
                 os.unlink(path)
-                try:
-                    shutil.rmtree(self.folder)
-                except:
-                    pass
-                shutil.move(osp.join(self.original_root, self.download_name), self.folder)
             else:
                 print('Stop download.')
                 exit(-1)
