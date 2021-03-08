@@ -12,7 +12,7 @@ torch>=1.7.0
 - `CHECKPOINT`: Path to save the best validation checkpoint.
 - `TEST_DIR`: Directory path to save the test submission. The test file will be saved at `${TEST_DIR}/y_pred_pcqm4m.npz`.
 
-## GNN baselines
+## Baselines
 
 ### GIN [1]
 ```bash
@@ -34,7 +34,6 @@ python main_gnn.py --gnn gcn --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --
 python main_gnn.py --gnn gcn-virtual --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --save_test_dir $TEST_DIR
 ```
 
-## Fingerprint baseline
 ### MLP + Morgan fingerprint baseline [4]
 ```bash
 python main_mlpfp.py --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --save_test_dir $TEST_DIR
