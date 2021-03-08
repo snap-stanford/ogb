@@ -12,7 +12,7 @@ torch>=1.7.0
 - `CHECKPOINT`: Path to save the best validation checkpoint.
 - `TEST_DIR`: Directory path to save the test submission. The test file will be saved at `${TEST_DIR}/y_pred_pcqm4m.npz`.
 
-## Baselines
+## Baseline models
 
 ### GIN [1]
 ```bash
