@@ -34,8 +34,8 @@ python main_gnn.py --gnn gcn --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --
 python main_gnn.py --gnn gcn-virtual --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --save_test_dir $TEST_DIR
 ```
 
-## Finger-print baseline
-### MLP + Morgan Fingerprint baseline [4]
+## Fingerprint baseline
+### MLP + Morgan fingerprint baseline [4]
 ```bash
 python main_mlpfp.py --log_dir $LOG_DIR --checkpoint_path $CHECKPOINT --save_test_dir $TEST_DIR
 ```
