@@ -102,7 +102,7 @@ class DglPCQM4MDataset(object):
 
 
     def get_idx_split(self):
-        split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'))
+        split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.folder, 'split_dict.pt')))
         return split_dict
 
     def __getitem__(self, idx):

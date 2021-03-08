@@ -55,18 +55,6 @@ class PygPCQM4MDataset(InMemoryDataset):
             print('Stop download.')
             exit(-1)
 
-    # def get_smiles_and_label(self, idx):
-    #     assert isinstance(idx, (int))
-        
-    #     if self._use_smiles is False:
-    #         # loading data
-    #         data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
-    #         self.smiles_list = list(data_df['smiles'])
-    #         self.label = list(data_df['homolumogap'])
-    #         self._use_smiles = True
-            
-    #     return self.smiles_list[idx], self.label[idx]
-
     def process(self):
         data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
         smiles_list = data_df['smiles']
