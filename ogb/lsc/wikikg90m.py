@@ -103,6 +103,14 @@ class WikiKG90MDataset(object):
         return self._relation_feat
 
     @property
+    def all_relation_feat(self) -> np.ndarray:
+        '''
+            For completeness.
+            #relations is small, so everything can be loaded into CPU memory.
+        '''
+        return self.relation_feat
+
+    @property
     def train_hrt(self) -> np.ndarray:
         '''
             Training triplets (h, r, t)
@@ -227,6 +235,7 @@ if __name__ == '__main__':
     print(dataset.entity_feat.shape)
     print(dataset.num_relations)
     print(dataset.relation_feat)
+    print(dataset.all_relation_feat)
     print(dataset.relation_feat.shape)
     print(dataset.train_hrt)
     print(dataset.valid_dict)
@@ -257,5 +266,5 @@ if __name__ == '__main__':
     input_dict['h,r->t'] = {'t_pred_top10': np.random.randint(0,1001, size = (1359303, 10))}
     evaluator.save_test_submission(input_dict, 'result')
 
-    print(dataset.all_entity_feat)
-    print(dataset.all_entity_feat.shape)
+    # print(dataset.all_entity_feat)
+    # print(dataset.all_entity_feat.shape)
