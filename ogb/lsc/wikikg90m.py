@@ -34,6 +34,7 @@ class WikiKG90MDataset(object):
 
         # node/edge features
         self._entity_feat = None
+        self._all_entity_feat = None
         self._relation_feat = None
 
         # Validation
@@ -80,6 +81,13 @@ class WikiKG90MDataset(object):
             path = osp.join(self.processed_dir, 'entity_feat.npy')
             self._entity_feat = np.load(path, mmap_mode='r')
         return self._entity_feat
+
+    @property
+    def all_entity_feat(self) -> np.ndarray:
+        if self._all_entity_feat is None:
+            path = osp.join(self.processed_dir, 'entity_feat.npy')
+            self._all_entity_feat = np.load(path)
+        return self._all_entity_feat
 
     @property
     def relation_feat(self) -> np.ndarray:
@@ -248,3 +256,6 @@ if __name__ == '__main__':
     input_dict = {}
     input_dict['h,r->t'] = {'t_pred_top10': np.random.randint(0,1001, size = (1359303, 10))}
     evaluator.save_test_submission(input_dict, 'result')
+
+    print(dataset.all_entity_feat)
+    print(dataset.all_entity_feat.shape)
