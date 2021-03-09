@@ -129,7 +129,7 @@ class WikiKG90MDataset(object):
                       i-th row stores i-th candidates for the tail entities
                       * Using mmap_mode
                 - t_correct_index: np.ndarray of shape (num_validation_triplets,)
-                      i-th row stores the index (0<= index < 1001) of the true tail entities
+                      i-th row stores the index (0<= index < 1001) of the true tail entity in t_candidate[i]
                       i.e., (h[i],r[i],t_candidate[i][t_correct_index[i]]) is the true triplet.
         '''
         if self._valid_dict is None:
@@ -247,6 +247,12 @@ if __name__ == '__main__':
 
     valid_dict = dataset.valid_dict
     t_correct_index = valid_dict['h,r->t']['t_correct_index']
+    test_task = dataset.test_dict['h,r->t']
+    
+    # t_correct_index = test_task['t_correct_index'] # key error
+    
+    hr = test_task['hr']
+    t_candidate = test_task['t_candidate']
     t_pred_top10 = np.random.randint(0,1001, size=(len(t_correct_index), 10))
 
     input_dict = {}
