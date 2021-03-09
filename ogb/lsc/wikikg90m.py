@@ -74,7 +74,7 @@ class WikiKG90MDataset(object):
             Entity feature
             - np.ndarray of shape (num_entities, num_feat_dims)
               i-th row stores the feature of i-th entity
-              * Using mmap_mode
+              * Loading everything into memory at once
               * saved in np.float16
         '''
         if self._entity_feat is None:
