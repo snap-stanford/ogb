@@ -1,5 +1,7 @@
 # Baseline code for PCQM4M-LSC
 
+Please refer to our OGB-LSC paper (coming soon) for the detailed setting.
+
 ## Installation requirements
 ```
 ogb>=1.3.0
