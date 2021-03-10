@@ -42,15 +42,6 @@ class Batch(NamedTuple):
 
 
 def get_col_slice(x, start_row_idx, end_row_idx, start_col_idx, end_col_idx):
-    '''
-        Args: 
-            x: numpy.memmap matrix
-            start_idx (int), end_idx (int)
-        
-        Output:
-            x[start_row_idx:end_row_idx, start_col_idx:end_col_idx]
-
-    '''
     print('Performing memory-efficient column slicing...')
     chunk = 100000
     return_mat_list = []
@@ -65,16 +56,6 @@ def get_col_slice(x, start_row_idx, end_row_idx, start_col_idx, end_col_idx):
 
 def save_col_slice(x_from, x_to, start_row_idx, end_row_idx, start_col_idx,
                    end_col_idx):
-    '''
-        Args:
-            x_from: numpy.ndarray
-            x_to: numpy.memmap matrix
-            start_idx (int), end_idx (int)
-        
-        Performing
-            x_to[start_row_idx:end_row_idx,start_col_idx:end_col_idx] = x_from
-    '''
-
     assert x_from.shape[0] == end_row_idx - start_row_idx
     assert x_from.shape[1] == end_col_idx - start_col_idx
 
@@ -212,14 +193,12 @@ class MAG240M(LightningDataModule):
                 # processing 64-dim subfeatures at a time for memory efficiency
                 for i in tqdm(range(0, self.num_features, dim_chunk)):
                     end_idx = min(i + dim_chunk, self.num_features)
-                    # inputs = torch.from_numpy(paper_feat[:, i:end_idx].copy())
                     inputs = torch.from_numpy(
                         get_col_slice(paper_feat, start_row_idx=0,
                                       end_row_idx=len(paper_feat),
                                       start_col_idx=i, end_col_idx=end_idx))
                     outputs = adj_t.matmul(inputs, reduce='mean').numpy()
                     del inputs
-                    # x[dataset.num_papers:dataset.num_papers + dataset.num_authors, i:end_idx] = outputs
                     save_col_slice(
                         x_from=outputs, x_to=x,
                         start_row_idx=dataset.num_papers,
@@ -238,9 +217,6 @@ class MAG240M(LightningDataModule):
                 # processing 64-dim subfeatures at a time for memory efficiency
                 for i in tqdm(range(0, self.num_features, dim_chunk)):
                     end_idx = min(i + dim_chunk, self.num_features)
-                    # inputs = torch.from_numpy(
-                    #     x[dataset.num_papers:dataset.num_papers +
-                    #     dataset.num_authors, i:end_idx].copy())
                     inputs = torch.from_numpy(
                         get_col_slice(
                             x, start_row_idx=dataset.num_papers,
@@ -249,8 +225,6 @@ class MAG240M(LightningDataModule):
                             end_col_idx=end_idx))
                     outputs = adj_t.matmul(inputs, reduce='mean').numpy()
                     del inputs
-                    # x[dataset.num_papers + dataset.num_authors:,
-                    # i:end_idx] = outputs
                     save_col_slice(
                         x_from=outputs, x_to=x,
                         start_row_idx=dataset.num_papers + dataset.num_authors,
@@ -261,7 +235,6 @@ class MAG240M(LightningDataModule):
                 del x
                 print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
-                # writing done flag
                 with open(done_flag_path, 'w') as f:
                     f.write('done')
 

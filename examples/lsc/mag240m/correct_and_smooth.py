@@ -14,10 +14,10 @@ from root import ROOT
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_correction_layers', type=int, default=3), # tuned for 2, 3
-    parser.add_argument('--correction_alpha', type=float, default=1.0), # tuned for 0.6, 0.8, 1.0
-    parser.add_argument('--num_smoothing_layers', type=int, default=2), # tuned for 2, 3
-    parser.add_argument('--smoothing_alpha', type=float, default=0.8), # tuned for 0.6, 0.8, 1.0
+    parser.add_argument('--num_correction_layers', type=int, default=3)
+    parser.add_argument('--correction_alpha', type=float, default=1.0)
+    parser.add_argument('--num_smoothing_layers', type=int, default=2)
+    parser.add_argument('--smoothing_alpha', type=float, default=0.8)
     args = parser.parse_args()
     print(args)
 
@@ -55,7 +55,8 @@ if __name__ == '__main__':
     y_valid = torch.from_numpy(dataset.paper_label[valid_idx]).to(torch.long)
 
     model = CorrectAndSmooth(args.num_correction_layers, args.correction_alpha,
-                             args.num_smoothing_layers, args.smoothing_alpha, autoscale = True)
+                             args.num_smoothing_layers, args.smoothing_alpha,
+                             autoscale=True)
 
     t = time.perf_counter()
     print('Correcting predictions...', end=' ', flush=True)
@@ -66,7 +67,6 @@ if __name__ == '__main__':
     print('Smoothing predictions...', end=' ', flush=True)
     y_pred = model.smooth(y_pred, y_train, train_idx, adj_t)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
-    
 
     train_acc = evaluator.eval({
         'y_true': y_train,

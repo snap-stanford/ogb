@@ -6,10 +6,10 @@ import numpy as np
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.nn import ModuleList, Linear, BatchNorm1d, Identity
-from torch.optim.lr_scheduler import StepLR
 
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from root import ROOT
+
 
 class MLP(torch.nn.Module):
     def __init__(self, in_channels: int, hidden_channels: int,
@@ -115,7 +115,6 @@ if __name__ == '__main__':
                 dataset.num_classes, args.num_layers, args.dropout,
                 not args.no_batch_norm, args.relu_last).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    # scheduler = StepLR(optimizer, step_size=90, gamma=0.25)
     num_params = sum([p.numel() for p in model.parameters()])
     print(f'#Params: {num_params}')
 
@@ -134,5 +133,3 @@ if __name__ == '__main__':
             print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, '
                   f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}, '
                   f'Best: {best_valid_acc:.4f}')
-
-        # scheduler.step()
