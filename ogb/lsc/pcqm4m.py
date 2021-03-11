@@ -57,13 +57,12 @@ class PCQM4MDataset(object):
         if not osp.exists(osp.join(raw_dir, 'data.csv.gz')):
             # if the raw file does not exist, then download it.
             self.download()
-        else:
-            data_df = pd.read_csv(osp.join(raw_dir, 'data.csv.gz'))
-            smiles_list = data_df['smiles'].values
-            homolumogap_list = data_df['homolumogap'].values
 
-            self.graphs = list(smiles_list)
-            self.labels = homolumogap_list
+        data_df = pd.read_csv(osp.join(raw_dir, 'data.csv.gz'))
+        smiles_list = data_df['smiles'].values
+        homolumogap_list = data_df['homolumogap'].values
+        self.graphs = list(smiles_list)
+        self.labels = homolumogap_list
 
     def prepare_graph(self):
         processed_dir = osp.join(self.folder, 'processed')
@@ -192,8 +191,12 @@ class PCQM4MEvaluator:
 if __name__ == '__main__':
     dataset = PCQM4MDataset(only_smiles=True)
     print(dataset)
-    print(dataset[100])
-    print(dataset.get_idx_split())
+    print(dataset[1234])
+    exit(-1)
+    split_dict = dataset.get_idx_split()
+    print(dataset[split_dict['test'][0]])
+    print(dataset[split_dict['valid'][0]])
+    print(dataset[split_dict['train'][0]])
 
     dataset = PCQM4MDataset()
     print(dataset)
