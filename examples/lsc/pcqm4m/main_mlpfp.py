@@ -5,12 +5,12 @@ import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import StepLR
 
+import os
+import os.path as osp
 from tqdm import tqdm
 import argparse
 import time
 import numpy as np
-import os.path as osp
-import os
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -138,7 +138,7 @@ def main_mlp():
                         help='radius (default: 2)')
     parser.add_argument('--log_dir', type=str, default="",
                         help='tensorboard log directory')
-    parser.add_argument('--checkpoint_path', type=str, default = '', help='path to save checkpoint')
+    parser.add_argument('--checkpoint_dir', type=str, default = '', help='directory to save checkpoint')
     parser.add_argument('--save_test_dir', type=str, default = '', help='directory to save test submission file')
     args = parser.parse_args()
 
@@ -178,6 +178,9 @@ def main_mlp():
     if args.save_test_dir is not '':
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
+    if args.checkpoint_dir is not '':
+        os.makedirs(args.checkpoint_dir, exist_ok = True)
+
     model = MLP(num_mlp_layers=args.num_mlp_layers, emb_dim=args.emb_dim, drop_ratio=args.drop_ratio).to(device)
 
     num_params = sum(p.numel() for p in model.parameters())
@@ -212,10 +215,10 @@ def main_mlp():
 
         if valid_mae < best_valid_mae:
             best_valid_mae = valid_mae
-            if args.checkpoint_path is not '':
+            if args.checkpoint_dir is not '':
                 print('Saving checkpoint...')
                 checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_val_mae': best_valid_mae, 'num_params': num_params}
-                torch.save(checkpoint, args.checkpoint_path)
+                torch.save(checkpoint, osp.join(args.checkpoint_dir, 'checkpoint.pt'))
 
             if args.save_test_dir is not '':
                 print('Predicting on test data...')

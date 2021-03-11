@@ -7,6 +7,7 @@ from torch.optim.lr_scheduler import StepLR
 
 from gnn import GNN
 
+import os
 from tqdm import tqdm
 import argparse
 import time
@@ -96,7 +97,7 @@ def main():
                         help='number of workers (default: 1)')
     parser.add_argument('--log_dir', type=str, default="",
                         help='tensorboard log directory')
-    parser.add_argument('--checkpoint_path', type=str, default = '', help='path to save checkpoint')
+    parser.add_argument('--checkpoint_dir', type=str, default = '', help='directory to save checkpoint')
     parser.add_argument('--save_test_dir', type=str, default = '', help='directory to save test submission file')
     args = parser.parse_args()
 
@@ -127,6 +128,9 @@ def main():
 
     if args.save_test_dir is not '':
         test_loader = DataLoader(dataset[split_idx["test"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+
+    if args.checkpoint_dir is not '':
+        os.makedirs(args.checkpoint_dir, exist_ok = True)
 
     shared_params = {
         'num_layers': args.num_layers,
@@ -178,10 +182,10 @@ def main():
 
         if valid_mae < best_valid_mae:
             best_valid_mae = valid_mae
-            if args.checkpoint_path is not '':
+            if args.checkpoint_dir is not '':
                 print('Saving checkpoint...')
                 checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_val_mae': best_valid_mae, 'num_params': num_params}
-                torch.save(checkpoint, args.checkpoint_path)
+                torch.save(checkpoint, os.path.join(args.checkpoint_dir, 'checkpoint.pt'))
 
             if args.save_test_dir is not '':
                 print('Predicting on test data...')
