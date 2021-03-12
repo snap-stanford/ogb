@@ -93,8 +93,8 @@ def main():
                         help='input batch size for training (default: 256)')
     parser.add_argument('--epochs', type=int, default=100,
                         help='number of epochs to train (default: 100)')
-    parser.add_argument('--num_workers', type=int, default=1,
-                        help='number of workers (default: 1)')
+    parser.add_argument('--num_workers', type=int, default=0,
+                        help='number of workers (default: 0)')
     parser.add_argument('--log_dir', type=str, default="",
                         help='tensorboard log directory')
     parser.add_argument('--checkpoint_dir', type=str, default = '', help='directory to save checkpoint')
