@@ -46,10 +46,10 @@ python main_mlpfp.py --log_dir $LOG_DIR --checkpoint_dir $CHECKPOINT_DIR --save_
 
 | Model              |Valid MAE  | Test MAE*   | \#Parameters    | Hardware |
 |:------------------ |:--------------   |:---------------| --------------:|----------|
-| GIN     | 0.1484 | 0.1621 | 11.6M  | GeForce RTX 2080 (11GB GPU) |
-| GIN-virtual     | 0.1382 | 0.1465 | 21.4M  | GeForce RTX 2080 (11GB GPU) |
-| GCN     | 0.1588 | 0.1710 | 5.9M  | GeForce RTX 2080 (11GB GPU) |
-| GCN-virtual     | 0.1459 | 0.1594 | 15.7M  | GeForce RTX 2080 (11GB GPU) |
+| GIN     | 0.1536 | 0.1678 | 3.8M  | GeForce RTX 2080 (11GB GPU) |
+| GIN-virtual     | 0.1396 | 0.1487 | 6.7M  | GeForce RTX 2080 (11GB GPU) |
+| GCN     | 0.1684 | 0.1838 | 2.0M  | GeForce RTX 2080 (11GB GPU) |
+| GCN-virtual     | 0.1510 | 0.1579 | 4.9M  | GeForce RTX 2080 (11GB GPU) |
 | MLP+Fingerprint     | 0.2044 | 0.2068 | 16.1M  | GeForce RTX 2080 (11GB GPU) |
 
 \* Test MAE is evaluated on the **hidden test set.**

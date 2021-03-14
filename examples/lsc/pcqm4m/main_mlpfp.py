@@ -11,6 +11,7 @@ from tqdm import tqdm
 import argparse
 import time
 import numpy as np
+import random
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -147,6 +148,7 @@ def main_mlp():
     np.random.seed(42)
     torch.manual_seed(42)
     torch.cuda.manual_seed(42)
+    random.seed(42)
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 

@@ -12,6 +12,8 @@ from tqdm import tqdm
 import argparse
 import time
 import numpy as np
+import random
+
 
 ### importing OGB-LSC
 from ogb.lsc import PygPCQM4MDataset, PCQM4MEvaluator
@@ -84,10 +86,10 @@ def main():
                         help='graph pooling strategy mean or sum (default: sum)')
     parser.add_argument('--drop_ratio', type=float, default=0,
                         help='dropout ratio (default: 0)')
-    parser.add_argument('--num_layers', type=int, default=7,
-                        help='number of GNN message passing layers (default: 7)')
-    parser.add_argument('--emb_dim', type=int, default=900,
-                        help='dimensionality of hidden units in GNNs (default: 900)')
+    parser.add_argument('--num_layers', type=int, default=5,
+                        help='number of GNN message passing layers (default: 5)')
+    parser.add_argument('--emb_dim', type=int, default=600,
+                        help='dimensionality of hidden units in GNNs (default: 600)')
     parser.add_argument('--train_subset', action='store_true')
     parser.add_argument('--batch_size', type=int, default=256,
                         help='input batch size for training (default: 256)')
@@ -106,6 +108,7 @@ def main():
     np.random.seed(42)
     torch.manual_seed(42)
     torch.cuda.manual_seed(42)
+    random.seed(42)
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
