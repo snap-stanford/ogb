@@ -207,10 +207,8 @@ class CommonArgParser(argparse.ArgumentParser):
                           help='The models provided by DGL-KE.')
         self.add_argument('--data_path', type=str, default='data',
                           help='The path of the directory where DGL-KE loads knowledge graph data.')
-        self.add_argument('--dataset', type=str, default='FB15k',
-                          help='The name of the builtin knowledge graph. Currently, the builtin knowledge '\
-                                  'graphs include FB15k, FB15k-237, wn18, wn18rr and Freebase. '\
-                                  'DGL-KE automatically downloads the knowledge graph and keep it under data_path.')
+        self.add_argument('--dataset', type=str, default='wikikg90m',
+                          help='The name of the builtin knowledge graph. Currently, it only supports wikikg90m')
         self.add_argument('--format', type=str, default='built_in',
                           help='The format of the dataset. For builtin knowledge graphs,'\
                                   'the foramt should be built_in. For users own knowledge graphs,'\
@@ -228,14 +226,14 @@ class CommonArgParser(argparse.ArgumentParser):
                           help='the path of the directory where models and logs are saved.')
         self.add_argument('--no_save_emb', action='store_true',
                           help='Disable saving the embeddings under save_path.')
-        self.add_argument('--max_step', type=int, default=80000,
+        self.add_argument('--max_step', type=int, default=1000000,
                           help='The maximal number of steps to train the model.'\
                                   'A step trains the model with a batch of data.')
-        self.add_argument('--batch_size', type=int, default=1024,
+        self.add_argument('--batch_size', type=int, default=400,
                           help='The batch size for training.')
-        self.add_argument('--batch_size_eval', type=int, default=8,
+        self.add_argument('--batch_size_eval', type=int, default=50,
                           help='The batch size used for validation and test.')
-        self.add_argument('--neg_sample_size', type=int, default=256,
+        self.add_argument('--neg_sample_size', type=int, default=100,
                           help='The number of negative samples we use for each positive sample in the training.')
         self.add_argument('--neg_deg_sample', action='store_true',
                           help='Construct negative samples proportional to vertex degree in the training.'\
@@ -244,7 +242,7 @@ class CommonArgParser(argparse.ArgumentParser):
                                   'the other half are generated proportional to vertex degree.')
         self.add_argument('--neg_deg_sample_eval', action='store_true',
                           help='Construct negative samples proportional to vertex degree in the evaluation.')
-        self.add_argument('--neg_sample_size_eval', type=int, default=-1,
+        self.add_argument('--neg_sample_size_eval', type=int, default=1000,
                           help='The number of negative samples we use to evaluate a positive sample.')
         self.add_argument('--eval_percent', type=float, default=1,
                           help='Randomly sample some percentage of edges for evaluation.')
@@ -252,7 +250,7 @@ class CommonArgParser(argparse.ArgumentParser):
                           help='Disable filter positive edges from randomly constructed negative edges for evaluation')
         self.add_argument('-log', '--log_interval', type=int, default=1000,
                           help='Print runtime of different components every x steps.')
-        self.add_argument('--eval_interval', type=int, default=10000,
+        self.add_argument('--eval_interval', type=int, default=50000,
                           help='Print evaluation results on the validation dataset every x steps'\
                                   'if validation is turned on')
         self.add_argument('--test', action='store_true',
