@@ -26,7 +26,7 @@ Our implementation is based on [DGL-KE](https://github.com/awslabs/dgl-ke).
 - ComplEx-RoBERTa [2,3]
 - ComplEx-Concat [2,3]
 
-All the scripts for the baseline models can be found in `run.sh`.
+All the scripts for the baseline models can be found in [`run.sh`](https://github.com/snap-stanford/ogb/blob/master/examples/lsc/wikikg90m/run.sh).
 
 
 ## Performance
