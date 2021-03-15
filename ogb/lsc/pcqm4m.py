@@ -1,26 +1,30 @@
-from rdkit import Chem
 import os
 import os.path as osp
 import shutil
 from ogb.utils import smiles2graph
-from ogb.utils.torch_util import replace_numpy_with_torchtensor
 from ogb.utils.url import decide_download, download_url, extract_zip
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import torch
-from torch_geometric.data import InMemoryDataset
-from torch_geometric.data import Data
 
-class PyGPCQM4MDataset(InMemoryDataset):
-    def __init__(self, root = 'dataset', smiles2graph = smiles2graph, transform=None, pre_transform = None):
+class PCQM4MDataset(object):
+    def __init__(self, root = 'dataset', smiles2graph = smiles2graph, only_smiles=False):
+        '''
+        Library-agnostic PCQM4M dataset object
+            - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
+            - smiles2graph (callable): A callable function that converts a SMILES string into a graph object
+                * The default smiles2graph requires rdkit to be installed
+            - only_smiles (bool): If this is true, we directly return the SMILES string in our __get_item__, without converting it into a graph.
+        '''
 
         self.original_root = root
         self.smiles2graph = smiles2graph
-        self.folder = osp.join(root, 'pcqm4m')
-        self.download_name = 'pcqm4m-folder'
+        self.only_smiles = only_smiles
+        self.folder = osp.join(root, 'pcqm4m_kddcup2021')
         self.version = 1
-        self.url = f'http://ogb-data.stanford.edu/data/lsc/{self.download_name}.zip'
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m_kddcup2021.zip'
+        # self._use_smiles = False
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
@@ -28,74 +32,111 @@ class PyGPCQM4MDataset(InMemoryDataset):
             if input('Will you update the dataset now? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.folder)
 
-        super(PyGPCQM4MDataset, self).__init__(self.folder, transform, pre_transform)
+        super(PCQM4MDataset, self).__init__()
 
-        self.data, self.slices = torch.load(self.processed_paths[0])
-
-    @property
-    def raw_file_names(self):
-        return 'data.csv.gz'
-
-    @property
-    def processed_file_names(self):
-        return 'geometric_data_processed.pt'
+        # Prepare everything.
+        # download if there is no raw file
+        # preprocess if there is no processed file
+        # load data if processed file is found.
+        if self.only_smiles:
+            self.prepare_smiles()
+        else:
+            self.prepare_graph()
 
     def download(self):
         if decide_download(self.url):
             path = download_url(self.url, self.original_root)
             extract_zip(path, self.original_root)
             os.unlink(path)
-            try:
-                shutil.rmtree(self.folder)
-            except:
-                pass
-            shutil.move(osp.join(self.original_root, self.download_name), self.folder)
         else:
             print('Stop download.')
             exit(-1)
 
-    def process(self):
-        data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
-        smiles_list = data_df['smiles']
-        homolumogap_list = data_df['homolumogap']
+    def prepare_smiles(self):
+        raw_dir = osp.join(self.folder, 'raw')
+        if not osp.exists(osp.join(raw_dir, 'data.csv.gz')):
+            # if the raw file does not exist, then download it.
+            self.download()
 
-        print('Converting SMILES strings into graphs...')
-        data_list = []
-        for i in tqdm(range(len(smiles_list))):
-            data = Data()
+        data_df = pd.read_csv(osp.join(raw_dir, 'data.csv.gz'))
+        smiles_list = data_df['smiles'].values
+        homolumogap_list = data_df['homolumogap'].values
+        self.graphs = list(smiles_list)
+        self.labels = homolumogap_list
 
-            smiles = smiles_list[i]
-            homolumogap = homolumogap_list[i]
-            graph = self.smiles2graph(smiles)
+    def prepare_graph(self):
+        processed_dir = osp.join(self.folder, 'processed')
+        raw_dir = osp.join(self.folder, 'raw')
+        pre_processed_file_path = osp.join(processed_dir, 'data_processed')
+
+        if osp.exists(pre_processed_file_path):        
+            # if pre-processed file already exists
+            loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
+        
+        else:
+            # if pre-processed file does not exist
             
-            assert(len(graph['edge_feat']) == graph['edge_index'].shape[1])
-            assert(len(graph['node_feat']) == graph['num_nodes'])
+            if not osp.exists(osp.join(raw_dir, 'data.csv.gz')):
+                # if the raw file does not exist, then download it.
+                self.download()
 
-            data.__num_nodes__ = int(graph['num_nodes'])
-            data.edge_index = torch.from_numpy(graph['edge_index']).to(torch.int64)
-            data.edge_attr = torch.from_numpy(graph['edge_feat']).to(torch.int64)
-            data.x = torch.from_numpy(graph['node_feat']).to(torch.int64)
-            data.y = torch.Tensor([homolumogap])
+            data_df = pd.read_csv(osp.join(raw_dir, 'data.csv.gz'))
+            smiles_list = data_df['smiles']
+            homolumogap_list = data_df['homolumogap']
 
-            data_list.append(data)
+            print('Converting SMILES strings into graphs...')
+            self.graphs = []
+            self.labels = []
+            for i in tqdm(range(len(smiles_list))):
 
-        # double-check prediction target
-        split_dict = self.get_idx_split()
-        assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['train']]))
-        assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['valid']]))
-        assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test']]))
+                smiles = smiles_list[i]
+                homolumogap = homolumogap_list[i]
+                graph = self.smiles2graph(smiles)
+                
+                assert(len(graph['edge_feat']) == graph['edge_index'].shape[1])
+                assert(len(graph['node_feat']) == graph['num_nodes'])
 
-        if self.pre_transform is not None:
-            data_list = [self.pre_transform(data) for data in data_list]
+                self.graphs.append(graph)
+                self.labels.append(homolumogap)
 
-        data, slices = self.collate(data_list)
+            self.labels = np.array(self.labels)
+            print(self.labels)
 
-        print('Saving...')
-        torch.save((data, slices), self.processed_paths[0])
+            # double-check prediction target
+            split_dict = self.get_idx_split()
+            assert(all([not np.isnan(self.labels[i]) for i in split_dict['train']]))
+            assert(all([not np.isnan(self.labels[i]) for i in split_dict['valid']]))
+            assert(all([np.isnan(self.labels[i]) for i in split_dict['test']]))
+
+            print('Saving...')
+            torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
     def get_idx_split(self):
-        split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt')))
+        split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'))
         return split_dict
+
+    def __getitem__(self, idx):
+        '''Get datapoint with index'''
+
+        if isinstance(idx, (int, np.integer)):
+            return self.graphs[idx], self.labels[idx]
+
+        raise IndexError(
+            'Only integer is valid index (got {}).'.format(type(idx).__name__))
+
+    def __len__(self):
+        '''Length of the dataset
+        Returns
+        -------
+        int
+            Length of Dataset
+        '''
+        return len(self.graphs)
+
+    def __repr__(self):  # pragma: no cover
+        return '{}({})'.format(self.__class__.__name__, len(self))
+
 
 class PCQM4MEvaluator:
     def __init__(self):
@@ -148,9 +189,19 @@ class PCQM4MEvaluator:
         np.savez_compressed(filename, y_pred = y_pred)
 
 if __name__ == '__main__':
-    # dataset = PyGPCQM4MDataset()
-    # print(dataset[0])
-    # print(dataset.get_idx_split())
+    dataset = PCQM4MDataset(only_smiles=True)
+    print(dataset)
+    print(dataset[1234])
+    exit(-1)
+    split_dict = dataset.get_idx_split()
+    print(dataset[split_dict['test'][0]])
+    print(dataset[split_dict['valid'][0]])
+    print(dataset[split_dict['train'][0]])
+
+    dataset = PCQM4MDataset()
+    print(dataset)
+    print(dataset[100])
+    print(dataset.get_idx_split())
 
     evaluator = PCQM4MEvaluator()
     y_true = torch.randn(100)

@@ -24,3 +24,4 @@ dataset/
 **.json
 **/checkpoint
 **/events.out.*
+**/test*
