@@ -10,6 +10,9 @@ dgl==0.4.3
 ```
 Also install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -e .`
 
+### Acknowledgement 
+The baselines are based on [DGL-KE](https://github.com/awslabs/dgl-ke).
+
 ## Key commandline arguments
 - `train_mode`: Choose within [`emb`, `roberta` and `both`], which corresponds to the `x-Shallow`, `x-RoBERTa`, `x-Concat` respectively (details in the paper).
 - `data_path`: Directory that downloads and stores the dataset.
@@ -22,7 +25,7 @@ Also install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -
 - ComplEx-RoBERTa [2,3]
 - ComplEx-Concat [2,3]
 
-Example scripts are in `examples.sh`
+All the scripts for the baseline models can be found in `run.sh`
 
 
 ## Performance
@@ -43,4 +46,4 @@ Example scripts are in `examples.sh`
 
 [2] Trouillon, T., Welbl, J., Riedel, S., Gaussier, É., & Bouchard, G. (2016). Complex embeddings for simple link prediction. ICML 2016
 
-[3] Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., ... & Stoyanov, V. (2019). RoBERTa: A robustly optimized bert pretraining approach.
+[3] Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., Levy, O., Lewis, M., Zettlemoyer, L. & Stoyanov, V. (2019). RoBERTa: A robustly optimized bert pretraining approach. arXiv preprint arXiv:1907.11692.
