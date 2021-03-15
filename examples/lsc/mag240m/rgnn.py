@@ -144,7 +144,8 @@ class MAG240M(LightningDataModule):
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
         path = f'{dataset.dir}/full_feat.npy'
-        if not osp.exists(path):  # Will take approximately 3 hours...
+        done_flag_path = f'{dataset.dir}/full_feat_done.txt'
+        if not osp.exists(done_flag_path):  # Will take ~3 hours...
             t = time.perf_counter()
             print('Generating full feature matrix...')
 
@@ -211,6 +212,9 @@ class MAG240M(LightningDataModule):
             x.flush()
             del x
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
+
+            with open(done_flag_path, 'w') as f:
+                f.write('done')
 
     def setup(self, stage: Optional[str] = None):
         t = time.perf_counter()
