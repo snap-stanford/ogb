@@ -4,7 +4,7 @@ dglke_train --model_name TransE_l2 \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 10000 --no_save_emb \
---print_on_screen --train_mode emb
+--print_on_screen --train_mode shallow
 
 
 # TransE-roberta
@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name TransE_l2 \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode both
+--print_on_screen --train_mode concat
 
 
 # ComplEx-shallow
@@ -31,7 +31,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode emb -de -dr
+--print_on_screen --train_mode shallow -de -dr
 
 # ComplEx-roberta
 CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
@@ -47,4 +47,4 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode both -de -dr
+--print_on_screen --train_mode concat -de -dr
