@@ -7,6 +7,10 @@
 [![PyPI](https://img.shields.io/pypi/v/ogb)](https://pypi.org/project/ogb/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snap-stanford/ogb/blob/master/LICENSE)
 
+## News!
+
+Check out [OGB Large-Scale Challenge](https://ogb.stanford.edu/kddcup2021/) at KDD Cup 2021, happening from March 15 to June 8, 2021. All the datasets are accessible through this package `ogb>=1.3.0`.
+
 ## Overview
 
 The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data loaders, and evaluators for graph machine learning. Datasets cover a variety of graph machine learning tasks and real-world applications.
@@ -32,8 +36,8 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.2.6.**
-The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.2.6).
+**If you have previously installed ogb, please make sure you update the version to 1.3.0.**
+The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.3.0).
 
 #### Requirements
  - Python>=3.6
@@ -55,7 +59,7 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.2.6". Otherwise, please update the version by
+# This should print "1.3.0". Otherwise, please update the version by
 pip install -U ogb
 ```
 
