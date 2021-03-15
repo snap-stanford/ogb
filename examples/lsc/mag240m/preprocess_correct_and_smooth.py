@@ -10,6 +10,7 @@ from torch.nn import ModuleList, Linear, BatchNorm1d, Identity
 
 from ogb.utils.url import makedirs
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
+from root import ROOT
 
 
 class MLP(torch.nn.Module):
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     torch.manual_seed(12345)
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
 
-    dataset = MAG240MDataset('~/datasets/OGB')
+    dataset = MAG240MDataset(ROOT)
     evaluator = MAG240MEvaluator()
 
     train_idx = dataset.get_idx_split('train')

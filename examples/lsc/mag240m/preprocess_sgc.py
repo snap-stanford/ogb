@@ -23,11 +23,11 @@ if __name__ == '__main__':
 
     t = time.perf_counter()
     print('Reading adjacency matrix...', end=' ', flush=True)
-    path = dataset.root + '/mag240m/paper_to_paper_symmetric_gcn.pt'
+    path = f'{dataset.dir}/paper_to_paper_symmetric_gcn.pt'
     if osp.exists(path):
         adj_t = torch.load(path)
     else:
-        path_sym = dataset.root + '/mag240m/paper_to_paper_symmetric.pt'
+        path_sym = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         if osp.exists(path_sym):
             adj_t = torch.load(path_sym)
         else:
@@ -57,12 +57,9 @@ if __name__ == '__main__':
 
         for i in range(1, args.num_layers + 1):
             x = adj_t @ x
-            np.save(f'{dataset.root}/mag240m/x_train_{i}_{j}.npy',
-                    x[train_idx].numpy())
-            np.save(f'{dataset.root}/mag240m/x_valid_{i}_{j}.npy',
-                    x[valid_idx].numpy())
-            np.save(f'{dataset.root}/mag240m/x_test_{i}_{j}.npy',
-                    x[test_idx].numpy())
+            np.save(f'{dataset.dir}/x_train_{i}_{j}.npy', x[train_idx].numpy())
+            np.save(f'{dataset.dir}/x_valid_{i}_{j}.npy', x[valid_idx].numpy())
+            np.save(f'{dataset.dir}/x_test_{i}_{j}.npy', x[test_idx].numpy())
             pbar.update(1)
     pbar.close()
 
@@ -71,22 +68,22 @@ if __name__ == '__main__':
     for i in range(1, args.num_layers + 1):
         x_train, x_valid, x_test = [], [], []
         for j in range(0, num_features, 128):
-            x_train += [np.load(f'{dataset.root}/mag240m/x_train_{i}_{j}.npy')]
-            x_valid += [np.load(f'{dataset.root}/mag240m/x_valid_{i}_{j}.npy')]
-            x_test += [np.load(f'{dataset.root}/mag240m/x_test_{i}_{j}.npy')]
+            x_train += [np.load(f'{dataset.dir}/x_train_{i}_{j}.npy')]
+            x_valid += [np.load(f'{dataset.dir}/x_valid_{i}_{j}.npy')]
+            x_test += [np.load(f'{dataset.dir}/x_test_{i}_{j}.npy')]
         x_train = np.concatenate(x_train, axis=-1)
         x_valid = np.concatenate(x_valid, axis=-1)
         x_test = np.concatenate(x_test, axis=-1)
-        np.save(f'{dataset.root}/mag240m/x_train_{i}.npy', x_train)
-        np.save(f'{dataset.root}/mag240m/x_valid_{i}.npy', x_valid)
-        np.save(f'{dataset.root}/mag240m/x_test_{i}.npy', x_test)
+        np.save(f'{dataset.dir}/x_train_{i}.npy', x_train)
+        np.save(f'{dataset.dir}/x_valid_{i}.npy', x_valid)
+        np.save(f'{dataset.dir}/x_test_{i}.npy', x_test)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     t = time.perf_counter()
     print('Cleaning up...', end=' ', flush=True)
     for i in range(1, args.num_layers + 1):
         for j in range(0, num_features, 128):
-            os.remove(f'{dataset.root}/mag240m/x_train_{i}_{j}.npy')
-            os.remove(f'{dataset.root}/mag240m/x_valid_{i}_{j}.npy')
-            os.remove(f'{dataset.root}/mag240m/x_test_{i}_{j}.npy')
+            os.remove(f'{dataset.dir}/x_train_{i}_{j}.npy')
+            os.remove(f'{dataset.dir}/x_valid_{i}_{j}.npy')
+            os.remove(f'{dataset.dir}/x_test_{i}_{j}.npy')
     print(f'Done! [{time.perf_counter() - t:.2f}s]')

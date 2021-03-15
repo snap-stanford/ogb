@@ -143,7 +143,7 @@ if __name__ == '__main__':
             x = dataset.paper_feat[idx]
             self.xs.append(torch.from_numpy(x).to(torch.float))
             for i in range(1, args.num_hops + 1):
-                x = np.load(f'{dataset.root}/mag240m/x_{split}_{i}.npy')
+                x = np.load(f'{dataset.dir}/x_{split}_{i}.npy')
                 self.xs.append(torch.from_numpy(x))
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 

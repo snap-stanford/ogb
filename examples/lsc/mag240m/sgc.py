@@ -98,11 +98,11 @@ if __name__ == '__main__':
 
     t = time.perf_counter()
     print('Reading node features...', end=' ', flush=True)
-    x_train = np.load(f'{dataset.root}/mag240m/x_train_{args.layer}.npy')
+    x_train = np.load(f'{dataset.dir}/x_train_{args.layer}.npy')
     x_train = torch.from_numpy(x_train).to(device)
-    x_valid = np.load(f'{dataset.root}/mag240m/x_valid_{args.layer}.npy')
+    x_valid = np.load(f'{dataset.dir}/x_valid_{args.layer}.npy')
     x_valid = torch.from_numpy(x_valid).to(device)
-    x_test = np.load(f'{dataset.root}/mag240m/x_test_{args.layer}.npy')
+    x_test = np.load(f'{dataset.dir}/x_test_{args.layer}.npy')
     x_test = torch.from_numpy(x_test).to(device)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 

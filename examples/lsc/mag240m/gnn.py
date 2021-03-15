@@ -56,7 +56,7 @@ class MAG240M(LightningDataModule):
 
     def prepare_data(self):
         dataset = MAG240MDataset(self.data_dir)
-        path = dataset.root + '/mag240m/paper_to_paper_symmetric.pt'
+        path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         if not osp.exists(path):
             t = time.perf_counter()
             print('Converting adjacency matrix...', end=' ', flush=True)
@@ -85,7 +85,7 @@ class MAG240M(LightningDataModule):
         self.x = dataset.paper_feat
         self.y = torch.from_numpy(dataset.all_paper_label)
 
-        path = f'{dataset.root}/mag240m/paper_to_paper_symmetric.pt'
+        path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         self.adj_t = torch.load(path)
         print(f'Done! [{time.perf_counter() - t:.2f}s]')
 

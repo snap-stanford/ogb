@@ -92,7 +92,7 @@ class MAG240M(LightningDataModule):
     def prepare_data(self):
         dataset = MAG240MDataset(self.data_dir)
 
-        path = f'{dataset.root}/mag240m/paper_to_paper_symmetric.pt'
+        path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         if not osp.exists(path):  # Will take approximately 5 minutes...
             t = time.perf_counter()
             print('Converting adjacency matrix...', end=' ', flush=True)
@@ -105,13 +105,13 @@ class MAG240M(LightningDataModule):
             torch.save(adj_t.to_symmetric(), path)
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
-        path = f'{dataset.root}/mag240m/full_adj_t.pt'
+        path = f'{dataset.dir}/full_adj_t.pt'
         if not osp.exists(path):  # Will take approximately 16 minutes...
             t = time.perf_counter()
             print('Merging adjacency matrices...', end=' ', flush=True)
 
             row, col, _ = torch.load(
-                f'{dataset.root}/mag240m/paper_to_paper_symmetric.pt').coo()
+                f'{dataset.dir}/paper_to_paper_symmetric.pt').coo()
             rows, cols = [row], [col]
 
             edge_index = dataset.edge_index('author', 'writes', 'paper')
@@ -154,9 +154,9 @@ class MAG240M(LightningDataModule):
             torch.save(full_adj_t, path)
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
-        path = f'{dataset.root}/mag240m/full_feat.npy'
+        path = f'{dataset.dir}/full_feat.npy'
         # indicate whether full_feat processing has been finished or not
-        done_flag_path = f'{dataset.root}/mag240m/full_feat_done.txt'
+        done_flag_path = f'{dataset.dir}/full_feat_done.txt'
         if not osp.exists(
                 done_flag_path):  # Will take approximately 3 hours...
             if os.path.exists(path):
@@ -261,12 +261,11 @@ class MAG240M(LightningDataModule):
 
         N = dataset.num_papers + dataset.num_authors + dataset.num_institutions
 
-        self.x = np.memmap(f'{dataset.root}/mag240m/full_feat.npy',
-                           dtype=np.float16, mode='r',
-                           shape=(N, self.num_features))
+        self.x = np.memmap(f'{dataset.dir}/full_feat.npy', dtype=np.float16,
+                           mode='r', shape=(N, self.num_features))
         self.y = torch.from_numpy(dataset.all_paper_label)
 
-        path = f'{dataset.root}/mag240m/full_adj_t.pt'
+        path = f'{dataset.dir}/full_adj_t.pt'
         self.adj_t = torch.load(path)
         print(f'Done! [{time.perf_counter() - t:.2f}s]')
 

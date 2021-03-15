@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     t = time.perf_counter()
     print('Reading adjacency matrix...', end=' ', flush=True)
-    path = dataset.root + '/mag240m/paper_to_paper_symmetric.pt'
+    path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
     if osp.exists(path):
         adj_t = torch.load(path)
     else:
