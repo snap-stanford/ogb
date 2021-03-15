@@ -193,7 +193,7 @@ def main():
     n_relations = dataset.n_relations
     ckpt_path = args.model_path
     model = load_model_from_checkpoint(args, n_entities, n_relations, ckpt_path, dataset.entity_feat.shape[1], dataset.relation_feat.shape[1])
-    if args.train_mode in ['roberta', 'both']:
+    if args.train_mode in ['roberta', 'concat']:
         model.entity_feat.emb = dataset.entity_feat
         model.relation_feat.emb = dataset.relation_feat
 

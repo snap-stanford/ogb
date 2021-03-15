@@ -68,8 +68,8 @@ class ArgParser(CommonArgParser):
                                   'as pos_score = pos_score * edge_importance')
 
         self.add_argument('--print_on_screen', action='store_true')
-        self.add_argument('--train_mode', type=str, default='emb',
-                          help='emb or roberta or both')
+        self.add_argument('--train_mode', type=str, default='shallow',
+                          help='shallow or roberta or concat')
         self.add_argument('--mlp_lr', type=float, default=0.0001,
                           help='The learning rate of optimizing mlp')
         self.add_argument('--seed', type=int, default=0,
@@ -300,7 +300,7 @@ def main():
     print("To create model")
     t1 = time.time()
     model = load_model(args, dataset.n_entities, dataset.n_relations, dataset.entity_feat.shape[1], dataset.relation_feat.shape[1])
-    if args.train_mode in ['roberta', 'both']:
+    if args.train_mode in ['roberta', 'concat']:
         model.entity_feat.emb = dataset.entity_feat
         model.relation_feat.emb = dataset.relation_feat
     print("Model created, it takes %s seconds" % (time.time()-t1))
