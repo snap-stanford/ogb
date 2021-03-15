@@ -55,7 +55,7 @@ def save_col_slice(x_src, x_dst, start_row_idx, end_row_idx, start_col_idx,
     assert x_src.shape[1] == end_col_idx - start_col_idx
     chunk, offset = 100000, start_row_idx
     for i in tqdm(range(0, end_row_idx - start_row_idx, chunk)):
-        j = min(i + chunk, end_row_idx, start_row_idx)
+        j = min(i + chunk, end_row_idx - start_row_idx)
         x_dst[offset + i:offset + j, start_col_idx:end_col_idx] = x_src[i + j]
 
 
@@ -158,6 +158,7 @@ class MAG240M(LightningDataModule):
             x = np.memmap(path, dtype=np.float16, mode='w+',
                           shape=(N, self.num_features))
 
+            print('Copying paper features...')
             for i in tqdm(range(0, dataset.num_papers, node_chunk_size)):
                 j = min(i + node_chunk_size, dataset.num_papers)
                 x[i:j] = paper_feat[i:j]
