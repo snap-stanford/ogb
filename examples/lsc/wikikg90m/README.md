@@ -11,7 +11,7 @@ dgl==0.4.3
 Also install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -e .`
 
 ## Key commandline arguments
-- `train_mode`: Choose within [`emb`, `roberta` and `both`], which corresponds to the `x-shallow`, `x-roberta`, `x-concat` respectively (details in the paper).
+- `train_mode`: Choose within [`emb`, `roberta` and `both`], which corresponds to the `x-Shallow`, `x-RoBERTa`, `x-Concat` respectively (details in the paper).
 - `data_path`: Directory that downloads and stores the dataset.
 
 ## Baseline models
