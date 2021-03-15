@@ -51,7 +51,7 @@ if __name__ == '__main__':
     pbar = tqdm(total=args.num_layers * (num_features // 128))
     pbar.set_description('Pre-processing node features')
 
-    for j in range(0, num_features, 128):  # Run spmm in chunks...
+    for j in range(0, num_features, 128):  # Run spmm in column-wise chunks...
         x = dataset.paper_feat[:, j:min(j + 128, num_features)]
         x = torch.from_numpy(x.astype(np.float32))
 

@@ -4,7 +4,6 @@ import glob
 import argparse
 import os.path as osp
 from tqdm import tqdm
-import traceback
 
 from typing import Optional, List, NamedTuple
 
@@ -42,32 +41,22 @@ class Batch(NamedTuple):
 
 
 def get_col_slice(x, start_row_idx, end_row_idx, start_col_idx, end_col_idx):
-    print('Performing memory-efficient column slicing...')
+    outs = []
     chunk = 100000
-    return_mat_list = []
     for i in tqdm(range(start_row_idx, end_row_idx, chunk)):
-        end_idx = min(i + chunk, end_row_idx)
-        tmp_arr = x[i:end_idx, start_col_idx:end_col_idx]
-        return_mat_list.append(tmp_arr.copy())
-        del tmp_arr
-
-    return np.concatenate(return_mat_list, axis=0)
+        j = min(i + chunk, end_row_idx)
+        outs.append(x[i:j, start_col_idx:end_col_idx].copy())
+    return np.concatenate(outs, axis=0)
 
 
-def save_col_slice(x_from, x_to, start_row_idx, end_row_idx, start_col_idx,
+def save_col_slice(x_src, x_dst, start_row_idx, end_row_idx, start_col_idx,
                    end_col_idx):
-    assert x_from.shape[0] == end_row_idx - start_row_idx
-    assert x_from.shape[1] == end_col_idx - start_col_idx
-
-    chunk = 100000
-    print('Memory-efficient writing...')
-    for i, j in tqdm(
-            list(
-                zip(range(start_row_idx, end_row_idx, chunk),
-                    range(0, end_row_idx - start_row_idx, chunk)))):
-        end_idx_i = min(i + chunk, end_row_idx)
-        end_idx_j = min(j + chunk, end_row_idx - start_row_idx)
-        x_to[i:end_idx_i, start_col_idx:end_col_idx] = x_from[j:end_idx_j]
+    assert x_src.shape[0] == end_row_idx - start_row_idx
+    assert x_src.shape[1] == end_col_idx - start_col_idx
+    chunk, offset = 100000, start_row_idx
+    for i in tqdm(range(0, end_row_idx - start_row_idx, chunk)):
+        j = min(i + chunk, end_row_idx, start_row_idx)
+        x_dst[offset + i:offset + j, start_col_idx:end_col_idx] = x_src[i + j]
 
 
 class MAG240M(LightningDataModule):
@@ -155,96 +144,73 @@ class MAG240M(LightningDataModule):
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
         path = f'{dataset.dir}/full_feat.npy'
-        # indicate whether full_feat processing has been finished or not
-        done_flag_path = f'{dataset.dir}/full_feat_done.txt'
-        if not osp.exists(
-                done_flag_path):  # Will take approximately 3 hours...
-            if os.path.exists(path):
-                print('Removing unfinished full_feat.npy')
-                os.remove(path)
+        if not osp.exists(path):  # Will take approximately 3 hours...
+            t = time.perf_counter()
+            print('Generating full feature matrix...')
 
-            try:
-                t = time.perf_counter()
-                print('Generating full feature matrix...')
+            node_chunk_size = 100000
+            dim_chunk_size = 64
+            N = (dataset.num_papers + dataset.num_authors +
+                 dataset.num_institutions)
 
-                N = (dataset.num_papers + dataset.num_authors +
-                     dataset.num_institutions)
+            paper_feat = dataset.paper_feat
+            x = np.memmap(path, dtype=np.float16, mode='w+',
+                          shape=(N, self.num_features))
 
-                x = np.memmap(path, dtype=np.float16, mode='w+',
-                              shape=(N, self.num_features))
-                paper_feat = dataset.paper_feat
-                dim_chunk = 64
-                chunk = 100000
+            for i in tqdm(range(0, dataset.num_papers, node_chunk_size)):
+                j = min(i + node_chunk_size, dataset.num_papers)
+                x[i:j] = paper_feat[i:j]
 
-                print('Copying paper features...')
-                for i in tqdm(range(0, dataset.num_papers,
-                                    chunk)):  # Copy paper features.
-                    end_idx = min(i + chunk, dataset.num_papers)
-                    x[i:end_idx] = paper_feat[i:end_idx]
+            edge_index = dataset.edge_index('author', 'writes', 'paper')
+            row, col = torch.from_numpy(edge_index)
+            adj_t = SparseTensor(
+                row=row, col=col,
+                sparse_sizes=(dataset.num_authors, dataset.num_papers),
+                is_sorted=True)
 
-                edge_index = dataset.edge_index('author', 'writes', 'paper')
-                row, col = torch.from_numpy(edge_index)
-                adj_t = SparseTensor(
-                    row=row, col=col,
-                    sparse_sizes=(dataset.num_authors, dataset.num_papers),
-                    is_sorted=True)
+            # Processing 64-dim subfeatures at a time for memory efficiency.
+            print('Generating author features...')
+            for i in tqdm(range(0, self.num_features, dim_chunk_size)):
+                j = min(i + dim_chunk_size, self.num_features)
+                inputs = get_col_slice(paper_feat, start_row_idx=0,
+                                       end_row_idx=dataset.num_papers,
+                                       start_col_idx=i, end_col_idx=j)
+                inputs = torch.from_numpy(inputs)
+                outputs = adj_t.matmul(inputs, reduce='mean').numpy()
+                del inputs
+                save_col_slice(
+                    x_src=outputs, x_dst=x, start_row_idx=dataset.num_papers,
+                    end_row_idx=dataset.num_papers + dataset.num_authors,
+                    start_col_idx=i, end_col_idx=j)
+                del outputs
 
-                print('Generating author features...')
-                # processing 64-dim subfeatures at a time for memory efficiency
-                for i in tqdm(range(0, self.num_features, dim_chunk)):
-                    end_idx = min(i + dim_chunk, self.num_features)
-                    inputs = torch.from_numpy(
-                        get_col_slice(paper_feat, start_row_idx=0,
-                                      end_row_idx=len(paper_feat),
-                                      start_col_idx=i, end_col_idx=end_idx))
-                    outputs = adj_t.matmul(inputs, reduce='mean').numpy()
-                    del inputs
-                    save_col_slice(
-                        x_from=outputs, x_to=x,
-                        start_row_idx=dataset.num_papers,
-                        end_row_idx=dataset.num_papers + dataset.num_authors,
-                        start_col_idx=i, end_col_idx=end_idx)
-                    del outputs
+            edge_index = dataset.edge_index('author', 'institution')
+            row, col = torch.from_numpy(edge_index)
+            adj_t = SparseTensor(
+                row=col, col=row,
+                sparse_sizes=(dataset.num_institutions, dataset.num_authors),
+                is_sorted=False)
 
-                edge_index = dataset.edge_index('author', 'institution')
-                row, col = torch.from_numpy(edge_index)
-                adj_t = SparseTensor(
-                    row=col, col=row, sparse_sizes=(dataset.num_institutions,
-                                                    dataset.num_authors),
-                    is_sorted=False)
+            print('Generating institution features...')
+            # Processing 64-dim subfeatures at a time for memory efficiency.
+            for i in tqdm(range(0, self.num_features, dim_chunk_size)):
+                j = min(i + dim_chunk_size, self.num_features)
+                inputs = get_col_slice(
+                    x, start_row_idx=dataset.num_papers,
+                    end_row_idx=dataset.num_papers + dataset.num_authors,
+                    start_col_idx=i, end_col_idx=j)
+                inputs = torch.from_numpy(inputs)
+                outputs = adj_t.matmul(inputs, reduce='mean').numpy()
+                del inputs
+                save_col_slice(
+                    x_src=outputs, x_dst=x,
+                    start_row_idx=dataset.num_papers + dataset.num_authors,
+                    end_row_idx=N, start_col_idx=i, end_col_idx=j)
+                del outputs
 
-                print('Generating institution features...')
-                # processing 64-dim subfeatures at a time for memory efficiency
-                for i in tqdm(range(0, self.num_features, dim_chunk)):
-                    end_idx = min(i + dim_chunk, self.num_features)
-                    inputs = torch.from_numpy(
-                        get_col_slice(
-                            x, start_row_idx=dataset.num_papers,
-                            end_row_idx=dataset.num_papers +
-                            dataset.num_authors, start_col_idx=i,
-                            end_col_idx=end_idx))
-                    outputs = adj_t.matmul(inputs, reduce='mean').numpy()
-                    del inputs
-                    save_col_slice(
-                        x_from=outputs, x_to=x,
-                        start_row_idx=dataset.num_papers + dataset.num_authors,
-                        end_row_idx=N, start_col_idx=i, end_col_idx=end_idx)
-                    del outputs
-
-                x.flush()
-                del x
-                print(f'Done! [{time.perf_counter() - t:.2f}s]')
-
-                with open(done_flag_path, 'w') as f:
-                    f.write('done')
-
-            except Exception:
-                traceback.print_exc()
-                if os.path.exists(path):
-                    print(
-                        'Removing unfinished full feat file due to exception')
-                    os.remove(path)
-                exit(-1)
+            x.flush()
+            del x
+            print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     def setup(self, stage: Optional[str] = None):
         t = time.perf_counter()
