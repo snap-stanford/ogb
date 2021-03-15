@@ -14,8 +14,8 @@ In addition, please install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and
 Our implementation is based on [DGL-KE](https://github.com/awslabs/dgl-ke).
 
 ## Key commandline arguments
-- `train_mode`: Choose within [`emb`, `roberta` `both`], which corresponds to the `x-Shallow`, `x-RoBERTa`, `x-Concat` respectively (details in the paper).
-- `model_name` Choose within [`TransE_l2`, `ComplEx`].
+- `model_name`: Decoder model. Choose from [`TransE_l2`, `ComplEx`].
+- `train_mode`: Encoder model. Choose from [`emb`, `roberta` `both`], which corresponds to the `Shallow`, `RoBERTa`, `Concat`, respectively (details in the paper).
 - `data_path`: Directory that downloads and stores the dataset.
 
 ## Baseline models
