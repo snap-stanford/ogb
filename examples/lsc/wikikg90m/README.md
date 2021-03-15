@@ -15,7 +15,7 @@ Our implementation is based on [DGL-KE](https://github.com/awslabs/dgl-ke).
 
 ## Key commandline arguments
 - `model_name`: Decoder model. Choose from [`TransE_l2`, `ComplEx`].
-- `train_mode`: Encoder model. Choose from [`emb`, `roberta` `both`], which corresponds to the `Shallow`, `RoBERTa`, `Concat`, respectively (details in the paper).
+- `train_mode`: Encoder model. Choose from [`shallow`, `roberta` `concat`].
 - `data_path`: Directory that downloads and stores the dataset.
 
 ## Baseline models
