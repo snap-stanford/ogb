@@ -8,10 +8,10 @@ ogb>=1.3.0
 torch>=1.7.0
 dgl==0.4.3
 ```
-Also install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -e .`
+In addition, please install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -e .`
 
 ### Acknowledgement 
-The baselines are based on [DGL-KE](https://github.com/awslabs/dgl-ke).
+Our implementation is based on [DGL-KE](https://github.com/awslabs/dgl-ke).
 
 ## Key commandline arguments
 - `train_mode`: Choose within [`emb`, `roberta` and `both`], which corresponds to the `x-Shallow`, `x-RoBERTa`, `x-Concat` respectively (details in the paper).
@@ -25,7 +25,7 @@ The baselines are based on [DGL-KE](https://github.com/awslabs/dgl-ke).
 - ComplEx-RoBERTa [2,3]
 - ComplEx-Concat [2,3]
 
-All the scripts for the baseline models can be found in `run.sh`
+All the scripts for the baseline models can be found in `run.sh`.
 
 
 ## Performance
@@ -40,6 +40,8 @@ All the scripts for the baseline models can be found in `run.sh`
 | ComplEx-Concat     | - | - | 17.4B  | Tesla P100 (16GB GPU) |
 
 \* Test MRR is evaluated on the **hidden test set.**
+
+-: Numbers coming soon.
 
 ## References
 [1] Bordes, A., Usunier, N., Garcia-Duran, A., Weston, J., & Yakhnenko, O. (2013). Translating embeddings for modeling multi-relational data. NeurIPS 2013
