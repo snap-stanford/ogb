@@ -6,7 +6,7 @@ Please refer to our OGB-LSC paper (coming soon) for the detailed setting.
 ```
 ogb>=1.3.0
 torch>=1.7.0
-dgl-cu101==0.4.3
+dgl==0.4.3
 ```
 Also install the dgl-ke-ogb-lsc by `cd dgl-ke-ogb-lsc/python` and `pip install -e .`
 
