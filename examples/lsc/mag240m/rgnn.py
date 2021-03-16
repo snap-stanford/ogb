@@ -56,7 +56,7 @@ def save_col_slice(x_src, x_dst, start_row_idx, end_row_idx, start_col_idx,
     chunk, offset = 100000, start_row_idx
     for i in tqdm(range(0, end_row_idx - start_row_idx, chunk)):
         j = min(i + chunk, end_row_idx - start_row_idx)
-        x_dst[offset + i:offset + j, start_col_idx:end_col_idx] = x_src[i + j]
+        x_dst[offset + i:offset + j, start_col_idx:end_col_idx] = x_src[i:j]
 
 
 class MAG240M(LightningDataModule):
