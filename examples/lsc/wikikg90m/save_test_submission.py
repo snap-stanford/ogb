@@ -9,7 +9,7 @@ from collections import defaultdict
 import torch.nn.functional as F
 import torch
 
-# python dump_test_by_best_valid.py $CKPT_PATH $NUM_PROC
+# python save_test_submission.py $TEST_DIR $NUM_PROC
 if __name__ == '__main__':
     path = sys.argv[1]
     num_proc = int(sys.argv[2])
