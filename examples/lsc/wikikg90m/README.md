@@ -48,7 +48,6 @@ python dump_test_by_best_valid.py $CKPT_PATH $NUM_PROC
 
 \* Test MRR is evaluated on the **hidden test set.**
 
--: Numbers coming soon.
 
 ## References
 [1] Bordes, A., Usunier, N., Garcia-Duran, A., Weston, J., & Yakhnenko, O. (2013). Translating embeddings for modeling multi-relational data. NeurIPS 2013
