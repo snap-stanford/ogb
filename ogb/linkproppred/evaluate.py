@@ -31,9 +31,9 @@ class Evaluator:
     def _parse_and_check_input(self, input_dict):
         if 'hits@' in self.eval_metric:
             if not 'y_pred_pos' in input_dict:
-                RuntimeError('Missing key of y_pred_pos')
+                raise RuntimeError('Missing key of y_pred_pos')
             if not 'y_pred_neg' in input_dict:
-                RuntimeError('Missing key of y_pred_neg')
+                raise RuntimeError('Missing key of y_pred_neg')
 
             y_pred_pos, y_pred_neg = input_dict['y_pred_pos'], input_dict['y_pred_neg']
 
@@ -86,9 +86,9 @@ class Evaluator:
         elif 'mrr' == self.eval_metric:
 
             if not 'y_pred_pos' in input_dict:
-                RuntimeError('Missing key of y_pred_pos')
+                raise RuntimeError('Missing key of y_pred_pos')
             if not 'y_pred_neg' in input_dict:
-                RuntimeError('Missing key of y_pred_neg')
+                raise RuntimeError('Missing key of y_pred_neg')
 
             y_pred_pos, y_pred_neg = input_dict['y_pred_pos'], input_dict['y_pred_neg']
 
@@ -151,7 +151,7 @@ class Evaluator:
         elif self.eval_metric == 'mrr':
             y_pred_pos, y_pred_neg, type_info = self._parse_and_check_input(input_dict)
             return self._eval_mrr(y_pred_pos, y_pred_neg, type_info)
-            
+
         else:
             raise ValueError('Undefined eval metric %s' % (self.eval_metric))
 
@@ -187,10 +187,10 @@ class Evaluator:
         elif self.eval_metric == 'mrr':
             desc += '{' + '\'hits@1_list\': hits@1_list, \'hits@3_list\': hits@3_list, \n\'hits@10_list\': hits@10_list, \'mrr_list\': mrr_list}\n'
             desc += '- mrr_list (list of float): list of scores for calculating MRR \n'
-            desc += '- hits@1_list (list of float): list of scores for calculating Hits@1 \n' 
+            desc += '- hits@1_list (list of float): list of scores for calculating Hits@1 \n'
             desc += '- hits@3_list (list of float): list of scores to calculating Hits@3\n'
-            desc += '- hits@10_list (list of float): list of scores to calculating Hits@10\n' 
-            desc += 'Note: i-th element corresponds to the prediction score for the i-th edge.\n' 
+            desc += '- hits@10_list (list of float): list of scores to calculating Hits@10\n'
+            desc += 'Note: i-th element corresponds to the prediction score for the i-th edge.\n'
             desc += 'Note: To obtain the final score, you need to concatenate the lists of scores and take average over the concatenated list.'
         else:
             raise ValueError('Undefined eval metric %s' % (self.eval_metric))
@@ -220,7 +220,7 @@ class Evaluator:
             hitsK = float(np.sum(y_pred_pos > kth_score_in_negative_edges)) / len(y_pred_pos)
 
         return {'hits@{}'.format(self.K): hitsK}
-    
+
     def _eval_mrr(self, y_pred_pos, y_pred_neg, type_info):
         '''
             compute mrr
@@ -239,7 +239,7 @@ class Evaluator:
             hits10_list = (ranking_list <= 10).to(torch.float)
             mrr_list = 1./ranking_list.to(torch.float)
 
-            return {'hits@1_list': hits1_list, 
+            return {'hits@1_list': hits1_list,
                      'hits@3_list': hits3_list,
                      'hits@10_list': hits10_list,
                      'mrr_list': mrr_list}
@@ -254,7 +254,7 @@ class Evaluator:
             hits10_list = (ranking_list <= 10).astype(np.float32)
             mrr_list = 1./ranking_list.astype(np.float32)
 
-            return {'hits@1_list': hits1_list, 
+            return {'hits@1_list': hits1_list,
                      'hits@3_list': hits3_list,
                      'hits@10_list': hits10_list,
                      'mrr_list': mrr_list}
