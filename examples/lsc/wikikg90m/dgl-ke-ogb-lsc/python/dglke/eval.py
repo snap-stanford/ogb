@@ -103,7 +103,7 @@ class ArgParser(argparse.ArgumentParser):
                           choices=['Hinge', 'Logistic', 'Logsigmoid', 'BCE'],
                           help='The loss function used to train KGEM.')
         self.add_argument('--print_on_screen', action='store_true')
-        self.add_argument('--train_mode', type=str, default='emb',
+        self.add_argument('--encoder_model_name', type=str, default='emb',
                           help='emb or roberta or both')
 
     def parse_args(self):
@@ -193,7 +193,7 @@ def main():
     n_relations = dataset.n_relations
     ckpt_path = args.model_path
     model = load_model_from_checkpoint(args, n_entities, n_relations, ckpt_path, dataset.entity_feat.shape[1], dataset.relation_feat.shape[1])
-    if args.train_mode in ['roberta', 'concat']:
+    if args.encoder_model_name in ['roberta', 'concat']:
         model.entity_feat.emb = dataset.entity_feat
         model.relation_feat.emb = dataset.relation_feat
 

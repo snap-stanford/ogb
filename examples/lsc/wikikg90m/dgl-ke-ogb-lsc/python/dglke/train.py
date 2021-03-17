@@ -68,7 +68,7 @@ class ArgParser(CommonArgParser):
                                   'as pos_score = pos_score * edge_importance')
 
         self.add_argument('--print_on_screen', action='store_true')
-        self.add_argument('--train_mode', type=str, default='shallow',
+        self.add_argument('--encoder_model_name', type=str, default='shallow',
                           help='shallow or roberta or concat')
         self.add_argument('--mlp_lr', type=float, default=0.0001,
                           help='The learning rate of optimizing mlp')
@@ -79,7 +79,7 @@ def prepare_save_path(args):
     if not os.path.exists(args.save_path):
         os.mkdir(args.save_path)
 
-    folder = '{}_{}_{}_d_{}_g_{}'.format(args.model_name, args.dataset, args.train_mode, args.hidden_dim, args.gamma)
+    folder = '{}_{}_{}_d_{}_g_{}'.format(args.model_name, args.dataset, args.encoder_model_name, args.hidden_dim, args.gamma)
     n = len([x for x in os.listdir(args.save_path) if x.startswith(folder)])
     folder += str(n)
     args.save_path = os.path.join(args.save_path, folder)
@@ -152,8 +152,8 @@ def main():
     args.strict_rel_part = args.mix_cpu_gpu and (train_data.cross_part == False)
     args.num_workers = 8 # fix num_worker to 8
     set_logger(args)
-    with open(os.path.join(args.save_path, args.train_mode), 'w') as f:
-        f.write(args.train_mode)
+    with open(os.path.join(args.save_path, args.encoder_model_name), 'w') as f:
+        f.write(args.encoder_model_name)
     if args.num_proc > 1:
         train_samplers = []
         for i in range(args.num_proc):
@@ -300,7 +300,7 @@ def main():
     print("To create model")
     t1 = time.time()
     model = load_model(args, dataset.n_entities, dataset.n_relations, dataset.entity_feat.shape[1], dataset.relation_feat.shape[1])
-    if args.train_mode in ['roberta', 'concat']:
+    if args.encoder_model_name in ['roberta', 'concat']:
         model.entity_feat.emb = dataset.entity_feat
         model.relation_feat.emb = dataset.relation_feat
     print("Model created, it takes %s seconds" % (time.time()-t1))
