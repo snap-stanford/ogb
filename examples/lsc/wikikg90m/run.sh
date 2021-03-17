@@ -4,7 +4,7 @@ dglke_train --model_name TransE_l2 \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 10000 --no_save_emb \
---print_on_screen --train_mode shallow
+--print_on_screen --train_mode shallow --save_path $SAVE_PATH
 
 
 # TransE-roberta
@@ -13,7 +13,7 @@ dglke_train --model_name TransE_l2 \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 10000 --no_save_emb \
---print_on_screen --train_mode roberta
+--print_on_screen --train_mode roberta --save_path $SAVE_PATH
 
 
 # TransE-concat
@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name TransE_l2 \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode concat
+--print_on_screen --train_mode concat --save_path $SAVE_PATH
 
 
 # ComplEx-shallow
@@ -31,7 +31,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode shallow -de -dr
+--print_on_screen --train_mode shallow -de -dr --save_path $SAVE_PATH
 
 # ComplEx-roberta
 CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
@@ -39,7 +39,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 10000 --no_save_emb \
---print_on_screen --train_mode roberta -de -dr
+--print_on_screen --train_mode roberta -de -dr --save_path $SAVE_PATH
 
 # ComplEx-concat
 CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
@@ -47,4 +47,4 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 dglke_train --model_name ComplEx \
 --valid --test -adv --mix_cpu_gpu --num_proc 4 --num_thread 4 \
 --gpu 0 1 2 3 \
 --async_update --force_sync_interval 50000 --no_save_emb \
---print_on_screen --train_mode concat -de -dr
+--print_on_screen --train_mode concat -de -dr --save_path $SAVE_PATH
