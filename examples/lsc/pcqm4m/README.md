@@ -1,6 +1,6 @@
 # Baseline code for PCQM4M-LSC
 
-Please refer to our OGB-LSC paper (coming soon) for the detailed setting.
+Please refer to the **[OGB-LSC paper](https://arxiv.org/abs/2103.09430)** for the detailed setting.
 
 ## Installation requirements
 ```
@@ -41,6 +41,14 @@ python main_gnn.py --gnn gcn-virtual --log_dir $LOG_DIR --checkpoint_dir $CHECKP
 python main_mlpfp.py --log_dir $LOG_DIR --checkpoint_dir $CHECKPOINT_DIR --save_test_dir $TEST_DIR
 ```
 
+## Measuring the Test Inference Time
+The code below takes **the raw SMILES strings as input**, uses the saved checkpoint, and perform inference over for all the 377,423 test molecules.
+```bash
+python test_inference_gnn.py --gnn $GNN --checkpoint_dir $CHECKPOINT_DIR --save_test_dir $TEST_DIR
+```
+
+For GIN-virtual, the total inference (from SMILES strings to target values) takes around 3 minutes on a single GeForce RTX 2080 GPU and an Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz.
+For your model, **the total inference time needs to be less than 12 hours on a single GPU and a CPU**. Ideally, you should use the GPU/CPU with the same spec as ours. However, we also allow the use of other GPU/CPU specs, as long as the specs are clearly reported in the final submission.
 
 ## Performance
 

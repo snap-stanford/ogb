@@ -1,6 +1,6 @@
 # Baseline code for MAG-240M
 
-Please refer to our OGB-LSC paper (coming soon) for the detailed setting.
+Please refer to the **[OGB-LSC paper](https://arxiv.org/abs/2103.09430)** for the detailed setting.
 
 ## Installation requirements
 ```
