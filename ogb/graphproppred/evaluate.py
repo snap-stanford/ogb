@@ -28,9 +28,9 @@ class Evaluator:
     def _parse_and_check_input(self, input_dict):
         if self.eval_metric == 'rocauc' or self.eval_metric == 'ap' or self.eval_metric == 'rmse' or self.eval_metric == 'acc':
             if not 'y_true' in input_dict:
-                RuntimeError('Missing key of y_true')
+                raise RuntimeError('Missing key of y_true')
             if not 'y_pred' in input_dict:
-                RuntimeError('Missing key of y_pred')
+                raise RuntimeError('Missing key of y_pred')
 
             y_true, y_pred = input_dict['y_true'], input_dict['y_pred']
 
@@ -64,9 +64,9 @@ class Evaluator:
 
         elif self.eval_metric == 'F1':
             if not 'seq_ref' in input_dict:
-                RuntimeError('Missing key of seq_ref')
+                raise RuntimeError('Missing key of seq_ref')
             if not 'seq_pred' in input_dict:
-                RuntimeError('Missing key of seq_pred')
+                raise RuntimeError('Missing key of seq_pred')
 
             seq_ref, seq_pred = input_dict['seq_ref'], input_dict['seq_pred']
 
@@ -75,7 +75,7 @@ class Evaluator:
 
             if not isinstance(seq_pred, list):
                 raise RuntimeError('seq_pred must be of type list')
-            
+
             if len(seq_ref) != len(seq_pred):
                 raise RuntimeError('Length of seq_true and seq_pred should be the same')
 
@@ -236,7 +236,7 @@ class Evaluator:
         precision_list = []
         recall_list = []
         f1_list = []
-        
+
         for l, p in zip(seq_ref, seq_pred):
             label = set(l)
             prediction = set(p)
@@ -248,7 +248,7 @@ class Evaluator:
                 precision = true_positive / (true_positive + false_positive)
             else:
                 precision = 0
-                
+
             if true_positive + false_negative > 0:
                 recall = true_positive / (true_positive + false_negative)
             else:
@@ -257,11 +257,11 @@ class Evaluator:
                 f1 = 2 * precision * recall / (precision + recall)
             else:
                 f1 = 0
-            
+
             precision_list.append(precision)
             recall_list.append(recall)
             f1_list.append(f1)
-                
+
         return {'precision': np.average(precision_list),
                 'recall': np.average(recall_list),
                 'F1': np.average(f1_list)}

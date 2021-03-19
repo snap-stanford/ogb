@@ -28,9 +28,9 @@ class Evaluator:
     def _parse_and_check_input(self, input_dict):
         if self.eval_metric == 'rocauc' or self.eval_metric == 'acc':
             if not 'y_true' in input_dict:
-                RuntimeError('Missing key of y_true')
+                raise RuntimeError('Missing key of y_true')
             if not 'y_pred' in input_dict:
-                RuntimeError('Missing key of y_pred')
+                raise RuntimeError('Missing key of y_pred')
 
             y_true, y_pred = input_dict['y_true'], input_dict['y_pred']
 

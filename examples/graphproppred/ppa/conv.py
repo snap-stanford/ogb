@@ -17,18 +17,18 @@ class GINConv(MessagePassing):
 
         self.mlp = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), torch.nn.BatchNorm1d(2*emb_dim), torch.nn.ReLU(), torch.nn.Linear(2*emb_dim, emb_dim))
         self.eps = torch.nn.Parameter(torch.Tensor([0]))
-        
+
         self.edge_encoder = torch.nn.Linear(7, emb_dim)
 
     def forward(self, x, edge_index, edge_attr):
-        edge_embedding = self.edge_encoder(edge_attr)    
+        edge_embedding = self.edge_encoder(edge_attr)
         out = self.mlp((1 + self.eps) *x + self.propagate(edge_index, x=x, edge_attr=edge_embedding))
-    
+
         return out
 
     def message(self, x_j, edge_attr):
         return F.relu(x_j + edge_attr)
-        
+
     def update(self, aggr_out):
         return aggr_out
 
@@ -98,8 +98,8 @@ class GNN_node(torch.nn.Module):
             elif gnn_type == 'gcn':
                 self.convs.append(GCNConv(emb_dim))
             else:
-                ValueError('Undefined GNN type called {}'.format(gnn_type))
-                
+                raise ValueError('Undefined GNN type called {}'.format(gnn_type))
+
             self.batch_norms.append(torch.nn.BatchNorm1d(emb_dim))
 
     def forward(self, batched_data):
@@ -177,7 +177,7 @@ class GNN_node_Virtualnode(torch.nn.Module):
             elif gnn_type == 'gcn':
                 self.convs.append(GCNConv(emb_dim))
             else:
-                ValueError('Undefined GNN type called {}'.format(gnn_type))
+                raise ValueError('Undefined GNN type called {}'.format(gnn_type))
 
             self.batch_norms.append(torch.nn.BatchNorm1d(emb_dim))
 
@@ -231,7 +231,7 @@ class GNN_node_Virtualnode(torch.nn.Module):
             node_representation = 0
             for layer in range(self.num_layer):
                 node_representation += h_list[layer]
-        
+
         return node_representation
 
 
