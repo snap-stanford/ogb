@@ -27,7 +27,7 @@ python main_pyg.py --gnn $GNN_TYPE --filename $FILENAME
 
 
 ## Converting code snippet into OGB graph object
-[`py2graph.py`](https://github.com/snap-stanford/ogb/blob/master/examples/graphproppred/code/py2graph.py) is a script that converts a Python code snippet into a graph object that is fully compatible with the OGB code dataset. 
+[`py2graph.py`](https://github.com/snap-stanford/ogb/blob/master/examples/graphproppred/code2/py2graph.py) is a script that converts a Python code snippet into a graph object that is fully compatible with the OGB code dataset. 
 This script can be used when one wants to perform transfer learning from external Python code datasets.
 
 ## References
