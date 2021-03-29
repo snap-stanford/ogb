@@ -71,10 +71,12 @@ def py2graph_helper(code, attr2idx, type2idx, mask=True):
     
     ast_nodes, ast_edges = walker.nodes, walker.graph.edges()
 
-    method_name = ast_nodes[1]['attribute']
-    for idx, ast_node in ast_nodes.items():
-        if 'FunctionDef' in ast_node['type'] and ast_node['attribute'] == method_name:
-            ast_nodes[idx]['attribute'] = MASK_TOKEN
+    if mask:
+        assert 'FunctionDef' in ast_nodes[1]['type'], 'To mask method name, 1st node in AST must be of type FunctionDef'
+        method_name = ast_nodes[1]['attribute']
+        for idx, ast_node in ast_nodes.items():
+            if 'FunctionDef' in ast_node['type'] and ast_node['attribute'] == method_name:
+                ast_nodes[idx]['attribute'] = MASK_TOKEN
 
     print(ast_nodes)
 
