@@ -52,7 +52,7 @@ if __name__ == '__main__':
     print('Propagating labels...', end=' ', flush=True)
     y = torch.zeros(dataset.num_papers, dataset.num_classes)
     y[train_idx] = F.one_hot(y_train, dataset.num_classes).float()
-    y_pred = model(y_train, adj_t).argmax(dim=-1)
+    y_pred = model(y, adj_t).argmax(dim=-1)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     train_acc = evaluator.eval({
