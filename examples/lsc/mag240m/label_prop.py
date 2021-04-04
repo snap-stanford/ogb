@@ -5,6 +5,7 @@ import time
 import argparse
 
 import torch
+import torch.nn.functional as F
 from torch_sparse import SparseTensor
 from torch_geometric.nn import LabelPropagation
 from torch_geometric.nn.conv.gcn_conv import gcn_norm
@@ -49,7 +50,9 @@ if __name__ == '__main__':
 
     t = time.perf_counter()
     print('Propagating labels...', end=' ', flush=True)
-    y_pred = model(y_train, adj_t, train_idx).argmax(dim=-1)
+    y = torch.zeros(dataset.num_papers, dataset.num_classes)
+    y[train_idx] = F.one_hot(y_train, dataset.num_classes).float()
+    y_pred = model(y_train, adj_t).argmax(dim=-1)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     train_acc = evaluator.eval({
