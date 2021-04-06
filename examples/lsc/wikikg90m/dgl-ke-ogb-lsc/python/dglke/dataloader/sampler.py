@@ -339,7 +339,7 @@ class TrainDataset(object):
         else:
             self.edge_parts = [np.arange(num_train)]
             self.rel_parts = [np.arange(dataset.n_relations)]
-            self.cross_part = False
+            self.cross_part = True
 
         self.g = ConstructGraph(triples, dataset.n_entities, args)
 

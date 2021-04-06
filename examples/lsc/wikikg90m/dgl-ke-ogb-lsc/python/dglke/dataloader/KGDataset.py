@@ -222,17 +222,7 @@ class KGDatasetFB15k(KGDataset):
         return 'relations.dict'
 
 class KGDatasetWiki(KGDataset):
-    '''Load a knowledge graph FB15k
-
-    The FB15k dataset has five files:
-    * entities.dict stores the mapping between entity Id and entity name.
-    * relations.dict stores the mapping between relation Id and relation name.
-    * train.txt stores the triples in the training set.
-    * valid.txt stores the triples in the validation set.
-    * test.txt stores the triples in the test set.
-
-    The mapping between entity (relation) name and entity (relation) Id is stored as 'name\tid'.
-    The triples are stored as 'head_nid\trelation_id\ttail_nid'.
+    '''Load a knowledge graph wikikg
     '''
     def __init__(self, path, name='wikikg90m'):
         self.name = name
