@@ -140,7 +140,7 @@ python rgnn.py --device=0 --model=rgat --evaluate
 | Label Propagation | 58.44 | 56.29 | 0 | --- |
 | SGC | 65.82 | 65.29 | 0.7M | GeForce RTX 2080 Ti (11GB GPU) |
 | SIGN | 66.64 | 66.09 | 3.8M | GeForce RTX 2080 Ti (11GB GPU) |
-| MLP+C&S | 66.98 | 66.09 | 0.5M | GeForce RTX 2080 Ti (11GB GPU) |
+| MLP+C&S | 66.98 | 66.18 | 0.5M | GeForce RTX 2080 Ti (11GB GPU) |
 | GraphSAGE | 67.32 | 66.25 | 4.9M | GeForce RTX 2080 Ti (11GB GPU) |
 | GAT | 67.71 | 66.63 | 4.9M | GeForce RTX 2080 Ti (11GB GPU) |
 | R-GraphSAGE | 70.21 | 68.94 | 12.2M | GeForce RTX 2080 Ti (11GB GPU) |
