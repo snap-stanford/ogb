@@ -12,7 +12,10 @@ from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 class MAG240MDataset(object):
     version = 1
-    url = 'http://ogb-data.stanford.edu/data/lsc/mag240m_kddcup2021.zip'
+    # Old url hosted at Stanford
+    # url = 'http://ogb-data.stanford.edu/data/lsc/mag240m_kddcup2021.zip'
+    # New url hosted by DGL team at AWS--much faster to download
+    url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/mag240m_kddcup2021.zip'
 
     __rels__ = {
         ('author', 'paper'): 'writes',
