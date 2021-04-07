@@ -232,7 +232,7 @@ class Evaluator:
         if type_info == 'torch':
             y_pred = torch.cat([y_pred_pos.view(-1,1), y_pred_neg], dim = 1)
             argsort = torch.argsort(y_pred, dim = 1, descending = True)
-            ranking_list = torch.nonzero(argsort == 0)
+            ranking_list = torch.nonzero(argsort == 0, as_tuple=False)
             ranking_list = ranking_list[:, 1] + 1
             hits1_list = (ranking_list <= 1).to(torch.float)
             hits3_list = (ranking_list <= 3).to(torch.float)

@@ -206,7 +206,7 @@ class WikiKG90MEvaluator:
             - pred_top10: shape (num_eval_triplets, 10)
         '''
         # extract indices where correct_index is within top10
-        tmp = torch.nonzero(correct_index.view(-1,1) == pred_top10)
+        tmp = torch.nonzero(correct_index.view(-1,1) == pred_top10, as_tuple=False)
 
         # reciprocal rank
         # if rank is larger than 10, then set the reciprocal rank to 0.
