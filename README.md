@@ -36,8 +36,8 @@ OGB is an on-going effort, and we are planning to increase our coverage in the f
 
 ## Installation
 You can install OGB using Python's package manager `pip`.
-**If you have previously installed ogb, please make sure you update the version to 1.3.0.**
-The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.3.0).
+**If you have previously installed ogb, please make sure you update the version to 1.3.1.**
+The release note is available [here](https://github.com/snap-stanford/ogb/releases/tag/1.3.1).
 
 #### Requirements
  - Python>=3.6
@@ -57,7 +57,7 @@ pip install ogb
 
 ```bash
 python -c "import ogb; print(ogb.__version__)"
-# This should print "1.3.0". Otherwise, please update the version by
+# This should print "1.3.1". Otherwise, please update the version by
 pip install -U ogb
 ```
 
