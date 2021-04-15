@@ -60,11 +60,13 @@ def save_col_slice(x_src, x_dst, start_row_idx, end_row_idx, start_col_idx,
 
 
 class MAG240M(LightningDataModule):
-    def __init__(self, data_dir: str, batch_size: int, sizes: List[int]):
+    def __init__(self, data_dir: str, batch_size: int, sizes: List[int],
+                 in_memory: bool = False):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.sizes = sizes
+        self.in_memory = in_memory
 
     @property
     def num_features(self) -> int:
@@ -232,8 +234,14 @@ class MAG240M(LightningDataModule):
 
         N = dataset.num_papers + dataset.num_authors + dataset.num_institutions
 
-        self.x = np.memmap(f'{dataset.dir}/full_feat.npy', dtype=np.float16,
-                           mode='r', shape=(N, self.num_features))
+        if self.in_memory:
+            self.x = np.load(f'{dataset.dir}/full_feat.npy')
+            self.x = torch.from_numpy(self.x).share_memory_()
+        else:
+            self.x = np.memmap(f'{dataset.dir}/full_feat.npy',
+                               dtype=np.float16, mode='r',
+                               shape=(N, self.num_features))
+
         self.y = torch.from_numpy(dataset.all_paper_label)
 
         path = f'{dataset.dir}/full_adj_t.pt'
@@ -266,7 +274,10 @@ class MAG240M(LightningDataModule):
                                batch_size=self.batch_size, num_workers=3)
 
     def convert_batch(self, batch_size, n_id, adjs):
-        x = torch.from_numpy(self.x[n_id.numpy()]).to(torch.float)
+        if self.in_memory:
+            x = self.x[n_id].to(torch.float)
+        else:
+            x = torch.from_numpy(self.x[n_id.numpy()]).to(torch.float)
         y = self.y[n_id[:batch_size]].to(torch.long)
         return Batch(x=x, y=y, adjs_t=[adj_t for adj_t, _, _ in adjs])
 
@@ -386,6 +397,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='rgat',
                         choices=['rgat', 'rgraphsage'])
     parser.add_argument('--sizes', type=str, default='25-15')
+    parser.add_argument('--in-memory', action='store_true')
     parser.add_argument('--device', type=str, default='0')
     parser.add_argument('--evaluate', action='store_true')
     args = parser.parse_args()
@@ -393,7 +405,7 @@ if __name__ == '__main__':
     print(args)
 
     seed_everything(42)
-    datamodule = MAG240M(ROOT, args.batch_size, args.sizes)
+    datamodule = MAG240M(ROOT, args.batch_size, args.sizes, args.in_memory)
 
     if not args.evaluate:
         model = RGNN(args.model, datamodule.num_features,
