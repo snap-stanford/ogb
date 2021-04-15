@@ -190,8 +190,6 @@ def test(args, model, test_samplers, step, rank=0, mode='Test'):
     if args.strict_rel_part or args.soft_rel_part:
         model.load_relation(th.device('cuda:' + str(gpu_id)))
 
-    # print (test_samplers)
-    # pdb.set_trace()
     with th.no_grad():
         logs = defaultdict(list)
         answers = defaultdict(list)
@@ -209,13 +207,8 @@ def test(args, model, test_samplers, step, rank=0, mode='Test'):
         if 'h,r->t' in answers:
             assert 'h,r->t' in logs, "h,r->t not in logs"
             input_dict['h,r->t'] = {'t_correct_index': th.cat(answers['h,r->t'], 0), 't_pred_top10': th.cat(logs['h,r->t'], 0)}
-        # if 't,r->h' in answers:
-        #     assert 't,r->h' in logs, "t,r->h not in logs"
-        #     input_dict['t,r->h'] = {'h_correct_index': th.cat(answers['t,r->h'], 0), 'h_pred_top10': th.cat(logs['t,r->h'], 0)}
     for i in range(len(test_samplers)):
         test_samplers[i] = test_samplers[i].reset()
-    # test_samplers[0] = test_samplers[0].reset()
-    # test_samplers[1] = test_samplers[1].reset()
 
     return input_dict
 

@@ -509,23 +509,7 @@ class KEModel(object):
         num_chunks = len(query)
         chunk_size = 1
         neg_sample_size = candidate.shape[1]
-        if mode == 't,r->h':
-            if self.encoder_model_name == 'roberta':
-                neg_head = self.transform_net.embed_entity(self.entity_feat(candidate.view(-1), gpu_id, False))
-                tail = self.transform_net.embed_entity(self.entity_feat(query[:,0], gpu_id, False))
-                rel = self.transform_net.embed_relation(self.relation_feat(query[:,1], gpu_id, False))
-            elif self.encoder_model_name == 'shallow':
-                neg_head = self.entity_emb(candidate.view(-1), gpu_id, False)
-                tail = self.entity_emb(query[:,0], gpu_id, False)
-                rel = self.relation_emb(query[:,1], gpu_id, False)
-            elif self.encoder_model_name == 'concat':
-                neg_head = self.transform_net.embed_entity(torch.cat([self.entity_feat(candidate.view(-1), gpu_id, False), self.entity_emb(candidate.view(-1), gpu_id, False)], -1))
-                tail = self.transform_net.embed_entity(torch.cat([self.entity_feat(query[:,0], gpu_id, False), self.entity_emb(query[:,0], gpu_id, False)], -1))
-                rel = self.transform_net.embed_relation(torch.cat([self.relation_feat(query[:,1], gpu_id, False), self.relation_emb(query[:,1], gpu_id, False)], -1))
-
-            neg_score = self.head_neg_score(neg_head, rel, tail,
-                                            num_chunks, chunk_size, neg_sample_size)
-        elif mode == 'h,r->t':
+        if mode == 'h,r->t':
             if self.encoder_model_name == 'roberta':
                 neg_tail = self.transform_net.embed_entity(self.entity_feat(candidate.view(-1), gpu_id, False))
                 head = self.transform_net.embed_entity(self.entity_feat(query[:,0], gpu_id, False))
@@ -542,7 +526,7 @@ class KEModel(object):
                                             num_chunks, chunk_size, neg_sample_size)
         else:
             assert False
-        return neg_score.squeeze()
+        return neg_score.squeeze(dim=1)
 
     # @profile
     def forward(self, pos_g, neg_g, gpu_id=-1):
