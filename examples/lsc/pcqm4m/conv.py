@@ -171,9 +171,9 @@ class GNN_node_Virtualnode(torch.nn.Module):
         self.mlp_virtualnode_list = torch.nn.ModuleList()
 
         for layer in range(num_layers):
-            if gnn_type == 'gin':
+            if gnn_type == 'gin-virtual':
                 self.convs.append(GINConv(emb_dim))
-            elif gnn_type == 'gcn':
+            elif gnn_type == 'gcn-virtual':
                 self.convs.append(GCNConv(emb_dim))
             else:
                 ValueError('Undefined GNN type called {}'.format(gnn_type))
