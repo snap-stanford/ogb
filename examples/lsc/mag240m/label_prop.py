@@ -1,4 +1,5 @@
-# NOTE: 256GB CPU memory required to run this script.
+# NOTE: More than 256GB CPU memory required to run this script.
+#       Use `--low-memory` to reduce memory consumption by using half-precision
 
 import os.path as osp
 import time
@@ -16,6 +17,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_layers', type=int, default=3),
     parser.add_argument('--alpha', type=float, default=0.9),
+    parser.add_argument('--low-memory', action='store_true'),
     args = parser.parse_args()
     print(args)
 
@@ -37,6 +39,8 @@ if __name__ == '__main__':
         adj_t = adj_t.to_symmetric()
         torch.save(adj_t, path)
     adj_t = gcn_norm(adj_t, add_self_loops=False)
+    if args.low_memory:
+        adj_t = adj_t.to(torch.half)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     train_idx = dataset.get_idx_split('train')
@@ -48,11 +52,20 @@ if __name__ == '__main__':
 
     model = LabelPropagation(args.num_layers, args.alpha)
 
+    N, C = dataset.num_papers, dataset.num_classes
+
     t = time.perf_counter()
     print('Propagating labels...', end=' ', flush=True)
-    y = torch.zeros(dataset.num_papers, dataset.num_classes)
-    y[train_idx] = F.one_hot(y_train, dataset.num_classes).float()
-    y_pred = model(y, adj_t).argmax(dim=-1)
+    if args.low_memory:
+        y = torch.zeros(N, C, dtype=torch.half)
+        y[train_idx] = F.one_hot(y_train, C).to(torch.half)
+        out = model(y, adj_t, post_step=lambda x: x)
+        y_pred = out.argmax(dim=-1)
+    else:
+        y = torch.zeros(N, C)
+        y[train_idx] = F.one_hot(y_train, C).to(torch.float)
+        out = model(y, adj_t)
+        y_pred = out.argmax(dim=-1)
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     train_acc = evaluator.eval({
