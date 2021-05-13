@@ -25,3 +25,6 @@ dataset/
 **/checkpoint
 **/events.out.*
 **/test*
+**/pcqm4m-scaf/**
+**/logs/**
+**/lightning_logs/**
