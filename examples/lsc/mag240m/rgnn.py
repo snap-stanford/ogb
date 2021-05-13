@@ -234,13 +234,14 @@ class MAG240M(LightningDataModule):
 
         N = dataset.num_papers + dataset.num_authors + dataset.num_institutions
 
+        x = np.memmap(f'{dataset.dir}/full_feat.npy', dtype=np.float16,
+                      mode='r', shape=(N, self.num_features))
+
         if self.in_memory:
-            self.x = np.load(f'{dataset.dir}/full_feat.npy')
-            self.x = torch.from_numpy(self.x).share_memory_()
+            self.x = np.empty((N, self.num_features), dtype=np.float16)
+            self.x[:] = x
         else:
-            self.x = np.memmap(f'{dataset.dir}/full_feat.npy',
-                               dtype=np.float16, mode='r',
-                               shape=(N, self.num_features))
+            self.x = x
 
         self.y = torch.from_numpy(dataset.all_paper_label)
 
