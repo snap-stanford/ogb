@@ -240,7 +240,7 @@ class MAG240M(LightningDataModule):
         if self.in_memory:
             self.x = np.empty((N, self.num_features), dtype=np.float16)
             self.x[:] = x
-            self.x = torch.from_numpy(x).share_memory_()
+            self.x = torch.from_numpy(self.x).share_memory_()
         else:
             self.x = x
 
