@@ -441,9 +441,11 @@ if __name__ == '__main__':
         loader = datamodule.hidden_test_dataloader()
 
         model.eval()
+        device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
+        model.to(device)
         y_preds = []
         for batch in tqdm(loader):
-            batch = batch.to(int(args.device))
+            batch = batch.to(device)
             with torch.no_grad():
                 out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
                 y_preds.append(out)
