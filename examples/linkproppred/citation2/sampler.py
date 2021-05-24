@@ -229,11 +229,13 @@ def main():
     x = data.x.to(device)
 
     pos_loader = PositiveLinkNeighborSampler(edge_index, sizes=[15, 10, 5],
+                                             num_nodes=x.size(0),
                                              batch_size=args.batch_size,
                                              shuffle=True,
                                              num_workers=args.num_workers)
 
     neg_loader = NegativeLinkNeighborSampler(edge_index, sizes=[15, 10, 5],
+                                             num_nodes=x.size(0),
                                              batch_size=args.batch_size,
                                              shuffle=False,
                                              num_workers=args.num_workers)
