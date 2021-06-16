@@ -48,7 +48,7 @@ class Evaluator:
 
 
             ## check type
-            if not (isinstance(y_true, np.ndarray) and isinstance(y_true, np.ndarray)):
+            if not isinstance(y_true, np.ndarray):
                 raise RuntimeError('Arguments to Evaluator need to be either numpy ndarray or torch tensor')
 
             if not y_true.shape == y_pred.shape:
@@ -268,7 +268,7 @@ class Evaluator:
 
 
 if __name__ == '__main__':
-    evaluator = Evaluator('ogbg-code')
+    evaluator = Evaluator('ogbg-code2')
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
     seq_ref = [['tom', 'is'], ['he'], ['he'], ['hey', 'fea', 'he'], ['alpha'], ['fe4qfq', 'beta'], ['aa']]
