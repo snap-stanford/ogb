@@ -7,10 +7,6 @@
 [![PyPI](https://img.shields.io/pypi/v/ogb)](https://pypi.org/project/ogb/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snap-stanford/ogb/blob/master/LICENSE)
 
-## News!
-
-Check out [OGB Large-Scale Challenge](https://ogb.stanford.edu/kddcup2021/) at KDD Cup 2021, happening from March 15 to June 8, 2021. All the datasets are accessible through this package `ogb>=1.3.0`.
-
 ## Overview
 
 The Open Graph Benchmark (OGB) is a collection of benchmark datasets, data loaders, and evaluators for graph machine learning. Datasets cover a variety of graph machine learning tasks and real-world applications.
@@ -102,13 +98,21 @@ input_dict = {'y_true': y_true, 'y_pred': y_pred}
 result_dict = evaluator.eval(input_dict) # E.g., {'rocauc': 0.7321}
 ```
 
-## Citing OGB
-If you use OGB datasets in your work, please cite our paper (Bibtex below).
+## Citing OGB / OGB-LSC
+If you use OGB or [OGB-LSC](https://ogb.stanford.edu/kddcup2021/) datasets in your work, please cite our papers (Bibtex below).
 ```
 @article{hu2020ogb,
   title={Open Graph Benchmark: Datasets for Machine Learning on Graphs},
-  author={Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, Jure Leskovec},
+  author={Hu, Weihua and Fey, Matthias and Zitnik, Marinka and Dong, Yuxiao and Ren, Hongyu and Liu, Bowen and Catasta, Michele and Leskovec, Jure},
   journal={arXiv preprint arXiv:2005.00687},
   year={2020}
+}
+```
+```
+@article{hu2021ogblsc,
+  title={OGB-LSC: A Large-Scale Challenge for Machine Learning on Graphs},
+  author={Hu, Weihua and Fey, Matthias and Ren, Hongyu and Nakata, Maho and Dong, Yuxiao and Leskovec, Jure},
+  journal={arXiv preprint arXiv:2103.09430},
+  year={2021}
 }
 ```
