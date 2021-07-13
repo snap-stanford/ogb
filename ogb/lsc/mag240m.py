@@ -39,6 +39,17 @@ class MAG240MDataset(object):
         self.__meta__ = torch.load(osp.join(self.dir, 'meta.pt'))
         self.__split__ = torch.load(osp.join(self.dir, 'split_dict.pt'))
 
+        # Assigning the whole test into test-dev and test-challenge
+        idx = torch.arange(len(self.__split__['test']))
+        dev_idx = torch.nonzero(idx % 5 < 3, as_tuple=True)[0]
+        competition_idx = torch.nonzero(~(idx % 5 < 3), as_tuple=True)[0]
+
+        self.__split__['test-whole'] = self.__split__['test']
+        self.__split__['test-dev'] = self.__split__['test-whole'][dev_idx]
+        self.__split__['test-challenge'] = self.__split__['test-whole'][competition_idx]
+
+        del self.__split__['test']
+
     def download(self):
         if not osp.exists(self.dir):
             if decide_download(self.url):
@@ -133,17 +144,26 @@ class MAG240MEvaluator:
 
         return {'acc': int((y_true == y_pred).sum()) / y_true.numel()}
 
-    def save_test_submission(self, input_dict, dir_path):
+    def save_test_submission(self, input_dict, dir_path, mode: str):
         assert 'y_pred' in input_dict
         y_pred = input_dict['y_pred']
-        assert y_pred.shape == (146818, )
+        makedirs(dir_path)
+
+        if mode == 'test-whole':
+            assert y_pred.shape == (146818, )
+            filename = osp.join(dir_path, 'y_pred_mag240m')
+        elif mode == 'test-dev':
+            assert y_pred.shape == (88092, )
+            filename = osp.join(dir_path, 'y_pred_mag240m_dev')
+        elif mode == 'test-challenge':
+            assert y_pred.shape == (58726, )
+            filename = osp.join(dir_path, 'y_pred_mag240m_challenge')
+        else:
+            raise ValueError("Unknown mode for save_test_submission.\n Should be chosen from ['test-whole', 'test-dev', 'test-challenge']")
 
         if isinstance(y_pred, torch.Tensor):
             y_pred = y_pred.cpu().numpy()
         y_pred = y_pred.astype(np.short)
-
-        makedirs(dir_path)
-        filename = osp.join(dir_path, 'y_pred_mag240m')
         np.savez_compressed(filename, y_pred=y_pred)
 
 
@@ -158,7 +178,26 @@ if __name__ == '__main__':
     print(split_dict['train'].shape)
     print(split_dict['valid'].shape)
     print('-----------------')
-    print(split_dict['test'].shape)
+    print(split_dict['test-dev'].shape)
+    print(split_dict['test-whole'].shape)
+    print(split_dict['test-challenge'].shape)
+
+    evaluator = MAG240MEvaluator()
+    evaluator.save_test_submission(
+        input_dict = {
+        'y_pred': np.random.randint(100, size = split_dict['test-dev'].shape), 
+        },
+        dir_path = 'results',
+        mode = 'test-dev'
+    )
+
+    evaluator.save_test_submission(
+        input_dict = {
+        'y_pred': np.random.randint(100, size = split_dict['test-challenge'].shape), 
+        },
+        dir_path = 'results',
+        mode = 'test-challenge'
+    )
 
     print(dataset.paper_feat.shape)
     print(dataset.paper_year.shape)
