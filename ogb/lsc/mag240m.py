@@ -8,6 +8,7 @@ import torch
 import numpy as np
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
+from ogb.lsc.utils import split_test
 
 
 class MAG240MDataset(object):
@@ -39,16 +40,7 @@ class MAG240MDataset(object):
         self.__meta__ = torch.load(osp.join(self.dir, 'meta.pt'))
         self.__split__ = torch.load(osp.join(self.dir, 'split_dict.pt'))
 
-        # Assigning the whole test into test-dev and test-challenge
-        idx = torch.arange(len(self.__split__['test']))
-        dev_idx = torch.nonzero(idx % 5 < 3, as_tuple=True)[0]
-        competition_idx = torch.nonzero(~(idx % 5 < 3), as_tuple=True)[0]
-
-        self.__split__['test-whole'] = self.__split__['test']
-        self.__split__['test-dev'] = self.__split__['test-whole'][dev_idx]
-        self.__split__['test-challenge'] = self.__split__['test-whole'][competition_idx]
-
-        del self.__split__['test']
+        split_test(self.__split__)
 
     def download(self):
         if not osp.exists(self.dir):
@@ -209,8 +201,9 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     val_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-whole')
     print(len(train_idx) + len(val_idx) + len(test_idx))
+
     print(dataset.paper_label[train_idx][:10])
     print(dataset.paper_label[val_idx][:10])
     print(dataset.paper_label[test_idx][:10])
