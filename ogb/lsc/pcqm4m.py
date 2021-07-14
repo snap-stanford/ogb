@@ -1,8 +1,11 @@
 import os
 import os.path as osp
 import shutil
+
 from ogb.utils import smiles2graph
 from ogb.utils.url import decide_download, download_url, extract_zip
+from ogb.lsc.utils import split_test
+
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -110,13 +113,14 @@ class PCQM4MDataset(object):
             split_dict = self.get_idx_split()
             assert(all([not np.isnan(self.labels[i]) for i in split_dict['train']]))
             assert(all([not np.isnan(self.labels[i]) for i in split_dict['valid']]))
-            assert(all([np.isnan(self.labels[i]) for i in split_dict['test']]))
+            assert(all([np.isnan(self.labels[i]) for i in split_dict['test-whole']]))
 
             print('Saving...')
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
     def get_idx_split(self):
         split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'))
+        split_test(split_dict)
         return split_dict
 
     def __getitem__(self, idx):
@@ -171,7 +175,7 @@ class PCQM4MEvaluator:
         else:
             return {'mae': float(np.mean(np.absolute(y_pred - y_true)))}
 
-    def save_test_submission(self, input_dict, dir_path):
+    def save_test_submission(self, input_dict, dir_path, mode: str):
         '''
             save test submission file at dir_path
         '''
@@ -180,11 +184,19 @@ class PCQM4MEvaluator:
 
         if not osp.exists(dir_path):
             os.makedirs(dir_path)
-            
-        filename = osp.join(dir_path, 'y_pred_pcqm4m')
+
+        if mode == 'test-whole':
+            filename = osp.join(dir_path, 'y_pred_pcqm4m')
+            assert(y_pred.shape == (377423,))
+        elif mode == 'test-dev':
+            filename = osp.join(dir_path, 'y_pred_pcqm4m_dev')
+            assert(y_pred.shape == (226455,))
+        elif mode == 'test-challenge':
+            filename = osp.join(dir_path, 'y_pred_pcqm4m_challenge')
+            assert(y_pred.shape == (150968,))
+
         assert(isinstance(filename, str))
         assert(isinstance(y_pred, np.ndarray) or isinstance(y_pred, torch.Tensor))
-        assert(y_pred.shape == (377423,))
 
         if isinstance(y_pred, torch.Tensor):
             y_pred = y_pred.numpy()
@@ -195,16 +207,15 @@ if __name__ == '__main__':
     dataset = PCQM4MDataset(only_smiles=True)
     print(dataset)
     print(dataset[1234])
-    exit(-1)
-    split_dict = dataset.get_idx_split()
-    print(dataset[split_dict['test'][0]])
-    print(dataset[split_dict['valid'][0]])
-    print(dataset[split_dict['train'][0]])
 
-    dataset = PCQM4MDataset()
-    print(dataset)
-    print(dataset[100])
-    print(dataset.get_idx_split())
+    split_dict = dataset.get_idx_split()
+    print(split_dict['train'].shape)
+    print(split_dict['valid'].shape)
+    print('-----------------')
+    print(split_dict['test-dev'].shape)
+    print(split_dict['test-whole'].shape)
+    print(split_dict['test-challenge'].shape)
+
 
     evaluator = PCQM4MEvaluator()
     y_true = torch.randn(100)
@@ -212,9 +223,29 @@ if __name__ == '__main__':
     result = evaluator.eval({'y_true': y_true, 'y_pred': y_pred})
     print(result)
 
-    y_pred = torch.randn(377423)
-    evaluator.save_test_submission({'y_pred': y_pred}, 'result')
+    y_pred = torch.randn(len(split_dict['test-whole']))
+    evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-whole')
 
+    y_pred = torch.randn(len(split_dict['test-dev']))
+    evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-dev')
+
+    y_pred = torch.randn(len(split_dict['test-challenge']))
+    evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-challenge')
+
+
+
+    exit(-1)
+    split_dict = dataset.get_idx_split()
+    print(dataset[split_dict['test'][0]])
+    print(dataset[split_dict['valid'][0]])
+    print(dataset[split_dict['test-whole'][0]])
+
+    dataset = PCQM4MDataset()
+    print(dataset)
+    print(dataset[100])
+    print(dataset.get_idx_split())
+
+    
 
         
 

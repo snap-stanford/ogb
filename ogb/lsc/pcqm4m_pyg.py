@@ -4,6 +4,7 @@ import shutil
 from ogb.utils import smiles2graph
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
 from ogb.utils.url import decide_download, download_url, extract_zip
+from ogb.lsc.utils import split_test
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -87,7 +88,7 @@ class PygPCQM4MDataset(InMemoryDataset):
         split_dict = self.get_idx_split()
         assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['train']]))
         assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['valid']]))
-        assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test']]))
+        assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test-whole']]))
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
@@ -99,6 +100,7 @@ class PygPCQM4MDataset(InMemoryDataset):
 
     def get_idx_split(self):
         split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt')))
+        split_test(split_dict)
         return split_dict
 
 if __name__ == '__main__':
