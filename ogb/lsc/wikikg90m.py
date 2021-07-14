@@ -14,7 +14,7 @@ class WikiKG90MDataset(object):
 
     def __init__(self, root: str = 'dataset'):
         print('The WikiKG90M has been deprecated. The leaderboard is no longer maintained.')
-        print('Please use WikiKG90M-v2 instead.')
+        print('Please use WikiKG90Mv2 instead.')
 
         self.original_root = root
 

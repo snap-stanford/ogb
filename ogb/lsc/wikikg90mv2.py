@@ -15,10 +15,10 @@ class WikiKG90Mv2Dataset(object):
     def __init__(self, root: str = 'dataset'):
         self.original_root = root
 
-        self.folder = osp.join(root, 'wikikg90m_kddcup2021')
+        self.folder = osp.join(root, 'wikikg90m-v2')
         self.version = 1
 
-        # (TODO) fillout
+        # (TODO) fill out
         self.url = None
 
         self.processed_dir = osp.join(self.folder, 'processed')
@@ -235,10 +235,10 @@ class WikiKG90Mv2Evaluator:
 
         if mode == 'test-dev':
             assert t_pred_top10.shape == (15000, 10)
-            filename = osp.join(dir_path, 't_pred_wikikg90m_test-dev')
+            filename = osp.join(dir_path, 't_pred_wikikg90m-v2_test-dev')
         elif mode == 'test-challenge':
             assert t_pred_top10.shape == (10000, 10)
-            filename = osp.join(dir_path, 't_pred_wikikg90m_test-challenge')
+            filename = osp.join(dir_path, 't_pred_wikikg90m-v2_test-challenge')
 
         makedirs(dir_path)
 
