@@ -6,6 +6,7 @@ import os.path as osp
 
 import torch
 import numpy as np
+import pandas as pd
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
@@ -198,7 +199,18 @@ class WikiKG90MEvaluator:
         assert (0 <= t_pred_top10).all() and (t_pred_top10 < 1001).all()
         assert (0 <= t_correct_index).all() and (t_correct_index < 1001).all()
 
-        mrr = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
+        # verifying that there is no duplicated prediction for each triplet
+        duplicated = False
+        for i in range(len(t_pred_top10)):
+            if len(torch.unique(t_pred_top10[i])) != len(t_pred_top10[i]):
+                duplicated = True
+                break
+
+        if duplicated:
+            print('Found duplicated tail prediction for some triplets! MRR is automatically set to 0.')
+            mrr = 0
+        else:
+            mrr = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
 
         return {'mrr': mrr}
 
@@ -228,6 +240,10 @@ class WikiKG90MEvaluator:
 
         if isinstance(t_pred_top10, torch.Tensor):
             t_pred_top10 = t_pred_top10.cpu().numpy()
+
+        for i in range(len(t_pred_top10)):
+            assert len(pd.unique(t_pred_top10[i])) == len(t_pred_top10[i]), 'Found duplicated tail prediction for some triplets!'
+
         t_pred_top10 = t_pred_top10.astype(np.int16)
 
         makedirs(dir_path)
@@ -255,29 +271,3 @@ if __name__ == '__main__':
     valid_dict = dataset.valid_dict
     t_correct_index = valid_dict['h,r->t']['t_correct_index']
     test_task = dataset.test_dict['h,r->t']
-    
-    # t_correct_index = test_task['t_correct_index'] # key error
-    
-    hr = test_task['hr']
-    t_candidate = test_task['t_candidate']
-    t_pred_top10 = np.random.randint(0,1001, size=(len(t_correct_index), 10))
-
-    input_dict = {}
-    input_dict['h,r->t'] = {'t_correct_index': t_correct_index, 't_pred_top10': t_pred_top10}
-    result = evaluator.eval(input_dict)
-    print(result)
-
-    t_correct_index = torch.from_numpy(t_correct_index)
-    t_pred_top10 = torch.from_numpy(t_pred_top10)
-
-    input_dict = {}
-    input_dict['h,r->t'] = {'t_correct_index': t_correct_index, 't_pred_top10': t_pred_top10}
-    result = evaluator.eval(input_dict)
-    print(result)
-
-    input_dict = {}
-    input_dict['h,r->t'] = {'t_pred_top10': np.random.randint(0,1001, size = (1359303, 10))}
-    evaluator.save_test_submission(input_dict, 'result')
-
-    # print(dataset.all_entity_feat)
-    # print(dataset.all_entity_feat.shape)

@@ -6,6 +6,7 @@ import os.path as osp
 
 import torch
 import numpy as np
+import pandas as pd
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
@@ -192,6 +193,19 @@ class WikiKG90Mv2Evaluator:
 
         assert t_pred_top10.shape[1] == 10 and len(t_pred_top10) == len(t)
 
+        # verifying that there is no duplicated prediction for each triplet
+        duplicated = False
+        for i in range(len(t_pred_top10)):
+            if len(torch.unique(t_pred_top10[i])) != len(t_pred_top10[i]):
+                duplicated = True
+                break
+
+        if duplicated:
+            print('Found duplicated tail prediction for some triplets! MRR is automatically set to 0.')
+            mrr = 0
+        else:
+            mrr = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
+
         mrr = self._calculate_mrr(t.to(t_pred_top10.device), t_pred_top10)
 
         return {'mrr': mrr}
@@ -217,6 +231,9 @@ class WikiKG90Mv2Evaluator:
         assert mode in ['test-dev', 'test-challenge']
 
         t_pred_top10 = input_dict['h,r->t']['t_pred_top10']
+        
+        for i in range(len(t_pred_top10)):
+            assert len(pd.unique(t_pred_top10[i])) == len(t_pred_top10[i]), 'Found duplicated tail prediction for some triplets!'
 
         if mode == 'test-dev':
             assert t_pred_top10.shape == (15000, 10)
