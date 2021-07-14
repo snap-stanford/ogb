@@ -204,9 +204,7 @@ class WikiKG90Mv2Evaluator:
             print('Found duplicated tail prediction for some triplets! MRR is automatically set to 0.')
             mrr = 0
         else:
-            mrr = self._calculate_mrr(t_correct_index.to(t_pred_top10.device), t_pred_top10)
-
-        mrr = self._calculate_mrr(t.to(t_pred_top10.device), t_pred_top10)
+            mrr = self._calculate_mrr(t.to(t_pred_top10.device), t_pred_top10)
 
         return {'mrr': mrr}
 
