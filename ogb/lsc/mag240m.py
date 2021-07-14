@@ -147,10 +147,10 @@ class MAG240MEvaluator:
             filename = osp.join(dir_path, 'y_pred_mag240m')
         elif mode == 'test-dev':
             assert y_pred.shape == (88092, )
-            filename = osp.join(dir_path, 'y_pred_mag240m_dev')
+            filename = osp.join(dir_path, 'y_pred_mag240m_test-dev')
         elif mode == 'test-challenge':
             assert y_pred.shape == (58726, )
-            filename = osp.join(dir_path, 'y_pred_mag240m_challenge')
+            filename = osp.join(dir_path, 'y_pred_mag240m_test-challenge')
 
         makedirs(dir_path)
         

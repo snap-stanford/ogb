@@ -235,10 +235,10 @@ class WikiKG90Mv2Evaluator:
 
         if mode == 'test-dev':
             assert t_pred_top10.shape == (15000, 10)
-            filename = osp.join(dir_path, 't_pred_wikikg90m_dev')
+            filename = osp.join(dir_path, 't_pred_wikikg90m_test-dev')
         elif mode == 'test-challenge':
             assert t_pred_top10.shape == (10000, 10)
-            filename = osp.join(dir_path, 't_pred_wikikg90m_challenge')
+            filename = osp.join(dir_path, 't_pred_wikikg90m_test-challenge')
 
         makedirs(dir_path)
 

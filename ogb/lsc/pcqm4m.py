@@ -190,10 +190,10 @@ class PCQM4MEvaluator:
             filename = osp.join(dir_path, 'y_pred_pcqm4m')
             assert(y_pred.shape == (377423,))
         elif mode == 'test-dev':
-            filename = osp.join(dir_path, 'y_pred_pcqm4m_dev')
+            filename = osp.join(dir_path, 'y_pred_pcqm4m_test-dev')
             assert(y_pred.shape == (226455,))
         elif mode == 'test-challenge':
-            filename = osp.join(dir_path, 'y_pred_pcqm4m_challenge')
+            filename = osp.join(dir_path, 'y_pred_pcqm4m_test-challenge')
             assert(y_pred.shape == (150968,))
 
         assert(isinstance(filename, str))
