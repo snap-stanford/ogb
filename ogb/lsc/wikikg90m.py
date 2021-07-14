@@ -9,10 +9,12 @@ import numpy as np
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
-
 class WikiKG90MDataset(object):
 
     def __init__(self, root: str = 'dataset'):
+        print('The WikiKG90M has been deprecated. The leaderboard is no longer maintained.')
+        print('Please use WikiKG90M-v2 instead.')
+
         self.original_root = root
 
         self.folder = osp.join(root, 'wikikg90m_kddcup2021')
