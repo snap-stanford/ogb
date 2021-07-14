@@ -136,10 +136,11 @@ class MAG240MEvaluator:
 
         return {'acc': int((y_true == y_pred).sum()) / y_true.numel()}
 
-    def save_test_submission(self, input_dict, dir_path, mode: str):
+    def save_test_submission(self, input_dict: Dict, dir_path: str, mode: str):
         assert 'y_pred' in input_dict
+        assert mode in ['test-whole', 'test-dev', 'test-challenge']
+
         y_pred = input_dict['y_pred']
-        makedirs(dir_path)
 
         if mode == 'test-whole':
             assert y_pred.shape == (146818, )
@@ -150,11 +151,12 @@ class MAG240MEvaluator:
         elif mode == 'test-challenge':
             assert y_pred.shape == (58726, )
             filename = osp.join(dir_path, 'y_pred_mag240m_challenge')
-        else:
-            raise ValueError("Unknown mode for save_test_submission.\n Should be chosen from ['test-whole', 'test-dev', 'test-challenge']")
 
+        makedirs(dir_path)
+        
         if isinstance(y_pred, torch.Tensor):
             y_pred = y_pred.cpu().numpy()
+
         y_pred = y_pred.astype(np.short)
         np.savez_compressed(filename, y_pred=y_pred)
 
@@ -190,6 +192,8 @@ if __name__ == '__main__':
         dir_path = 'results',
         mode = 'test-challenge'
     )
+
+    exit(-1)
 
     print(dataset.paper_feat.shape)
     print(dataset.paper_year.shape)

@@ -1,3 +1,5 @@
+from typing import Optional, Union, Dict
+
 import os
 import os.path as osp
 import shutil
@@ -175,15 +177,14 @@ class PCQM4MEvaluator:
         else:
             return {'mae': float(np.mean(np.absolute(y_pred - y_true)))}
 
-    def save_test_submission(self, input_dict, dir_path, mode: str):
+    def save_test_submission(self, input_dict: Dict, dir_path: str, mode: str):
         '''
             save test submission file at dir_path
         '''
         assert('y_pred' in input_dict)
-        y_pred = input_dict['y_pred']
+        assert mode in ['test-whole', 'test-dev', 'test-challenge']
 
-        if not osp.exists(dir_path):
-            os.makedirs(dir_path)
+        y_pred = input_dict['y_pred']
 
         if mode == 'test-whole':
             filename = osp.join(dir_path, 'y_pred_pcqm4m')
@@ -197,6 +198,9 @@ class PCQM4MEvaluator:
 
         assert(isinstance(filename, str))
         assert(isinstance(y_pred, np.ndarray) or isinstance(y_pred, torch.Tensor))
+
+        if not osp.exists(dir_path):
+            os.makedirs(dir_path)
 
         if isinstance(y_pred, torch.Tensor):
             y_pred = y_pred.numpy()
