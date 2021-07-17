@@ -140,7 +140,6 @@ class WikiKG90Mv2Dataset(object):
             self._valid_dict['h,r->t']['t'] = np.load(osp.join(self.processed_dir, 'val_t.npy'))
         return self._valid_dict
 
-    @property
     def test_dict(self, mode: str) -> Dict[str, Dict[str, np.ndarray]]:
         '''
             - h,r->t: Given head and relation, predict target entities
@@ -159,7 +158,7 @@ class WikiKG90Mv2Dataset(object):
         
         elif mode == 'test-challenge':
             if self._test_challenge_dict is None:
-                self._test_dev_dict = {}
+                self._test_challenge_dict = {}
                 # h, r -> t
                 self._test_challenge_dict['h,r->t'] = {}
                 self._test_challenge_dict['h,r->t']['hr'] = np.load(osp.join(self.processed_dir, 'test-challenge_hr.npy'))
@@ -249,19 +248,19 @@ class WikiKG90Mv2Evaluator:
         np.savez_compressed(filename, t_pred_top10=t_pred_top10)
 
 if __name__ == '__main__':
-    # dataset = WikiKG90Mv2Dataset()
-    # print(dataset)
-    # print(dataset.num_entities)
-    # print(dataset.entity_feat)
-    # print(dataset.entity_feat.shape)
-    # print(dataset.num_relations)
-    # print(dataset.relation_feat)
-    # print(dataset.all_relation_feat)
-    # print(dataset.relation_feat.shape)
-    # print(dataset.train_hrt)
-    # print(dataset.valid_dict)
-    # print(dataset.test_dict('test-dev'))
-    # print(dataset.test_dict('test-challenge'))
+    dataset = WikiKG90Mv2Dataset(root = '/dfs/user/weihuahu/ogb-lsc/datasets/wikikg90m-v2/')
+    print(dataset)
+    print(dataset.num_entities)
+    print(dataset.entity_feat)
+    print(dataset.entity_feat.shape)
+    print(dataset.num_relations)
+    print(dataset.relation_feat)
+    print(dataset.all_relation_feat)
+    print(dataset.relation_feat.shape)
+    print(dataset.train_hrt)
+    print(dataset.valid_dict)
+    print(dataset.test_dict(mode = 'test-dev'))
+    print(dataset.test_dict(mode = 'test-challenge'))
 
     evaluator = WikiKG90Mv2Evaluator()
 
