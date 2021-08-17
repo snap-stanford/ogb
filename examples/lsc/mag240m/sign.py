@@ -186,7 +186,7 @@ if __name__ == '__main__':
                     xs = [x.to(device) for x in xs]
                     y_pred.append(model(xs).argmax(dim=-1).cpu())
                 res = {'y_pred': torch.cat(y_pred, dim=0)}
-                evaluator.save_test_submission(res, 'results/sign')
+                evaluator.save_test_submission(res, 'results/sign', mode = 'test-dev')
         if epoch % 1 == 0:
             print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, '
                   f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}, '

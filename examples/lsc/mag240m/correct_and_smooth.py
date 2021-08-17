@@ -83,4 +83,4 @@ if __name__ == '__main__':
     print(f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}')
 
     res = {'y_pred': y_pred[test_idx].argmax(dim=-1)}
-    evaluator.save_test_submission(res, 'results/cs')
+    evaluator.save_test_submission(res, 'results/cs', mode = 'test-dev')

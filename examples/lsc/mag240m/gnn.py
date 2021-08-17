@@ -268,4 +268,4 @@ if __name__ == '__main__':
                 out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
                 y_preds.append(out)
         res = {'y_pred': torch.cat(y_preds, dim=0)}
-        evaluator.save_test_submission(res, f'results/{args.model}')
+        evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')

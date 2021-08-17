@@ -194,7 +194,7 @@ def main():
                 print('Predicting on test data...')
                 y_pred = test(model, device, test_loader)
                 print('Saving test submission file...')
-                evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir)
+                evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = 'test-dev')
 
         scheduler.step()
             

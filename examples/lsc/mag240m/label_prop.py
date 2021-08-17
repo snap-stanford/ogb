@@ -79,4 +79,4 @@ if __name__ == '__main__':
     print(f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}')
 
     res = {'y_pred': y_pred[test_idx]}
-    evaluator.save_test_submission(res, 'results/label_prop')
+    evaluator.save_test_submission(res, 'results/label_prop', mode = 'test-dev')
