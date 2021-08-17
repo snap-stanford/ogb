@@ -15,6 +15,9 @@ import torch
 
 class PCQM4MDataset(object):
     def __init__(self, root = 'dataset', smiles2graph = smiles2graph, only_smiles=False):
+        print('The PCQM4M has been deprecated. The leaderboard is no longer maintained.')
+        print('Please use PCQM4Mv2 instead.')
+
         '''
         Library-agnostic PCQM4M dataset object
             - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021

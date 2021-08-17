@@ -15,6 +15,9 @@ from torch_geometric.data import Data
 
 class PygPCQM4MDataset(InMemoryDataset):
     def __init__(self, root = 'dataset', smiles2graph = smiles2graph, transform=None, pre_transform = None):
+        print('The PCQM4M has been deprecated. The leaderboard is no longer maintained.')
+        print('Please use PCQM4Mv2 instead.')
+        
         '''
             Pytorch Geometric PCQM4M dataset object
                 - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
