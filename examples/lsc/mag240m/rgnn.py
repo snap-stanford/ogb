@@ -229,7 +229,7 @@ class MAG240M(LightningDataModule):
         self.train_idx.share_memory_()
         self.val_idx = torch.from_numpy(dataset.get_idx_split('valid'))
         self.val_idx.share_memory_()
-        self.test_idx = torch.from_numpy(dataset.get_idx_split('test'))
+        self.test_idx = torch.from_numpy(dataset.get_idx_split('test-dev'))
         self.test_idx.share_memory_()
 
         N = dataset.num_papers + dataset.num_authors + dataset.num_institutions

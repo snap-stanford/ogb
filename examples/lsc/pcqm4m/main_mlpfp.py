@@ -172,7 +172,7 @@ def main_mlp():
         train_dataset = TensorDataset(X[split_idx['train']], Y[split_idx['train']])
 
     valid_dataset = TensorDataset(X[split_idx['valid']], Y[split_idx['valid']])
-    test_dataset = TensorDataset(X[split_idx['test']], Y[split_idx['test']])
+    test_dataset = TensorDataset(X[split_idx['test-dev']], Y[split_idx['test']])
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers = args.num_workers)
     valid_loader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)

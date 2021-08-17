@@ -100,7 +100,7 @@ def main():
     smiles_dataset = PCQM4MDataset(root='dataset/', only_smiles=True)
     split_idx = smiles_dataset.get_idx_split()
 
-    test_smiles_dataset = [smiles_dataset[i] for i in split_idx['test']]
+    test_smiles_dataset = [smiles_dataset[i] for i in split_idx['test-whole']]
     onthefly_dataset = OnTheFlyPCQMDataset(test_smiles_dataset)
     test_loader = DataLoader(onthefly_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 

@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     train_dataset = MyDataset(split='train')
     valid_dataset = MyDataset(split='valid')
-    test_dataset = MyDataset(split='test')
+    test_dataset = MyDataset(split='test-dev')
 
     train_loader = DataLoader(train_dataset, args.batch_size, shuffle=True,
                               num_workers=6, persistent_workers=True)

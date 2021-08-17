@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     valid_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-dev')
 
     t = time.perf_counter()
     print('Reading training node features...', end=' ', flush=True)

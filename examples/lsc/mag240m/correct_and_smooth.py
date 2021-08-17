@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     train_idx = torch.from_numpy(dataset.get_idx_split('train'))
     valid_idx = torch.from_numpy(dataset.get_idx_split('valid'))
-    test_idx = torch.from_numpy(dataset.get_idx_split('test'))
+    test_idx = torch.from_numpy(dataset.get_idx_split('test-dev'))
 
     y_train = torch.from_numpy(dataset.paper_label[train_idx]).to(torch.long)
     y_valid = torch.from_numpy(dataset.paper_label[valid_idx]).to(torch.long)

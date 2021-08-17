@@ -130,7 +130,7 @@ def main():
     valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.save_test_dir is not '':
-        test_loader = DataLoader(dataset[split_idx["test"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        test_loader = DataLoader(dataset[split_idx["test-dev"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.checkpoint_dir is not '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
