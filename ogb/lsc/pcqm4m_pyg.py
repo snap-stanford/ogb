@@ -4,7 +4,6 @@ import shutil
 from ogb.utils import smiles2graph
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
 from ogb.utils.url import decide_download, download_url, extract_zip
-from ogb.lsc.utils import split_test
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -103,7 +102,6 @@ class PygPCQM4MDataset(InMemoryDataset):
 
     def get_idx_split(self):
         split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt')))
-        split_test(split_dict)
         return split_dict
 
 if __name__ == '__main__':
