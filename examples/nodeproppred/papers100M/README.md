@@ -30,3 +30,15 @@ python mlp.py --use_sgc_embedding
 # Train based on node2vec features (Requires data_dict.pt, the node2vec features need to be converged.)
 python mlp.py --use_node_embedding
 ```
+
+## Getting Raw Texts
+
+The tsv file that maps paper IDs into their titles and abstracts are available [here](https://snap.stanford.edu/ogb/data/misc/ogbn_papers100M/paperinfo.zip) (34GB).
+```bash
+unzip paperinfo.zip
+cd paperinfo
+```
+
+There are two files: `idx_title.tsv` and `idx_abs.tsv`. For `idx_title.tsv`, the format is paperid \t title. For `idx_abs.tsv`, the format is paperid \t abstract.
+You can obtain the paper ID for each node at `mapping/nodeidx2paperid.csv.gz` of the downloaded dataset directory.
+Note that the titles and abstract were created from a MAG dump that is different from the original dataset; Hence, abstract and titles of some paper nodes are missing.
