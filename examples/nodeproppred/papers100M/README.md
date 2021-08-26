@@ -39,6 +39,6 @@ unzip paperinfo.zip
 cd paperinfo
 ```
 
-There are two files: `idx_title.tsv` and `idx_abs.tsv`. For `idx_title.tsv`, the format is idx \t title. For `idx_abs.tsv`, the format is idx \t abstract.
-You can obtain the mapping from idx to MAG's paper ID at `mapping/nodeidx2paperid.csv.gz` of the downloaded dataset directory.
+There are two files: `idx_title.tsv` and `idx_abs.tsv`. For `idx_title.tsv`, the format is nodeidx \t title. For `idx_abs.tsv`, the format is nodeidx \t abstract.
+You can obtain the mapping from node idx to MAG's paper ID at `mapping/nodeidx2paperid.csv.gz` of the downloaded dataset directory.
 Note that the titles and abstract were created from a MAG dump that is different from the original dataset; Hence, abstract and titles of some paper nodes are missing.
