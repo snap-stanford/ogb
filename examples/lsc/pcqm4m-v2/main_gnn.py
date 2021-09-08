@@ -130,7 +130,8 @@ def main():
     valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.save_test_dir != '':
-        test_loader = DataLoader(dataset[split_idx["test-dev"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testdev_loader = DataLoader(dataset[split_idx["test-dev"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testchallenge_loader = DataLoader(dataset[split_idx["test-challenge"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.checkpoint_dir != '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
@@ -191,10 +192,15 @@ def main():
                 torch.save(checkpoint, os.path.join(args.checkpoint_dir, 'checkpoint.pt'))
 
             if args.save_test_dir != '':
-                print('Predicting on test data...')
-                y_pred = test(model, device, test_loader)
+                testdev_pred = test(model, device, testdev_loader)
+                testdev_pred = testdev_pred.cpu().detach().numpy()
+
+                testchallenge_pred = test(model, device, testchallenge_loader)
+                testchallenge_pred = testchallenge_pred.cpu().detach().numpy()
+
                 print('Saving test submission file...')
-                evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testdev_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testchallenge_pred}, args.save_test_dir, mode = 'test-challenge')
 
         scheduler.step()
             

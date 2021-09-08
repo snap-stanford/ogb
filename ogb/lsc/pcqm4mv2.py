@@ -29,7 +29,8 @@ class PCQM4Mv2Dataset(object):
         self.version = 1
 
         # Old url hosted at Stanford
-        # self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m_kddcup2021.zip'
+        # md5sum: 65b742bafca5670be4497499db7d361b
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
         # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
 
@@ -187,10 +188,10 @@ class PCQM4Mv2Evaluator:
 
         if mode == 'test-dev':
             filename = osp.join(dir_path, 'y_pred_pcqm4m-v2_test-dev')
-            assert(y_pred.shape == (220808,))
+            assert(y_pred.shape == (147037,))
         elif mode == 'test-challenge':
             filename = osp.join(dir_path, 'y_pred_pcqm4m-v2_test-challenge')
-            assert(y_pred.shape == (147206,))
+            assert(y_pred.shape == (147432,))
 
         assert(isinstance(filename, str))
         assert(isinstance(y_pred, np.ndarray) or isinstance(y_pred, torch.Tensor))
@@ -222,21 +223,15 @@ if __name__ == '__main__':
     result = evaluator.eval({'y_true': y_true, 'y_pred': y_pred})
     print(result)
 
+    print(len(split_dict['test-dev']))
+    print(len(split_dict['test-challenge']))
+
     y_pred = torch.randn(len(split_dict['test-dev']))
     evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-dev')
 
     y_pred = torch.randn(len(split_dict['test-challenge']))
     evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-challenge')
 
-    exit(-1)
-    split_dict = dataset.get_idx_split()
-    print(dataset[split_dict['test'][0]])
-    print(dataset[split_dict['valid'][0]])
-
-    dataset = PCQM4Mv2Dataset()
-    print(dataset)
-    print(dataset[100])
-    print(dataset.get_idx_split())
 
     
 

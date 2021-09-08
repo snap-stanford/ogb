@@ -63,8 +63,8 @@ class GNN(torch.nn.Module):
         if self.training:
             return output
         else:
-            # At inference time, relu is applied to output to ensure positivity
-            return torch.clamp(output, min=0, max=50)
+            # At inference time, we clamp the value between 0 and 20
+            return torch.clamp(output, min=0, max=20)
 
 
 if __name__ == '__main__':
