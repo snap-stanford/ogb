@@ -5,7 +5,7 @@
 
 ## Installation requirements
 ```
-ogb>=1.3.0
+ogb>=1.3.2
 rdkit>=2021.03.1
 torch>=1.7.0
 ```
