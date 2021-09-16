@@ -1,5 +1,7 @@
 # Baseline code for Wikikg90m
 
+## **Important:** This dataset has been deprecated. Please use the updated version, WikiKG90Mv2.
+
 Please refer to the **[OGB-LSC paper](https://arxiv.org/abs/2103.09430)** for the detailed setting.
 
 ## Installation requirements
