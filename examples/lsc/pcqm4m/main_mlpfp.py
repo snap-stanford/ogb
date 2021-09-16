@@ -177,10 +177,10 @@ def main_mlp():
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers = args.num_workers)
     valid_loader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
-    if args.save_test_dir is not '':
+    if args.save_test_dir != '':
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
-    if args.checkpoint_dir is not '':
+    if args.checkpoint_dir != '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
 
     model = MLP(num_mlp_layers=args.num_mlp_layers, emb_dim=args.emb_dim, drop_ratio=args.drop_ratio).to(device)
@@ -190,7 +190,7 @@ def main_mlp():
 
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    if args.log_dir is not '':
+    if args.log_dir != '':
         writer = SummaryWriter(log_dir=args.log_dir)
 
     best_valid_mae = 1000
@@ -211,18 +211,18 @@ def main_mlp():
 
         print({'Train': train_mae, 'Validation': valid_mae})
 
-        if args.log_dir is not '':
+        if args.log_dir != '':
             writer.add_scalar('valid/mae', valid_mae, epoch)
             writer.add_scalar('train/mae', train_mae, epoch)
 
         if valid_mae < best_valid_mae:
             best_valid_mae = valid_mae
-            if args.checkpoint_dir is not '':
+            if args.checkpoint_dir != '':
                 print('Saving checkpoint...')
                 checkpoint = {'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'scheduler_state_dict': scheduler.state_dict(), 'best_val_mae': best_valid_mae, 'num_params': num_params}
                 torch.save(checkpoint, osp.join(args.checkpoint_dir, 'checkpoint.pt'))
 
-            if args.save_test_dir is not '':
+            if args.save_test_dir != '':
                 print('Predicting on test data...')
                 y_pred = test(model, device, test_loader)
                 print('Saving test submission file...')
@@ -232,7 +232,7 @@ def main_mlp():
             
         print(f'Best validation MAE so far: {best_valid_mae}')
 
-    if args.log_dir is not '':
+    if args.log_dir != '':
         writer.close()
 
 
