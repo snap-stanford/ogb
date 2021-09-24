@@ -22,6 +22,7 @@ class WikiKG90MDataset(object):
         self.version = 1
 
         # Old url hosted at Stanford
+        # md5sum: 73d4f5dde29d78669330b4db4c12fc9c
         # self.url = 'http://ogb-data.stanford.edu/data/lsc/wikikg90m_kddcup2021.zip'
         # New url hosted by DGL team at AWS--much faster to download
         self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m_kddcup2021.zip'
