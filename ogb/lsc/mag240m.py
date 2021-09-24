@@ -14,6 +14,7 @@ from ogb.lsc.utils import split_test
 class MAG240MDataset(object):
     version = 1
     # Old url hosted at Stanford
+    # md5sum: bd61c9446f557fbe4430d9a7ce108b34
     # url = 'http://ogb-data.stanford.edu/data/lsc/mag240m_kddcup2021.zip'
     # New url hosted by DGL team at AWS--much faster to download
     url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/mag240m_kddcup2021.zip'

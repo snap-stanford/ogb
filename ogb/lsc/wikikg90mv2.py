@@ -11,15 +11,19 @@ import pandas as pd
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 
 class WikiKG90Mv2Dataset(object):
-    # (TODO) WIP
+    
     def __init__(self, root: str = 'dataset'):
         self.original_root = root
 
         self.folder = osp.join(root, 'wikikg90m-v2')
         self.version = 1
 
-        # (TODO) fill out
-        self.url = None
+        # Old url hosted at Stanford
+        # md5sum: bfd6257134b7eb59e2edc0a4af21faa8
+        self.url = 'http://ogb-data.stanford.edu/data/lsc/wikikg90m-v2.zip'
+        # New url hosted by DGL team at AWS--much faster to download
+        # (TODO) change the DGL link
+        # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m_kddcup2021.zip'
 
         self.processed_dir = osp.join(self.folder, 'processed')
 

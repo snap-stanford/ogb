@@ -30,6 +30,7 @@ class PygPCQM4MDataset(InMemoryDataset):
         self.version = 1
         
         # Old url hosted at Stanford
+        # md5sum: 5144ebaa7c67d24da1a2acbe41f57f6a
         # self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m_kddcup2021.zip'
         # New url hosted by DGL team at AWS--much faster to download
         self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
@@ -90,7 +91,7 @@ class PygPCQM4MDataset(InMemoryDataset):
         split_dict = self.get_idx_split()
         assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['train']]))
         assert(all([not torch.isnan(data_list[i].y)[0] for i in split_dict['valid']]))
-        assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test-whole']]))
+        assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test']]))
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]

@@ -32,6 +32,7 @@ class PCQM4Mv2Dataset(object):
         # md5sum: 65b742bafca5670be4497499db7d361b
         self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
+        # (TODO) chagne the DGL link
         # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
 
         # check version and update if necessary
