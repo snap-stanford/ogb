@@ -48,7 +48,7 @@ The code below takes **the raw SMILES strings as input**, uses the saved checkpo
 python test_inference_gnn.py --gnn $GNN --checkpoint_dir $CHECKPOINT_DIR --save_test_dir $TEST_DIR
 ```
 
-For GIN-virtual, the total inference (from SMILES strings to target values) takes around 1 minutes on a single GeForce RTX 2080 GPU and an Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz.
+For GIN-virtual, the total inference (from SMILES strings to target values) takes around 1 minute on a single GeForce RTX 2080 GPU and an Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz.
 For your model, **the total inference time needs to be less than 4 hours on a single GPU and a CPU**. Ideally, you should use the GPU/CPU with the same spec as ours. However, we also allow the use of other GPU/CPU specs, as long as the specs are clearly reported in the final submission.
 
 ## Performance
@@ -62,6 +62,10 @@ For your model, **the total inference time needs to be less than 4 hours on a si
 | MLP+Fingerprint     | 0.1753 | 0.1760 | 16.1M  | GeForce RTX 2080 (11GB GPU) |
 
 \* Test MAE is evaluated on the **hidden test-dev set.**
+
+## 3D graphs
+
+We further provide the equilibrium 3D graph structure for training molecules. The zipped folder can be downloaded **[here](http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2_xyz.zip)** (2.7GB). The folder contains the xyz coordinate files of all the training molecules. For `i`-th molecule, the corresponding xyz file is `i.xyz`, e.g., xyz file of the 1234-th molecule is named `1234.xyz`. The community should feel free to exploit 3D structural information to improve their model performance. Note that 3D information is *not* provided for validation and test molecules, and test-time inference needs to be performed without explicit 3D information.
 
 ## References
 [1] Xu, K., Hu, W., Leskovec, J., & Jegelka, S. (2019). How powerful are graph neural networks?. ICLR 2019
