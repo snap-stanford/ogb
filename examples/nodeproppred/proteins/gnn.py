@@ -5,6 +5,8 @@ import torch.nn.functional as F
 
 import torch_geometric.transforms as T
 from torch_geometric.nn import GCNConv, SAGEConv
+from torch_scatter import scatter
+from torch_sparse import SparseTensor
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
@@ -119,13 +121,14 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-proteins',
-                                     transform=T.ToSparseTensor())
+    dataset = PygNodePropPredDataset(name='ogbn-proteins')
     data = dataset[0]
 
     # Move edge features to node features.
-    data.x = data.adj_t.mean(dim=1)
-    data.adj_t.set_value_(None)
+    data.x = scatter(data.edge_attr, data.edge_index[0], dim=0,
+                dim_size=data.num_nodes, reduce='mean').to('cpu')
+    data.adj_t = SparseTensor(row=data.edge_index[0], col=data.edge_index[1], 
+                value=torch.ones(data.edge_index[0].size(0)))
 
     split_idx = dataset.get_idx_split()
     train_idx = split_idx['train'].to(device)
