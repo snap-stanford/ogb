@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     valid_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-dev')
     num_features = dataset.num_paper_features
 
     pbar = tqdm(total=args.num_layers * (num_features // 128))

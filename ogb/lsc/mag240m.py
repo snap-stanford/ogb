@@ -8,11 +8,13 @@ import torch
 import numpy as np
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
+from ogb.lsc.utils import split_test
 
 
 class MAG240MDataset(object):
     version = 1
     # Old url hosted at Stanford
+    # md5sum: bd61c9446f557fbe4430d9a7ce108b34
     # url = 'http://ogb-data.stanford.edu/data/lsc/mag240m_kddcup2021.zip'
     # New url hosted by DGL team at AWS--much faster to download
     url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/mag240m_kddcup2021.zip'
@@ -38,6 +40,8 @@ class MAG240MDataset(object):
         self.download()
         self.__meta__ = torch.load(osp.join(self.dir, 'meta.pt'))
         self.__split__ = torch.load(osp.join(self.dir, 'split_dict.pt'))
+
+        split_test(self.__split__)
 
     def download(self):
         if not osp.exists(self.dir):
@@ -133,17 +137,28 @@ class MAG240MEvaluator:
 
         return {'acc': int((y_true == y_pred).sum()) / y_true.numel()}
 
-    def save_test_submission(self, input_dict, dir_path):
+    def save_test_submission(self, input_dict: Dict, dir_path: str, mode: str):
         assert 'y_pred' in input_dict
-        y_pred = input_dict['y_pred']
-        assert y_pred.shape == (146818, )
+        assert mode in ['test-whole', 'test-dev', 'test-challenge']
 
-        if isinstance(y_pred, torch.Tensor):
-            y_pred = y_pred.cpu().numpy()
-        y_pred = y_pred.astype(np.short)
+        y_pred = input_dict['y_pred']
+
+        if mode == 'test-whole':
+            assert y_pred.shape == (146818, )
+            filename = osp.join(dir_path, 'y_pred_mag240m')
+        elif mode == 'test-dev':
+            assert y_pred.shape == (88092, )
+            filename = osp.join(dir_path, 'y_pred_mag240m_test-dev')
+        elif mode == 'test-challenge':
+            assert y_pred.shape == (58726, )
+            filename = osp.join(dir_path, 'y_pred_mag240m_test-challenge')
 
         makedirs(dir_path)
-        filename = osp.join(dir_path, 'y_pred_mag240m')
+        
+        if isinstance(y_pred, torch.Tensor):
+            y_pred = y_pred.cpu().numpy()
+
+        y_pred = y_pred.astype(np.short)
         np.savez_compressed(filename, y_pred=y_pred)
 
 
@@ -158,7 +173,28 @@ if __name__ == '__main__':
     print(split_dict['train'].shape)
     print(split_dict['valid'].shape)
     print('-----------------')
-    print(split_dict['test'].shape)
+    print(split_dict['test-dev'].shape)
+    print(split_dict['test-whole'].shape)
+    print(split_dict['test-challenge'].shape)
+
+    evaluator = MAG240MEvaluator()
+    evaluator.save_test_submission(
+        input_dict = {
+        'y_pred': np.random.randint(100, size = split_dict['test-dev'].shape), 
+        },
+        dir_path = 'results',
+        mode = 'test-dev'
+    )
+
+    evaluator.save_test_submission(
+        input_dict = {
+        'y_pred': np.random.randint(100, size = split_dict['test-challenge'].shape), 
+        },
+        dir_path = 'results',
+        mode = 'test-challenge'
+    )
+
+    exit(-1)
 
     print(dataset.paper_feat.shape)
     print(dataset.paper_year.shape)
@@ -170,8 +206,9 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     val_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-whole')
     print(len(train_idx) + len(val_idx) + len(test_idx))
+
     print(dataset.paper_label[train_idx][:10])
     print(dataset.paper_label[val_idx][:10])
     print(dataset.paper_label[test_idx][:10])

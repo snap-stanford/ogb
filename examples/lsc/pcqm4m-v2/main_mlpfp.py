@@ -17,7 +17,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 ### importing OGB-LSC
-from ogb.lsc import PCQM4MDataset, PCQM4MEvaluator
+from ogb.lsc import PCQM4Mv2Dataset, PCQM4Mv2Evaluator
 
 reg_criterion = torch.nn.L1Loss()
 
@@ -113,8 +113,8 @@ class MLP(torch.nn.Module):
         if self.training:
             return output 
         else:
-            # At inference time, relu is applied to output to ensure positivity
-            return torch.clamp(output, min=0, max=50)
+            # At inference time, we clamp the value between 0 and 20
+            return torch.clamp(output, min=0, max=20)
 
 
 def main_mlp():
@@ -152,7 +152,7 @@ def main_mlp():
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
-    dataset = PCQM4MDataset(root='dataset/', only_smiles=True)
+    dataset = PCQM4Mv2Dataset(root='dataset/', only_smiles=True)
     fp_processed_file = preprocess_fp(dataset, args.radius)
 
     data_dict = torch.load(fp_processed_file)
@@ -160,7 +160,7 @@ def main_mlp():
         
     split_idx = dataset.get_idx_split()
     ### automatic evaluator. takes dataset name as input
-    evaluator = PCQM4MEvaluator()
+    evaluator = PCQM4Mv2Evaluator()
 
     if args.train_subset:
         print('train subset')
@@ -172,13 +172,15 @@ def main_mlp():
         train_dataset = TensorDataset(X[split_idx['train']], Y[split_idx['train']])
 
     valid_dataset = TensorDataset(X[split_idx['valid']], Y[split_idx['valid']])
-    test_dataset = TensorDataset(X[split_idx['test-dev']], Y[split_idx['test']])
+    testdev_dataset = TensorDataset(X[split_idx['test-dev']], Y[split_idx['test-dev']])
+    testchallenge_dataset = TensorDataset(X[split_idx['test-challenge']], Y[split_idx['test-challenge']])
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers = args.num_workers)
     valid_loader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.save_test_dir != '':
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testdev_loader = DataLoader(testdev_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testchallenge_loader = DataLoader(testchallenge_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.checkpoint_dir != '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
@@ -223,10 +225,16 @@ def main_mlp():
                 torch.save(checkpoint, osp.join(args.checkpoint_dir, 'checkpoint.pt'))
 
             if args.save_test_dir != '':
-                print('Predicting on test data...')
-                y_pred = test(model, device, test_loader)
+                testdev_pred = test(model, device, testdev_loader)
+                testdev_pred = testdev_pred.cpu().detach().numpy()
+
+                testchallenge_pred = test(model, device, testchallenge_loader)
+                testchallenge_pred = testchallenge_pred.cpu().detach().numpy()
+
                 print('Saving test submission file...')
-                evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testdev_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testchallenge_pred}, args.save_test_dir, mode = 'test-challenge')
+
 
         scheduler.step()
             

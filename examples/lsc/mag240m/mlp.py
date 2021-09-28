@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     valid_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-dev')
 
     t = time.perf_counter()
     print('Reading training node features...', end=' ', flush=True)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
             with torch.no_grad():
                 model.eval()
                 res = {'y_pred': model(x_test).argmax(dim=-1)}
-                evaluator.save_test_submission(res, 'results/mlp')
+                evaluator.save_test_submission(res, 'results/mlp', mode = 'test-dev')
         if epoch % 1 == 0:
             print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, '
                   f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}, '

@@ -16,7 +16,7 @@ import random
 
 
 ### importing OGB-LSC
-from ogb.lsc import PygPCQM4MDataset, PCQM4MEvaluator
+from ogb.lsc import PygPCQM4Mv2Dataset, PCQM4Mv2Evaluator
 
 reg_criterion = torch.nn.L1Loss()
 
@@ -113,12 +113,12 @@ def main():
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
     ### automatic dataloading and splitting
-    dataset = PygPCQM4MDataset(root = 'dataset/')
+    dataset = PygPCQM4Mv2Dataset(root = 'dataset/')
 
     split_idx = dataset.get_idx_split()
 
     ### automatic evaluator. takes dataset name as input
-    evaluator = PCQM4MEvaluator()
+    evaluator = PCQM4Mv2Evaluator()
 
     if args.train_subset:
         subset_ratio = 0.1
@@ -130,7 +130,8 @@ def main():
     valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.save_test_dir != '':
-        test_loader = DataLoader(dataset[split_idx["test-dev"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testdev_loader = DataLoader(dataset[split_idx["test-dev"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
+        testchallenge_loader = DataLoader(dataset[split_idx["test-challenge"]], batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     if args.checkpoint_dir != '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
@@ -191,10 +192,15 @@ def main():
                 torch.save(checkpoint, os.path.join(args.checkpoint_dir, 'checkpoint.pt'))
 
             if args.save_test_dir != '':
-                print('Predicting on test data...')
-                y_pred = test(model, device, test_loader)
+                testdev_pred = test(model, device, testdev_loader)
+                testdev_pred = testdev_pred.cpu().detach().numpy()
+
+                testchallenge_pred = test(model, device, testchallenge_loader)
+                testchallenge_pred = testchallenge_pred.cpu().detach().numpy()
+
                 print('Saving test submission file...')
-                evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testdev_pred}, args.save_test_dir, mode = 'test-dev')
+                evaluator.save_test_submission({'y_pred': testchallenge_pred}, args.save_test_dir, mode = 'test-challenge')
 
         scheduler.step()
             

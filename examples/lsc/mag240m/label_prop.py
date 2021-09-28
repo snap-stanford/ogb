@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     train_idx = dataset.get_idx_split('train')
     valid_idx = dataset.get_idx_split('valid')
-    test_idx = dataset.get_idx_split('test')
+    test_idx = dataset.get_idx_split('test-dev')
 
     y_train = torch.from_numpy(dataset.paper_label[train_idx]).to(torch.long)
     y_valid = torch.from_numpy(dataset.paper_label[valid_idx]).to(torch.long)
@@ -79,4 +79,4 @@ if __name__ == '__main__':
     print(f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}')
 
     res = {'y_pred': y_pred[test_idx]}
-    evaluator.save_test_submission(res, 'results/label_prop')
+    evaluator.save_test_submission(res, 'results/label_prop', mode = 'test-dev')

@@ -15,7 +15,7 @@ import numpy as np
 import random
 
 ### importing OGB-LSC
-from ogb.lsc import PCQM4MDataset, PCQM4MEvaluator
+from ogb.lsc import PCQM4Mv2Dataset, PCQM4Mv2Evaluator
 from ogb.utils import smiles2graph
 from torch_geometric.data import Data
 
@@ -83,6 +83,7 @@ def main():
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
     parser.add_argument('--checkpoint_dir', type=str, default = '', help='directory to save checkpoint')
+    parser.add_argument('--test_type', type=str, default = 'test-dev', help='test-dev or test-challenge')
     parser.add_argument('--save_test_dir', type=str, default = '', help='directory to save test submission file')
     args = parser.parse_args()
 
@@ -97,15 +98,15 @@ def main():
 
     ### automatic dataloading and splitting
     ### Read in the raw SMILES strings
-    smiles_dataset = PCQM4MDataset(root='dataset/', only_smiles=True)
+    smiles_dataset = PCQM4Mv2Dataset(root='dataset/', only_smiles=True)
     split_idx = smiles_dataset.get_idx_split()
 
-    test_smiles_dataset = [smiles_dataset[i] for i in split_idx['test-whole']]
+    test_smiles_dataset = [smiles_dataset[i] for i in split_idx[args.test_type]]
     onthefly_dataset = OnTheFlyPCQMDataset(test_smiles_dataset)
     test_loader = DataLoader(onthefly_dataset, batch_size=args.batch_size, shuffle=False, num_workers = args.num_workers)
 
     ### automatic evaluator. takes dataset name as input
-    evaluator = PCQM4MEvaluator()
+    evaluator = PCQM4Mv2Evaluator()
 
     if args.checkpoint_dir is not '':
         os.makedirs(args.checkpoint_dir, exist_ok = True)
@@ -142,7 +143,7 @@ def main():
     print('Predicting on test data...')
     y_pred = test(model, device, test_loader)
     print('Saving test submission file...')
-    evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = 'test-whole')
+    evaluator.save_test_submission({'y_pred': y_pred}, args.save_test_dir, mode = args.test_type)
 
 
 if __name__ == "__main__":

@@ -12,13 +12,10 @@ import numpy as np
 from tqdm import tqdm
 import torch
 
-class PCQM4MDataset(object):
+class PCQM4Mv2Dataset(object):
     def __init__(self, root = 'dataset', smiles2graph = smiles2graph, only_smiles=False):
-        print('The PCQM4M has been deprecated. The leaderboard is no longer maintained.')
-        print('Please use PCQM4Mv2 instead.')
-
         '''
-        Library-agnostic PCQM4M dataset object
+        Library-agnostic PCQM4Mv2 dataset object
             - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
             - smiles2graph (callable): A callable function that converts a SMILES string into a graph object
                 * The default smiles2graph requires rdkit to be installed
@@ -28,22 +25,23 @@ class PCQM4MDataset(object):
         self.original_root = root
         self.smiles2graph = smiles2graph
         self.only_smiles = only_smiles
-        self.folder = osp.join(root, 'pcqm4m_kddcup2021')
+        self.folder = osp.join(root, 'pcqm4m-v2')
         self.version = 1
 
         # Old url hosted at Stanford
-        # md5sum: 5144ebaa7c67d24da1a2acbe41f57f6a
-        # self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m_kddcup2021.zip'
+        # md5sum: 65b742bafca5670be4497499db7d361b
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
-        self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
+        # (TODO) chagne the DGL link
+        # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
-            print('PCQM4M dataset has been updated.')
+            print('PCQM4Mv2 dataset has been updated.')
             if input('Will you update the dataset now? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.folder)
 
-        super(PCQM4MDataset, self).__init__()
+        super(PCQM4Mv2Dataset, self).__init__()
 
         # Prepare everything.
         # download if there is no raw file
@@ -118,7 +116,8 @@ class PCQM4MDataset(object):
             split_dict = self.get_idx_split()
             assert(all([not np.isnan(self.labels[i]) for i in split_dict['train']]))
             assert(all([not np.isnan(self.labels[i]) for i in split_dict['valid']]))
-            assert(all([np.isnan(self.labels[i]) for i in split_dict['test']]))
+            assert(all([np.isnan(self.labels[i]) for i in split_dict['test-dev']]))
+            assert(all([np.isnan(self.labels[i]) for i in split_dict['test-challenge']]))
 
             print('Saving...')
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
@@ -149,10 +148,10 @@ class PCQM4MDataset(object):
         return '{}({})'.format(self.__class__.__name__, len(self))
 
 
-class PCQM4MEvaluator:
+class PCQM4Mv2Evaluator:
     def __init__(self):
         '''
-            Evaluator for the PCQM4M dataset
+            Evaluator for the PCQM4Mv2 dataset
             Metric is Mean Absolute Error
         '''
         pass 
@@ -179,15 +178,21 @@ class PCQM4MEvaluator:
         else:
             return {'mae': float(np.mean(np.absolute(y_pred - y_true)))}
 
-    def save_test_submission(self, input_dict: Dict, dir_path: str):
+    def save_test_submission(self, input_dict: Dict, dir_path: str, mode: str):
         '''
             save test submission file at dir_path
         '''
         assert('y_pred' in input_dict)
+        assert mode in ['test-dev', 'test-challenge']
 
         y_pred = input_dict['y_pred']
 
-        filename = osp.join(dir_path, 'y_pred_pcqm4m')
+        if mode == 'test-dev':
+            filename = osp.join(dir_path, 'y_pred_pcqm4m-v2_test-dev')
+            assert(y_pred.shape == (147037,))
+        elif mode == 'test-challenge':
+            filename = osp.join(dir_path, 'y_pred_pcqm4m-v2_test-challenge')
+            assert(y_pred.shape == (147432,))
 
         assert(isinstance(filename, str))
         assert(isinstance(y_pred, np.ndarray) or isinstance(y_pred, torch.Tensor))
@@ -201,7 +206,7 @@ class PCQM4MEvaluator:
         np.savez_compressed(filename, y_pred = y_pred)
 
 if __name__ == '__main__':
-    dataset = PCQM4MDataset(only_smiles=True)
+    dataset = PCQM4Mv2Dataset(only_smiles=True)
     print(dataset)
     print(dataset[1234])
 
@@ -209,26 +214,25 @@ if __name__ == '__main__':
     print(split_dict['train'].shape)
     print(split_dict['valid'].shape)
     print('-----------------')
-    print(split_dict['test'].shape)
+    print(split_dict['test-dev'].shape)
+    print(split_dict['test-challenge'].shape)
 
 
-    evaluator = PCQM4MEvaluator()
+    evaluator = PCQM4Mv2Evaluator()
     y_true = torch.randn(100)
     y_pred = torch.randn(100)
     result = evaluator.eval({'y_true': y_true, 'y_pred': y_pred})
     print(result)
 
-    y_pred = torch.randn(len(split_dict['test']))
-    evaluator.save_test_submission({'y_pred': y_pred}, 'results')
+    print(len(split_dict['test-dev']))
+    print(len(split_dict['test-challenge']))
 
-    split_dict = dataset.get_idx_split()
-    print(dataset[split_dict['test'][0]])
-    print(dataset[split_dict['valid'][0]])
+    y_pred = torch.randn(len(split_dict['test-dev']))
+    evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-dev')
 
-    dataset = PCQM4MDataset()
-    print(dataset)
-    print(dataset[100])
-    print(dataset.get_idx_split())
+    y_pred = torch.randn(len(split_dict['test-challenge']))
+    evaluator.save_test_submission({'y_pred': y_pred}, 'results',mode = 'test-challenge')
+
 
     
 

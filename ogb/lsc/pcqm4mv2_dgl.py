@@ -11,13 +11,10 @@ import dgl
 from tqdm import tqdm
 import torch
 
-class DglPCQM4MDataset(object):
+class DglPCQM4Mv2Dataset(object):
     def __init__(self, root = 'dataset', smiles2graph = smiles2graph):
-        print('The PCQM4M has been deprecated. The leaderboard is no longer maintained.')
-        print('Please use PCQM4Mv2 instead.')
-
         '''
-        DGL PCQM4M dataset object
+        DGL PCQM4Mv2 dataset object
             - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
             - smiles2graph (callable): A callable function that converts a SMILES string into a graph object
                 * The default smiles2graph requires rdkit to be installed
@@ -25,22 +22,23 @@ class DglPCQM4MDataset(object):
 
         self.original_root = root
         self.smiles2graph = smiles2graph
-        self.folder = osp.join(root, 'pcqm4m_kddcup2021')
+        self.folder = osp.join(root, 'pcqm4m-v2')
         self.version = 1
 
         # Old url hosted at Stanford
-        # md5sum: 5144ebaa7c67d24da1a2acbe41f57f6a
-        # self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m_kddcup2021.zip'
+        # md5sum: 65b742bafca5670be4497499db7d361b
+        self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
-        self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
+        # (TODO) chagne the DGL link
+        # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
-            print('PCQM4M dataset has been updated.')
+            print('PCQM4Mv2 dataset has been updated.')
             if input('Will you update the dataset now? (y/N)\n').lower() == 'y':
                 shutil.rmtree(self.folder)
 
-        super(DglPCQM4MDataset, self).__init__()
+        super(DglPCQM4Mv2Dataset, self).__init__()
 
         # Prepare everything.
         # download if there is no raw file
@@ -102,7 +100,8 @@ class DglPCQM4MDataset(object):
             split_dict = self.get_idx_split()
             assert(all([not torch.isnan(self.labels[i]) for i in split_dict['train']]))
             assert(all([not torch.isnan(self.labels[i]) for i in split_dict['valid']]))
-            assert(all([torch.isnan(self.labels[i]) for i in split_dict['test']]))
+            assert(all([torch.isnan(self.labels[i]) for i in split_dict['test-dev']]))
+            assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test-challenge']]))
 
             print('Saving...')
             save_graphs(pre_processed_file_path, self.graphs, labels={'labels': self.labels})
@@ -150,7 +149,7 @@ def collate_dgl(samples):
         return batched_graph, labels
 
 if __name__ == '__main__':
-    dataset = DglPCQM4MDataset()
+    dataset = DglPCQM4Mv2Dataset()
     print(dataset)
     print(dataset[100])
     split_dict = dataset.get_idx_split()
