@@ -1,1 +1,1 @@
-ROOT = '/dfs/scratch1/weihuahu/ogb/ogb/lsc/dataset'
+ROOT = '/dfs/user/weihuahu/ogb/ogb/lsc/dataset'
