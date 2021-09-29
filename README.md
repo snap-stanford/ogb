@@ -99,7 +99,7 @@ result_dict = evaluator.eval(input_dict) # E.g., {'rocauc': 0.7321}
 ```
 
 ## Citing OGB / OGB-LSC
-If you use OGB or [OGB-LSC](https://ogb.stanford.edu/kddcup2021/) datasets in your work, please cite our papers (Bibtex below).
+If you use OGB or [OGB-LSC](https://ogb.stanford.edu/docs/lsc/) datasets in your work, please cite our papers (Bibtex below).
 ```
 @article{hu2020ogb,
   title={Open Graph Benchmark: Datasets for Machine Learning on Graphs},
