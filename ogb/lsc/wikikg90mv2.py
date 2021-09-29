@@ -198,7 +198,7 @@ class WikiKG90Mv2Evaluator:
         # verifying that there is no duplicated prediction for each triplet
         duplicated = False
         for i in range(len(t_pred_top10)):
-            if len(torch.unique(t_pred_top10[i])) != len(t_pred_top10[i]):
+            if len(torch.unique(t_pred_top10[i][t_pred_top10[i] >= 0])) != len(t_pred_top10[i][t_pred_top10[i] >= 0]):
                 duplicated = True
                 break
 
