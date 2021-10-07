@@ -101,12 +101,11 @@ def save_model(model, optimizer, save_variable_list, args):
     with open(os.path.join(args.save_path, 'config.json'), 'w') as fjson:
         json.dump(argparse_dict, fjson)
 
-    torch.save({
-        **save_variable_list,
+    save_dict = {
         'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict()},
-        os.path.join(args.save_path, 'checkpoint')
-    )
+        'optimizer_state_dict': optimizer.state_dict()}
+    save_dict.update(save_variable_list)
+    torch.save(save_dict, os.path.join(args.save_path, 'checkpoint'))
     
     entity_embedding = model.entity_embedding.detach().cpu().numpy()
     np.save(
