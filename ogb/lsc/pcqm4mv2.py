@@ -30,10 +30,9 @@ class PCQM4Mv2Dataset(object):
 
         # Old url hosted at Stanford
         # md5sum: 65b742bafca5670be4497499db7d361b
-        self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
+        # self.url = f'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
-        # (TODO) chagne the DGL link
-        # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m_kddcup2021.zip'
+        self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m-v2.zip'
 
         # check version and update if necessary
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):

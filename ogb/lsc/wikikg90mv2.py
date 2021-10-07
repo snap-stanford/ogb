@@ -20,10 +20,9 @@ class WikiKG90Mv2Dataset(object):
 
         # Old url hosted at Stanford
         # md5sum: bfd6257134b7eb59e2edc0a4af21faa8
-        self.url = 'http://ogb-data.stanford.edu/data/lsc/wikikg90m-v2.zip'
+        # self.url = 'http://ogb-data.stanford.edu/data/lsc/wikikg90m-v2.zip'
         # New url hosted by DGL team at AWS--much faster to download
-        # (TODO) change the DGL link
-        # self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m_kddcup2021.zip'
+        self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m-v2.zip'
 
         self.processed_dir = osp.join(self.folder, 'processed')
 
@@ -199,7 +198,7 @@ class WikiKG90Mv2Evaluator:
         # verifying that there is no duplicated prediction for each triplet
         duplicated = False
         for i in range(len(t_pred_top10)):
-            if len(torch.unique(t_pred_top10[i])) != len(t_pred_top10[i]):
+            if len(torch.unique(t_pred_top10[i][t_pred_top10[i] >= 0])) != len(t_pred_top10[i][t_pred_top10[i] >= 0]):
                 duplicated = True
                 break
 
