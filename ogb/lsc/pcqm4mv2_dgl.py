@@ -100,7 +100,7 @@ class DglPCQM4Mv2Dataset(object):
             assert(all([not torch.isnan(self.labels[i]) for i in split_dict['train']]))
             assert(all([not torch.isnan(self.labels[i]) for i in split_dict['valid']]))
             assert(all([torch.isnan(self.labels[i]) for i in split_dict['test-dev']]))
-            assert(all([torch.isnan(data_list[i].y)[0] for i in split_dict['test-challenge']]))
+            assert(all([torch.isnan(self.labels[i]) for i in split_dict['test-challenge']]))
 
             print('Saving...')
             save_graphs(pre_processed_file_path, self.graphs, labels={'labels': self.labels})
