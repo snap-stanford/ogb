@@ -191,7 +191,7 @@ if __name__ == '__main__':
     print(pyg_dataset[split_index['valid']])
     print(pyg_dataset[split_index['test']])
 
-    # from torch_geometric.data import DataLoader
+    # from torch_geometric.loader import DataLoader
     # loader = DataLoader(pyg_dataset, batch_size=32, shuffle=True)
     # for batch in loader:
     #     print(batch)

@@ -74,8 +74,6 @@ class GNN(torch.nn.Module):
         h_graph = self.pool(h_node, batched_data.batch)
 
         pred_list = []
-        # for i in range(self.max_seq_len):
-        #     pred_list.append(self.graph_pred_mlp_list[i](h_graph))
 
         for i in range(self.max_seq_len):
             pred_list.append(self.graph_pred_linear_list[i](h_graph))

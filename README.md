@@ -38,7 +38,7 @@ The release note is available [here](https://github.com/snap-stanford/ogb/releas
 #### Requirements
  - Python>=3.6
  - PyTorch>=1.6
- - DGL>=0.5.0 or torch-geometric>=1.6.0
+ - DGL>=0.5.0 or torch-geometric>=2.0.2
  - Numpy>=1.16.0
  - pandas>=0.24.0
  - urllib3>=1.24.0
@@ -73,7 +73,7 @@ We prepare easy-to-use PyTorch Geometric and DGL data loaders. We handle dataset
 Below, on PyTorch Geometric, we see that a few lines of code is sufficient to prepare and split the dataset! Needless to say, you can enjoy the same convenience for DGL!
 ```python
 from ogb.graphproppred import PygGraphPropPredDataset
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 # Download and process data at './dataset/ogbg_molhiv/'
 dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv')
