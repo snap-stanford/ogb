@@ -105,6 +105,7 @@ def test(model, data, evaluator, subgraph_loader, device):
 
 
 def to_inductive(data):
+    data = data.clone()
     mask = data.train_mask
     data.x = data.x[mask]
     data.y = data.y[mask]
