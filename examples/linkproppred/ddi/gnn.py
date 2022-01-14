@@ -242,7 +242,8 @@ def main():
                     args.hidden_channels, args.num_layers,
                     args.dropout).to(device)
 
-    emb = torch.nn.Embedding(data.num_nodes, args.hidden_channels).to(device)
+    emb = torch.nn.Embedding(data.adj_t.size(0),
+                             args.hidden_channels).to(device)
     predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 

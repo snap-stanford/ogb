@@ -116,7 +116,7 @@ def test(model, predictor, data, split_edge, evaluator, batch_size, device):
     predictor.eval()
     print('Evaluating full-batch GNN on CPU...')
 
-    weights = [(conv.weight.cpu().detach().numpy(),
+    weights = [(conv.lin.weight.t().cpu().detach().numpy(),
                 conv.bias.cpu().detach().numpy()) for conv in model.convs]
     model = GCNInference(weights)
 
@@ -222,7 +222,9 @@ def main():
         run_success = True
         for epoch in range(1, 1 + args.epochs):
             loss = train(model, predictor, loader, optimizer, device)
-            print(f'Run: {run_idx + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}')
+            print(
+                f'Run: {run_idx + 1:02d}, Epoch: {epoch:02d}, Loss: {loss:.4f}'
+            )
             if loss > 2.:
                 run_success = False
                 logger.reset(run_idx)
@@ -241,7 +243,6 @@ def main():
                       f'Train: {train_mrr:.4f}, '
                       f'Valid: {valid_mrr:.4f}, '
                       f'Test: {test_mrr:.4f}')
-
 
         print('GraphSAINT')
         if run_success:

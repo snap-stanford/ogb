@@ -21,7 +21,7 @@ def read_graph_pyg(raw_dir, add_inverse_edge = False, additional_node_files = []
 
     for graph in tqdm(graph_list):
         g = Data()
-        g.__num_nodes__ = graph['num_nodes']
+        g.num_nodes = graph['num_nodes']
         g.edge_index = torch.from_numpy(graph['edge_index'])
 
         del graph['num_nodes']
