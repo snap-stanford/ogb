@@ -223,7 +223,6 @@ def main():
     dataset = PygLinkPropPredDataset(name='ogbl-ddi',
                                      transform=T.ToSparseTensor())
     data = dataset[0]
-    print(data)
     adj_t = data.adj_t.to(device)
 
     split_edge = dataset.get_edge_split()
