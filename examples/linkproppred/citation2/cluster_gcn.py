@@ -116,7 +116,7 @@ def test(model, predictor, data, split_edge, evaluator, batch_size, device):
     predictor.eval()
     print('Evaluating full-batch GNN on CPU...')
 
-    weights = [(conv.weight.cpu().detach().numpy(),
+    weights = [(conv.lin.weight.t().cpu().detach().numpy(),
                 conv.bias.cpu().detach().numpy()) for conv in model.convs]
     model = GCNInference(weights)
 
@@ -163,7 +163,8 @@ def test(model, predictor, data, split_edge, evaluator, batch_size, device):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OGBL-Citation2 (Cluster-GCN)')
+    parser = argparse.ArgumentParser(
+        description='OGBL-Citation2 (Cluster-GCN)')
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--log_steps', type=int, default=1)
     parser.add_argument('--num_partitions', type=int, default=15000)

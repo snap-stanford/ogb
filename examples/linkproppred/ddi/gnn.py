@@ -223,6 +223,7 @@ def main():
     dataset = PygLinkPropPredDataset(name='ogbl-ddi',
                                      transform=T.ToSparseTensor())
     data = dataset[0]
+    print(data)
     adj_t = data.adj_t.to(device)
 
     split_edge = dataset.get_edge_split()
@@ -242,7 +243,8 @@ def main():
                     args.hidden_channels, args.num_layers,
                     args.dropout).to(device)
 
-    emb = torch.nn.Embedding(data.num_nodes, args.hidden_channels).to(device)
+    emb = torch.nn.Embedding(data.adj_t.size(0),
+                             args.hidden_channels).to(device)
     predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 
