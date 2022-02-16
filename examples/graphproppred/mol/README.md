@@ -34,7 +34,7 @@ The last three datasets (`ogbg-molesol`, `ogbg-molfreesolv`, `ogbg-mollipo`) are
 - `gin`: GIN [2]
 - `gin-virtual`: GIN over graphs augmented with virtual nodes\* [4]
 - `gcn`: GCN [3]
-- `gin-virtual`: GCN over graphs augmented with virtual nodes\* [4]
+- `gcn-virtual`: GCN over graphs augmented with virtual nodes\* [4]
 
 \* Additional nodes that are connected to all the nodes in the original graphs.
 
