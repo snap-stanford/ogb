@@ -25,6 +25,9 @@ class WikiKG90Mv2Dataset(object):
         self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m-v2.zip'
 
         self.processed_dir = osp.join(self.folder, 'processed')
+        
+        if osp.isdir(osp.join(self.folder, 'mapping')):
+            shutil.rmtree(osp.join(self.folder, 'mapping'))
 
         if osp.isdir(self.folder) and (not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
             print('WikiKG90M-v2 dataset has been updated.')
