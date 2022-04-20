@@ -1,29 +1,26 @@
-import os
-import time
-import glob
 import argparse
+import glob
+import os
 import os.path as osp
-from tqdm import tqdm
-
-from typing import Optional, List, NamedTuple
+import time
+from typing import List, NamedTuple, Optional
 
 import numpy as np
 import torch
-from torch import Tensor
 import torch.nn.functional as F
-from torch.nn import ModuleList, Sequential, Linear, BatchNorm1d, ReLU, Dropout
-from torch.optim.lr_scheduler import StepLR
-
-from pytorch_lightning.metrics import Accuracy
-from pytorch_lightning.callbacks import ModelCheckpoint
+from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
-
-from torch_sparse import SparseTensor
-from torch_geometric.nn import SAGEConv, GATConv
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.metrics import Accuracy
+from torch import Tensor
+from torch.nn import BatchNorm1d, Dropout, Linear, ModuleList, ReLU, Sequential
+from torch.optim.lr_scheduler import StepLR
 from torch_geometric.data import NeighborSampler
+from torch_geometric.nn import GATConv, SAGEConv
+from torch_sparse import SparseTensor
+from tqdm import tqdm
 
-from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from root import ROOT
 
 
@@ -355,6 +352,7 @@ class RGNN(LightningModule):
             for j in range(self.num_relations):
                 edge_type = adj_t.storage.value() == j
                 subadj_t = adj_t.masked_select_nnz(edge_type, layout='coo')
+                subadj_t = subadj_t.set_value(None, layout=None)
                 if subadj_t.nnz() > 0:
                     out += self.convs[i][j]((x, x_target), subadj_t)
 
@@ -415,7 +413,8 @@ if __name__ == '__main__':
                      datamodule.num_relations, num_layers=len(args.sizes),
                      dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-        checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode = 'max', save_top_k=1)
+        checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode='max',
+                                              save_top_k=1)
         trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
                           callbacks=[checkpoint_callback],
                           default_root_dir=f'logs/{args.model}')
@@ -450,4 +449,5 @@ if __name__ == '__main__':
                 out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
                 y_preds.append(out)
         res = {'y_pred': torch.cat(y_preds, dim=0)}
-        evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+        evaluator.save_test_submission(res, f'results/{args.model}',
+                                       mode='test-dev')
