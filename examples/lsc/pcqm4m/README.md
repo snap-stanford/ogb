@@ -1,4 +1,4 @@
-# Baseline code for PCQM4M-LSC
+# Baseline code for PCQM4M
 
 ## **Important:** This dataset has been deprecated. Please use the updated version, PCQM4Mv2.
 

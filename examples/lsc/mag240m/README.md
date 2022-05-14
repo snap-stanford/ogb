@@ -1,4 +1,4 @@
-# Baseline code for MAG-240M
+# Baseline code for MAG240M
 
 - Please refer to the **[OGB-LSC paper](https://arxiv.org/abs/2103.09430)** for the detailed setting.
 - Baseline code based on **[DGL](https://www.dgl.ai/)** is available **[here](https://github.com/dmlc/dgl/tree/master/examples/pytorch/ogb_lsc/MAG240M)**.
@@ -13,12 +13,12 @@ torch-geometric==master (pip install git+https://github.com/rusty1s/pytorch_geom
 
 ## Baseline models
 
-The `MAG240M-LSC` dataset will be automatically downloaded to the path denoted in `root.py`.
+The `MAG240M` dataset will be automatically downloaded to the path denoted in `root.py`.
 Please change its content accordingly if you want to download the dataset to a custom hard-drive or folder.
 For each experiment, the test submission will be automatically saved in `./results/` after training is done.
 
 We consider a broad range of graph ML models for initial benchmarking efforts in both homogeneous (where only paper to paper relations are considered) and full heterogeneous settings.
-Due to the file size of the `MAG240M-LSC` node feature matrix, some scripts may require up to 256GB RAM.
+Due to the file size of the `MAG240M` node feature matrix, some scripts may require up to 256GB RAM.
 
 ### (Graph-Agnostic) MLP
 

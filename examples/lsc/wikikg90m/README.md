@@ -1,4 +1,4 @@
-# Baseline code for Wikikg90m
+# Baseline code for WikiKG90M
 
 ## **Important:** This dataset has been deprecated. Please use the updated version, WikiKG90Mv2.
 

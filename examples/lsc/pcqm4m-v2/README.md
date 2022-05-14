@@ -1,4 +1,4 @@
-# Baseline code for PCQM4Mv2-LSC
+# Baseline code for PCQM4Mv2
 
 - Please refer to the **[OGB-LSC paper](https://arxiv.org/abs/2103.09430)** for the detailed setting.
 - Baseline code based on **[DGL](https://www.dgl.ai/)** is available **[here](https://github.com/dmlc/dgl/tree/master/examples/pytorch/ogb_lsc/PCQM4M)**.
