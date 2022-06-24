@@ -1,5 +1,5 @@
-from .dataset import LinkPropPredDataset
 from .evaluate import Evaluator
+from .dataset import LinkPropPredDataset
 
 try:
     from .dataset_pyg import PygLinkPropPredDataset
