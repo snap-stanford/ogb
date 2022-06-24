@@ -1,9 +1,9 @@
-from torch_geometric.data import InMemoryDataset
 import pandas as pd
 import shutil, os
 import os.path as osp
 import torch
 import numpy as np
+from torch_geometric.data import InMemoryDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
 from ogb.io.read_graph_pyg import read_graph_pyg, read_heterograph_pyg
 from ogb.io.read_graph_raw import read_node_label_hetero, read_nodesplitidx_split_hetero
