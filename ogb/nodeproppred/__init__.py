@@ -2,8 +2,6 @@ from .dataset import NodePropPredDataset
 from .evaluate import Evaluator
 
 try:
-    import torch
-
     from .dataset_pyg import PygNodePropPredDataset
 except ImportError:
     pass
