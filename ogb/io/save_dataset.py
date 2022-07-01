@@ -461,7 +461,7 @@ class DatasetSaver(object):
         meta_dict['url'] = f'https://snap.stanford.edu/ogb/data/{map_dict[self.dataset_prefix]}/' + meta_dict['download_name'] + '.zip'
         meta_dict['add_inverse_edge'] = 'False'
         meta_dict['has_node_attr'] = str(self.has_node_attr)
-        meta_dict['has_edge_attr'] = str(self.has_node_attr)
+        meta_dict['has_edge_attr'] = str(self.has_edge_attr)
         meta_dict['additional node files'] = 'None'
         meta_dict['additional edge files'] = 'None'
         meta_dict['is hetero'] = str(self.is_hetero)
