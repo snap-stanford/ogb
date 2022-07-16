@@ -282,8 +282,8 @@ class Evaluator:
             y_pred_pos_numpy = y_pred_pos
             y_pred_neg_numpy = y_pred_neg
         
-        y_true = np.concatenate([np.ones(len(y_pred_pos)), np.zeros(len(y_pred_pos))]).astype(np.int32)
-        y_pred = np.concatenate([y_pred_pos, y_pred_neg])
+        y_true = np.concatenate([np.ones(len(y_pred_pos_numpy)), np.zeros(len(y_pred_neg_numpy))]).astype(np.int32)
+        y_pred = np.concatenate([y_pred_pos_numpy, y_pred_neg_numpy])
 
         rocauc = roc_auc_score(y_true, y_pred)
 
