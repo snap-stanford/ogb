@@ -39,8 +39,8 @@ class Evaluator:
             y_pred_pos, y_pred_neg = input_dict['y_pred_pos'], input_dict['y_pred_neg']
 
             '''
-                y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )
-                y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, )
+                y_pred_pos: numpy ndarray or torch tensor of shape (num_edges, )
+                y_pred_neg: numpy ndarray or torch tensor of shape (num_edges, )
             '''
 
             # convert y_pred_pos, y_pred_neg into either torch tensor or both numpy array
@@ -94,8 +94,8 @@ class Evaluator:
             y_pred_pos, y_pred_neg = input_dict['y_pred_pos'], input_dict['y_pred_neg']
 
             '''
-                y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, )
-                y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, num_node_negative)
+                y_pred_pos: numpy ndarray or torch tensor of shape (num_edges, )
+                y_pred_neg: numpy ndarray or torch tensor of shape (num_edges, num_nodes_negative)
             '''
 
             # convert y_pred_pos, y_pred_neg into either torch tensor or both numpy array
@@ -163,23 +163,23 @@ class Evaluator:
         desc = '==== Expected input format of Evaluator for {}\n'.format(self.name)
         if 'hits@' in self.eval_metric:
             desc += '{\'y_pred_pos\': y_pred_pos, \'y_pred_neg\': y_pred_neg}\n'
-            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n'
-            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n'
+            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edges, ). Torch tensor on GPU is recommended for efficiency.\n'
+            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edges, ). Torch tensor on GPU is recommended for efficiency.\n'
             desc += 'y_pred_pos is the predicted scores for positive edges.\n'
             desc += 'y_pred_neg is the predicted scores for negative edges.\n'
             desc += 'Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges.'
         elif self.eval_metric == 'mrr':
             desc += '{\'y_pred_pos\': y_pred_pos, \'y_pred_neg\': y_pred_neg}\n'
-            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ). Torch tensor on GPU is recommended for efficiency.\n'
-            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, num_nodes_neg). Torch tensor on GPU is recommended for efficiency.\n'
+            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edges, ). Torch tensor on GPU is recommended for efficiency.\n'
+            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edges, num_nodes_neg). Torch tensor on GPU is recommended for efficiency.\n'
             desc += 'y_pred_pos is the predicted scores for positive edges.\n'
             desc += 'y_pred_neg is the predicted scores for negative edges. It needs to be a 2d matrix.\n'
             desc += 'y_pred_pos[i] is ranked among y_pred_neg[i].\n'
             desc += 'Note: As the evaluation metric is ranking-based, the predicted scores need to be different for different edges.'
         elif self.eval_metric == 'rocauc':
             desc += '{\'y_pred_pos\': y_pred_pos, \'y_pred_neg\': y_pred_neg}\n'
-            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edge, ).\n'
-            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edge, ).\n'
+            desc += '- y_pred_pos: numpy ndarray or torch tensor of shape (num_edges, ).\n'
+            desc += '- y_pred_neg: numpy ndarray or torch tensor of shape (num_edges, ).\n'
             desc += 'y_pred_pos is the predicted scores for positive edges.\n'
             desc += 'y_pred_neg is the predicted scores for negative edges.\n'
         else:
