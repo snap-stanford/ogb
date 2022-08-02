@@ -40,7 +40,7 @@ class LinkPredictor(torch.nn.Module):
         return torch.sigmoid(x)
 
 
-def train(x, predictor, split_edge, optimizer, batch_size,splitting_strategy):
+def train(x, predictor, split_edge, optimizer, batch_size):
     predictor.train()
 
     pos_train_edge = split_edge['train']['edge'].to(x.device)
@@ -74,7 +74,7 @@ def train(x, predictor, split_edge, optimizer, batch_size,splitting_strategy):
 
 
 @torch.no_grad()
-def test(x, predictor, split_edge, evaluator, batch_size,eval_metric):
+def test(x, predictor, split_edge, evaluator, batch_size):
     predictor.eval()
 
     pos_train_edge = split_edge['train']['edge'].to(x.device)
@@ -172,21 +172,21 @@ def main():
     predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)
 
-    evaluator = Evaluator(name=args.dataset)    
+    evaluator = Evaluator(name='ogbl-vessel')    
     logger = Logger(args.runs, args)
 
     for run in range(args.runs):
-        torch.nn.init.normal_(emb.weight, std = args.std)
+        emb.reset_parameters()
         predictor.reset_parameters()
         optimizer = torch.optim.Adam(
             list(emb.parameters()) + list(predictor.parameters()), lr=args.lr)
 
         for epoch in range(1, 1 + args.epochs):
-            loss = train(predictor, emb.weight, split_edge, optimizer,
+            loss = train(emb.weight, predictor, split_edge, optimizer,
                          args.batch_size)
 
             if epoch % args.eval_steps == 0:
-                result = test(predictor, emb.weight, split_edge, evaluator,
+                result = test(emb.weight, predictor, split_edge, evaluator,
                               args.batch_size)
                 logger.add_result(run, result)
 
