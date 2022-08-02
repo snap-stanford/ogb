@@ -53,7 +53,7 @@ def train(predictor, x, split_edge, optimizer, batch_size):
         pos_out = predictor(x[edge[0]], x[edge[1]])
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
-        # random element of previously sampled negative edges 
+        # random element of previously sampled negative edges
         # negative samples are obtained by using spatial sampling criteria
         edge = neg_train_edge[perm].t()
         neg_out = predictor(x[edge[0]], x[edge[1]])
@@ -117,7 +117,6 @@ def test(predictor, x, split_edge, evaluator, batch_size):
         neg_test_preds += [predictor(x[edge[0]], x[edge[1]]).squeeze().cpu()]
     neg_test_pred = torch.cat(neg_test_preds, dim=0)
         
-    
     train_rocauc = evaluator.eval({
             'y_pred_pos': pos_train_pred,
             'y_pred_neg': neg_train_pred,
@@ -134,7 +133,6 @@ def test(predictor, x, split_edge, evaluator, batch_size):
         })[f'rocauc']
 
     return train_rocauc, valid_rocauc, test_rocauc
-        
 
 
 def main():
@@ -156,8 +154,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygLinkPropPredDataset(name=args.dataset,
-                                    root=str(Path(os.path.abspath(__file__)).parents[1])+'/dataset')
+    dataset = PygLinkPropPredDataset(name='ogbl-vessel')
 
     split_edge = dataset.get_edge_split()
     data = dataset[0]
@@ -184,7 +181,7 @@ def main():
     for run in range(args.runs):
 
         predictor.reset_parameters()
-    
+
         for epoch in range(1, 1 + args.epochs):
             loss = train(predictor, x, split_edge, optimizer, args.batch_size)
 
