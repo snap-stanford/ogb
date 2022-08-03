@@ -35,8 +35,8 @@ class Evaluator:
             y_true, y_pred = input_dict['y_true'], input_dict['y_pred']
 
             '''
-                y_true: numpy ndarray or torch tensor of shape (num_node, num_tasks)
-                y_pred: numpy ndarray or torch tensor of shape (num_node, num_tasks)
+                y_true: numpy ndarray or torch tensor of shape (num_nodes num_tasks)
+                y_pred: numpy ndarray or torch tensor of shape (num_nodes num_tasks)
             '''
 
             # converting to torch.Tensor to numpy on cpu
@@ -81,15 +81,15 @@ class Evaluator:
         desc = '==== Expected input format of Evaluator for {}\n'.format(self.name)
         if self.eval_metric == 'rocauc':
             desc += '{\'y_true\': y_true, \'y_pred\': y_pred}\n'
-            desc += '- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n'
-            desc += '- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n'
+            desc += '- y_true: numpy ndarray or torch tensor of shape (num_nodes num_tasks)\n'
+            desc += '- y_pred: numpy ndarray or torch tensor of shape (num_nodes num_tasks)\n'
             desc += 'where y_pred stores score values (for computing ROC-AUC),\n'
             desc += 'num_task is {}, and '.format(self.num_tasks)
             desc += 'each row corresponds to one node.\n'
         elif self.eval_metric == 'acc':
             desc += '{\'y_true\': y_true, \'y_pred\': y_pred}\n'
-            desc += '- y_true: numpy ndarray or torch tensor of shape (num_node, num_task)\n'
-            desc += '- y_pred: numpy ndarray or torch tensor of shape (num_node, num_task)\n'
+            desc += '- y_true: numpy ndarray or torch tensor of shape (num_nodes num_tasks)\n'
+            desc += '- y_pred: numpy ndarray or torch tensor of shape (num_nodes num_tasks)\n'
             desc += 'where y_pred stores predicted class label (integer),\n'
             desc += 'num_task is {}, and '.format(self.num_tasks)
             desc += 'each row corresponds to one node.\n'
