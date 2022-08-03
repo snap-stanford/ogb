@@ -1,4 +1,13 @@
-# ogbl-vessel
+# Baseline code for OGBL-VESSEL
+
+- Please refer to the **[NeuRIPS paper](https://arxiv.org/abs/2108.13233)** for the detailed setting.
+
+## Installation requirements
+```
+ogb>=1.3.3
+torch>=1.7.0
+torch-geometric==master (pip install git+https://github.com/rusty1s/pytorch_geometric.git)
+```
 
 This repository includes the following example scripts:
 
@@ -10,8 +19,28 @@ This repository includes the following example scripts:
 
 ```
 # Run with default config
-python mlp.py
+python gnn.py
 
 # Run with custom config
-python mlp.py --hidden_channels=128
+python gnn.py --hidden_channels=128
+
+# Use Node2Vec embeddings
+python gnn.py --hidden_channels=128 --use_node_embedding
 ```
+## Sampling Strategy
+
+Following the NeurIPS paper, we propose to use a spatial sampling strategy that constitutes a more challening and realistic scenario in comparison to random sampling.
+Random sampling ultimately creates unrealistic edges, i.e. vessels connecting totally different brain regions or unrealistic structures. These are very easy to identify for a classifier,
+leading to overly optimistic scores on the link prediction task. In contrast, spatial sampling (as proposed in our paper) creates more challenging edges, and biologically more realistic structures. These are harder to differentiate from the (actual) edges in the whole brain graph. Employing the spatial sampling criteria, we force the link predictor to learn more meaningful representations that will lead to biologically accurate results when using the link prediction algorithm for missing link prediction or graph completion.
+We kindly ask you to employ the spatial sampling structure for negative edges by making use of the presampled negative edges.
+
+## Performance
+
+| Model |Highest Valid Accuracy (%) | Final Test Accuracy (%)  | Hardware |
+|:-|:-|:-|:-|
+| MLP | 58.06 ± 0.01 | 58.04 ± 0.02 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| MF | 50.01 ± 0.05 | 50.02 ± 0.04 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GNN GCN | 49.98 ± 1.52 | 50.05 ± 1.54| GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GNN GCN + emb. | 49.66 ± 0.74 | 49.64 ± 0.77 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GNN SAGE | 56.20 ± 0.75 | 56.12 ± 0.74 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GNN SAGE+ emb. | 49.96 ± 0.73| 49.93 ± 0.72 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
