@@ -1,6 +1,6 @@
 # Baseline code for OGBL-VESSEL
 
-- Please refer to the **[NeuRIPS paper](https://arxiv.org/abs/2108.13233)** for the detailed setting.
+This is an external contribution to OGB, please refer to the **[NeuRIPS paper](https://arxiv.org/abs/2108.13233)** for the detailed setting.
 
 ## Installation requirements
 ```
@@ -44,3 +44,21 @@ We kindly ask you to employ the spatial sampling structure for negative edges by
 | GNN GCN + emb. | 49.66 ± 0.74 | 49.64 ± 0.77 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
 | GNN SAGE | 56.20 ± 0.75 | 56.12 ± 0.74 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
 | GNN SAGE+ emb. | 49.96 ± 0.73| 49.93 ± 0.72 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
+
+## Citing
+
+Please consider citing this work if any of our code or dataset is helpful for your research. Considering the specific graphs and baseline models please also cite the respective original articles as described in the preprint.
+
+- [arXiv link](https://arxiv.org/abs/2108.13233)
+- [Published in NIPS 2021 Dataset & Benchmark Track](https://nips.cc/Conferences/2021/ScheduleMultitrack?event=29873)
+
+```
+@misc{paetzold2021brain,
+      title={Whole Brain Vessel Graphs: A Dataset and Benchmark for Graph Learning and Neuroscience (VesselGraph)}, 
+      author={Johannes C. Paetzold and Julian McGinnis and Suprosanna Shit and Ivan Ezhov and Paul Büschl and Chinmay Prabhakar and Mihail I. Todorov and Anjany Sekuboyina and Georgios Kaissis and Ali Ertürk and Stephan Günnemann and Bjoern H. Menze},
+      year={2021},
+      eprint={2108.13233},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
