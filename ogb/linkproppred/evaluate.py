@@ -242,10 +242,11 @@ class Evaluator:
 
 
         if type_info == 'torch':
-            y_pred = torch.cat([y_pred_pos.view(-1,1), y_pred_neg], dim = 1)
-            argsort = torch.argsort(y_pred, dim = 1, descending = True)
-            ranking_list = torch.nonzero(argsort == 0, as_tuple=False)
-            ranking_list = ranking_list[:, 1] + 1
+            # calculate ranks
+            y_pred_pos = y_pred_pos.view(-1, 1)
+            optimistic_rank = (y_pred_pos >= y_pred_neg).sum(dim=1)
+            pessimistic_rank = (y_pred_pos > y_pred_neg).sum(dim=1)
+            ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
             hits1_list = (ranking_list <= 1).to(torch.float)
             hits3_list = (ranking_list <= 3).to(torch.float)
             hits10_list = (ranking_list <= 10).to(torch.float)
@@ -257,10 +258,10 @@ class Evaluator:
                      'mrr_list': mrr_list}
 
         else:
-            y_pred = np.concatenate([y_pred_pos.reshape(-1,1), y_pred_neg], axis = 1)
-            argsort = np.argsort(-y_pred, axis = 1)
-            ranking_list = (argsort == 0).nonzero()
-            ranking_list = ranking_list[1] + 1
+            y_pred_pos = y_pred_pos.reshape(-1, 1)
+            optimistic_rank = (y_pred_pos >= y_pred_neg).sum(dim=1)
+            pessimistic_rank = (y_pred_pos > y_pred_neg).sum(dim=1)
+            ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
             hits1_list = (ranking_list <= 1).astype(np.float32)
             hits3_list = (ranking_list <= 3).astype(np.float32)
             hits10_list = (ranking_list <= 10).astype(np.float32)
