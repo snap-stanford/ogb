@@ -299,7 +299,7 @@ if __name__ == '__main__':
     evaluator = Evaluator(name = 'ogbl-vessel')
     print(evaluator.expected_input_format)
     print(evaluator.expected_output_format)
-    y_pred_pos = torch.tensor(np.random.randn(1000,))
+    y_pred_pos = torch.tensor(np.random.randn(1500,))
     y_pred_neg = torch.tensor(np.random.randn(1000,))
     input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
     result = evaluator.eval(input_dict)
