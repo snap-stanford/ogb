@@ -137,6 +137,7 @@ def train(model, predictor, data, split_edge, optimizer, batch_size):
 @torch.no_grad()
 def test(model, predictor, data, split_edge, evaluator, batch_size):
     model.eval()
+    predictor.eval()
 
     h = model(data.x, data.adj_t)
 
