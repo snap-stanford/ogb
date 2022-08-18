@@ -146,8 +146,8 @@ def main():
     parser.add_argument('--hidden_channels', type=int, default=64)
     parser.add_argument('--dropout', type=float, default=0.2)
     parser.add_argument('--batch_size', type=int, default=64 * 1024)
-    parser.add_argument('--lr', type=float, default=0.0001) #0.005
-    parser.add_argument('--epochs', type=int, default=500)
+    parser.add_argument('--lr', type=float, default=1e-3) #0.005
+    parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--eval_steps', type=int, default=1)
     parser.add_argument('--runs', type=int, default=10)
 
