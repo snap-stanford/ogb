@@ -2,9 +2,9 @@
 
 This is an external contribution to OGB, please refer to the **[NeuRIPS paper](https://arxiv.org/abs/2108.13233)** for the detailed setting.
 
-## Installation requirements
+## Ins.tallation requirements
 ```
-ogb>=1.3.3
+ogb>=1.3.4
 torch>=1.7.0
 torch-geometric==master (pip install git+https://github.com/rusty1s/pytorch_geometric.git)
 ```
@@ -14,6 +14,10 @@ This repository includes the following example scripts:
 * **[MLP](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/vessel/mlp.py)**: Full-batch MLP training based on Node2Vec features. This script requires node embeddings be saved in `embedding.pt`. To generate them, please run `python node2vec.py` [requires `torch-geometric>=1.5.0`].
 * **[GNN](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/vessel/gnn.py)**: Full-batch GNN training using either the GCN or GraphSAGE operator (`--use_sage`) [requires `torch-geometric>=1.6.0`].
 * **[Matrix Factorization](https://github.com/snap-stanford/ogb/blob/master/examples/linkproppred/vessel/mf.py)**: Full-batch Matrix Factorization training.
+
+## Hyperparameter Search
+
+In order to select the values, we employed Grid Search using wandb.ai based sweeps (c.f. yaml-configuration files). Due to the huge size of our dataset, hyperparameter tuning is challenging. To overcome this challenge, we subsample a region of the mouse brain in order to create a small graph. To ensure we are not introducing any bias, we measured the KL-Divergence to ensure that our small graph is representative of the whole brain in its distribution of vasculature. We selected the best set of hyperparameters on the small graph and used it on the actual graph with small modifications if needed.
 
 ## Training & Evaluation
 
@@ -36,14 +40,9 @@ We kindly ask you to employ the spatial sampling structure for negative edges by
 
 ## Performance
 
-| Model |Highest Valid Accuracy (%) | Final Test Accuracy (%)  | Hardware |
-|:-|:-|:-|:-|
-| MLP | 58.06 ± 0.01 | 58.04 ± 0.02 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
-| MF | 50.01 ± 0.05 | 50.02 ± 0.04 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
-| GNN GCN | 49.98 ± 1.52 | 50.05 ± 1.54| GeForce Quadro RTX 8000 Ti (48GB GPU) |
-| GNN GCN + emb. | 49.66 ± 0.74 | 49.64 ± 0.77 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
-| GNN SAGE | 56.20 ± 0.75 | 56.12 ± 0.74 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
-| GNN SAGE+ emb. | 49.96 ± 0.73| 49.93 ± 0.72 |GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| Model |Highest Valid Accuracy (%) | Final Test Accuracy (%)  | #num_params | Hardware |
+|:-|:-|:-|:-|:-|
+| MF |  49.99 ± 0.06 | 49.97 ± 0.05 | 8641| GeForce Quadro RTX 8000 Ti (48GB GPU) |
 
 ## Citing
 
