@@ -43,6 +43,7 @@ We kindly ask you to employ the spatial sampling structure for negative edges by
 | Model |Highest Valid Accuracy (%) | Final Test Accuracy (%)  | #num_params | Hardware |
 |:-|:-|:-|:-|:-|
 | MF |  49.99 ± 0.06 | 49.97 ± 0.05 | 8641| GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| MLP |  48.01 ± 1.32 | 47.94 ± 1.33 | 1037577 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
 
 ## Citing
 
