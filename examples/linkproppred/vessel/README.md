@@ -4,7 +4,7 @@ This is an external contribution to OGB, please refer to the **[NeuRIPS paper](h
 
 ## Installation requirements
 ```
-ogb>=1.3.3
+ogb>=1.3.4
 torch>=1.7.0
 torch-geometric==master (pip install git+https://github.com/rusty1s/pytorch_geometric.git)
 ```
