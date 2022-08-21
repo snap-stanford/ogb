@@ -1,4 +1,4 @@
-  GNU nano 4.8                                                                                  mlp_config.yaml                                                                                            
+                                                                                        
 program: mlp_wandb.py
 method: grid
 metric:
