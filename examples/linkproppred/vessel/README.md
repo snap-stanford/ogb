@@ -2,7 +2,7 @@
 
 This is an external contribution to OGB, please refer to the **[NeuRIPS paper](https://arxiv.org/abs/2108.13233)** for the detailed setting.
 
-## Ins.tallation requirements
+## Installation requirements
 ```
 ogb>=1.3.4
 torch>=1.7.0
