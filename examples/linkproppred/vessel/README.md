@@ -46,6 +46,8 @@ We kindly ask you to employ the spatial sampling structure for negative edges by
 | MLP |  48.01 ± 1.32 | 47.94 ± 1.33 | 1037577 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
 | GCN | 43.49 ± 9.61 | 43.53 ± 9.61 | 396289 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
 | GraphSAGE|  49.93 ± 6.76 | 49.89 ± 6.78 | 396289 | GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GCN + Node2Vec|49.60 ± 0.61 | 49.54 ± 0.57| 226744513| GeForce Quadro RTX 8000 Ti (48GB GPU) |
+| GraphSAGE + Node2VEc| 47.36 ± 1.36| 47.35 ± 1.36| 226892737| GeForce Quadro RTX 8000 Ti (48GB GPU) |
 
 ## Citing
 
