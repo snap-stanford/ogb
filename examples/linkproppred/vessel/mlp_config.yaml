@@ -15,12 +15,3 @@ parameters:
     values: [512, 1024, 65536]
   dropout:
     values: [0, 0.2, 0.5]
-
-
-
-
-
-
-
-
-
