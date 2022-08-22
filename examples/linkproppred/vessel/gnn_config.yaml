@@ -1,0 +1,17 @@
+                                                                          
+program: gnn_wandb.py
+method: grid
+metric:
+  name: loss
+  goal: minimize
+parameters:
+  num_layers:
+    values: [1, 2, 3, 4]
+  hidden_channels:
+    values: [32, 64, 128, 256]
+  dropout:
+    values: [0, 0.2, 0.5]
+  lr:
+    values: [1e-2, 1e-3, 1e-4]
+  batch_size:
+    values: [512, 1024, 65536]

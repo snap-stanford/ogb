@@ -1,0 +1,18 @@
+program: node2vec_wandb.py
+method: grid
+metric:
+  name: loss
+  goal: minimize
+parameters:
+  lr:
+    values: [1e-2, 1e-3, 1e-4, 1e-5]
+  batch_size:
+    values: [256, 512, 1024, 2048, 65536]
+  walk_length:
+    values: [3,5,10,15,20]
+  context_size:
+    values: [3,5,10,15,20]
+  embedding_dim:
+    values: [4,8,16,32,64,128]
+  walks_per_node:
+    values: [3,5,7,10,15,20]
