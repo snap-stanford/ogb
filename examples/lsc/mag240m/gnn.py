@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from torch.nn import ModuleList, Sequential, Linear, BatchNorm1d, ReLU, Dropout
 from torch.optim.lr_scheduler import StepLR
 
-from pytorch_lightning.metrics import Accuracy
+from torchmetrics import Accuracy
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
@@ -24,7 +24,12 @@ from torch_geometric.data import NeighborSampler
 
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from root import ROOT
-
+from torch_geometric.loader.neighbor_loader import NeighborLoader
+from torch.profiler import profile, ProfilerActivity
+from torch_geometric.data import Data
+from torch_sparse import coalesce
+from torch_geometric.typing import Adj
+import torch_geometric.transforms as T
 
 class Batch(NamedTuple):
     x: Tensor
@@ -214,7 +219,7 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_channels', type=int, default=1024)
     parser.add_argument('--batch_size', type=int, default=1024)
     parser.add_argument('--dropout', type=float, default=0.5)
-    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--model', type=str, default='gat',
                         choices=['gat', 'graphsage'])
     parser.add_argument('--sizes', type=str, default='25-15')
@@ -234,7 +239,7 @@ if __name__ == '__main__':
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode = 'max', save_top_k=1)
-        trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
+        trainer = Trainer(accelerator="cpu", max_epochs=args.epochs,
                           callbacks=[checkpoint_callback],
                           default_root_dir=f'logs/{args.model}')
         trainer.fit(model, datamodule=datamodule)
@@ -246,7 +251,7 @@ if __name__ == '__main__':
         print(f'Evaluating saved model in {logdir}...')
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
 
-        trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
+        trainer = Trainer(accelerator="cpu", resume_from_checkpoint=ckpt)
         model = GNN.load_from_checkpoint(checkpoint_path=ckpt,
                                          hparams_file=f'{logdir}/hparams.yaml')
 
@@ -255,17 +260,17 @@ if __name__ == '__main__':
 
         trainer.test(model=model, datamodule=datamodule)
 
-        evaluator = MAG240MEvaluator()
-        loader = datamodule.hidden_test_dataloader()
+        # evaluator = MAG240MEvaluator()
+        # loader = datamodule.hidden_test_dataloader()
 
-        model.eval()
-        device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
-        model.to(device)
-        y_preds = []
-        for batch in tqdm(loader):
-            batch = batch.to(device)
-            with torch.no_grad():
-                out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
-                y_preds.append(out)
-        res = {'y_pred': torch.cat(y_preds, dim=0)}
-        evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+        # model.eval()
+        # device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
+        # model.to(device)
+        # y_preds = []
+        # for batch in tqdm(loader):
+        #     batch = batch.to(device)
+        #     with torch.no_grad():
+        #         out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
+        #         y_preds.append(out)
+        # res = {'y_pred': torch.cat(y_preds, dim=0)}
+        # evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
