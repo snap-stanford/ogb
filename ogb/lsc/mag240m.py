@@ -9,6 +9,7 @@ import numpy as np
 
 from ogb.utils.url import decide_download, download_url, extract_zip, makedirs
 from ogb.lsc.utils import split_test
+from torch_geometric.data import HeteroData
 
 
 class MAG240MDataset(object):
@@ -52,6 +53,25 @@ class MAG240MDataset(object):
             else:
                 print('Stop download.')
                 exit(-1)
+
+    def to_pyg_hetero_data(self):
+        data = HeteroData()
+        path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
+        # Current is not in-memory
+        data["paper"].x = torch.from_numpy(np.load(path, mmap_mode='r'))
+        path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
+        data["paper"].y = torch.from_numpy(np.load(path))
+        path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
+        data["paper"].year = torch.from_numpy(np.load(path, mmap_mode='r'))
+        
+        for edge_type in [('author', 'affiliated_with', 'institution'),
+                          ('author', 'writes', 'paper'),
+                          ('paper', 'cites', 'paper')]:
+            name = '___'.join(edge_type)
+            path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
+            edge_index = torch.from_numpy(np.load(path))
+            data[edge_type].edge_index = edge_index
+        return data
 
     @property
     def num_papers(self) -> int:
@@ -108,14 +128,14 @@ class MAG240MDataset(object):
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         return np.load(path)
 
-    def edge_index(self, id1: str, id2: str,
-                   id3: Optional[str] = None) -> np.ndarray:
-        src = id1
-        rel, dst = (id3, id2) if id3 is None else (id2, id3)
-        rel = self.__rels__[(src, dst)] if rel is None else rel
-        name = f'{src}___{rel}___{dst}'
-        path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
-        return np.load(path)
+    # def edge_index(self, id1: str, id2: str,
+    #                id3: Optional[str] = None) -> np.ndarray:
+    #     src = id1
+    #     rel, dst = (id3, id2) if id3 is None else (id2, id3)
+    #     rel = self.__rels__[(src, dst)] if rel is None else rel
+    #     name = f'{src}___{rel}___{dst}'
+    #     path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
+    #     return np.load(path)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
@@ -163,7 +183,8 @@ class MAG240MEvaluator:
 
 
 if __name__ == '__main__':
-    dataset = MAG240MDataset()
+    dataset = MAG240MDataset('/home/user/yanbing/pyg/ogb/ogb/lsc/dataset')
+    data = dataset.to_pyg_hetero_data()
     print(dataset)
     print(dataset.num_papers)
     print(dataset.num_authors)
@@ -196,12 +217,15 @@ if __name__ == '__main__':
 
     exit(-1)
 
-    print(dataset.paper_feat.shape)
-    print(dataset.paper_year.shape)
-    print(dataset.paper_year[:100])
-    print(dataset.edge_index('author', 'paper').shape)
-    print(dataset.edge_index('author', 'writes', 'paper').shape)
-    print(dataset.edge_index('author', 'writes', 'paper')[:, :10])
+    print(data['paper'].x.shape)
+    print(data['paper'].year.shape)
+    print(data['paper'].year[:100])
+    print(data[(('author', 'writes', 'paper'))].edge_index.shape)
+    print(data[('author', 'affiliated_with', 'institution')].edge_index.shape)
+    print(data[('paper', 'cites', 'paper')].edge_index.shape)
+    print(data[('author', 'writes', 'paper')].edge_index[:, :10])
+    print(data[('author', 'affiliated_with', 'institution')].edge_index[:, :10])
+    print(data[('paper', 'cites', 'paper')].edge_index[:, :10])
     print('-----------------')
 
     train_idx = dataset.get_idx_split('train')
@@ -209,9 +233,9 @@ if __name__ == '__main__':
     test_idx = dataset.get_idx_split('test-whole')
     print(len(train_idx) + len(val_idx) + len(test_idx))
 
-    print(dataset.paper_label[train_idx][:10])
-    print(dataset.paper_label[val_idx][:10])
-    print(dataset.paper_label[test_idx][:10])
-    print(dataset.paper_year[train_idx][:10])
-    print(dataset.paper_year[val_idx][:10])
-    print(dataset.paper_year[test_idx][:10])
+    print(data['paper'].y[train_idx][:10])
+    print(data['paper'].y[val_idx][:10])
+    print(data['paper'].y[test_idx][:10])
+    print(data['paper'].year[train_idx][:10])
+    print(data['paper'].year[val_idx][:10])
+    print(data['paper'].year[test_idx][:10])
