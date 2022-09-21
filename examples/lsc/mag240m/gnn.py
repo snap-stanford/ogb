@@ -19,30 +19,19 @@ from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
 
 from torch_sparse import SparseTensor
-from torch_geometric.nn import SAGEConv, GATConv
+from torch_geometric.nn import SAGEConv, GATConv, to_hetero
 from torch_geometric.data import NeighborSampler
 
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from root import ROOT
 from torch_geometric.loader.neighbor_loader import NeighborLoader
-from torch.profiler import profile, ProfilerActivity
-from torch_geometric.data import Data
-from torch_sparse import coalesce
 from torch_geometric.typing import Adj
 import torch_geometric.transforms as T
+from torch_geometric.typing import EdgeType, NodeType
+from typing import Dict, Tuple
+from torch_geometric.data import Batch
 
-class Batch(NamedTuple):
-    x: Tensor
-    y: Tensor
-    adjs_t: List[SparseTensor]
-
-    def to(self, *args, **kwargs):
-        return Batch(
-            x=self.x.to(*args, **kwargs),
-            y=self.y.to(*args, **kwargs),
-            adjs_t=[adj_t.to(*args, **kwargs) for adj_t in self.adjs_t],
-        )
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class MAG240M(LightningDataModule):
     def __init__(self, data_dir: str, batch_size: int, sizes: List[int],
@@ -52,6 +41,7 @@ class MAG240M(LightningDataModule):
         self.batch_size = batch_size
         self.sizes = sizes
         self.in_memory = in_memory
+        self.transform = T.ToUndirected(merge=False)
 
     @property
     def num_features(self) -> int:
@@ -63,23 +53,25 @@ class MAG240M(LightningDataModule):
 
     def prepare_data(self):
         dataset = MAG240MDataset(self.data_dir)
+        self.data = dataset.to_pyg_hetero_data()
         path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         if not osp.exists(path):
             t = time.perf_counter()
             print('Converting adjacency matrix...', end=' ', flush=True)
-            edge_index = dataset.edge_index('paper', 'cites', 'paper')
-            edge_index = torch.from_numpy(edge_index)
-            adj_t = SparseTensor(
-                row=edge_index[0], col=edge_index[1],
-                sparse_sizes=(dataset.num_papers, dataset.num_papers),
-                is_sorted=True)
-            torch.save(adj_t.to_symmetric(), path)
+            edge_index = self.data[('paper', 'cites', 'paper')].edge_index
+            # edge_index = torch.from_numpy(edge_index)
+            # adj_t = SparseTensor(
+            #     row=edge_index[0], col=edge_index[1],
+            #     sparse_sizes=(dataset.num_papers, dataset.num_papers),
+            #     is_sorted=True)
+            # torch.save(adj_t.to_symmetric(), path)
             print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     def setup(self, stage: Optional[str] = None):
         t = time.perf_counter()
         print('Reading dataset...', end=' ', flush=True)
         dataset = MAG240MDataset(self.data_dir)
+        self.data = dataset.to_pyg_hetero_data()
 
         self.train_idx = torch.from_numpy(dataset.get_idx_split('train'))
         self.train_idx = self.train_idx
@@ -88,123 +80,163 @@ class MAG240M(LightningDataModule):
         self.val_idx.share_memory_()
         self.test_idx = torch.from_numpy(dataset.get_idx_split('test-dev'))
         self.test_idx.share_memory_()
+        print("train_idx", self.train_idx)
+        print("val_idx", self.val_idx)
+        print("test_idx", self.test_idx)
 
         if self.in_memory:
             self.x = torch.from_numpy(dataset.all_paper_feat).share_memory_()
         else:
-            self.x = dataset.paper_feat
-        self.y = torch.from_numpy(dataset.all_paper_label)
+            self.x = self.data['paper'].x
+        self.y = self.data['paper'].y
 
-        path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
-        self.adj_t = torch.load(path)
+        # path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
+        # self.adj_t = torch.load(path)
         print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
+    def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
+        node_types = ['paper']
+        edge_types = [('author', 'affiliated_with', 'institution'),
+                      ('author', 'writes', 'paper'),
+                      ('paper', 'cites', 'paper')]
+        return node_types, edge_types        
+
     def train_dataloader(self):
-        return NeighborSampler(self.adj_t, node_idx=self.train_idx,
-                               sizes=self.sizes, return_e_id=False,
-                               transform=self.convert_batch,
-                               batch_size=self.batch_size, shuffle=True,
-                               num_workers=4)
+        return NeighborLoader(self.data, num_neighbors=self.sizes,
+                              input_nodes=self.train_idx,
+                                batch_size=self.batch_size, shuffle=True,
+                                num_workers=4)
 
     def val_dataloader(self):
-        return NeighborSampler(self.adj_t, node_idx=self.val_idx,
-                               sizes=self.sizes, return_e_id=False,
-                               transform=self.convert_batch,
-                               batch_size=self.batch_size, num_workers=2)
+        return NeighborLoader(self.data, num_neighbors=self.sizes,
+                              input_nodes=self.val_idx,
+                                batch_size=self.batch_size, num_workers=2)
 
     def test_dataloader(self):  # Test best validation model once again.
-        return NeighborSampler(self.adj_t, node_idx=self.val_idx,
-                               sizes=self.sizes, return_e_id=False,
-                               transform=self.convert_batch,
-                               batch_size=self.batch_size, num_workers=2)
+        return NeighborLoader(self.data, num_neighbors=self.sizes,
+                              input_nodes=self.val_idx, 
+                                batch_size=self.batch_size, num_workers=2)
 
     def hidden_test_dataloader(self):
-        return NeighborSampler(self.adj_t, node_idx=self.test_idx,
-                               sizes=self.sizes, return_e_id=False,
-                               transform=self.convert_batch,
-                               batch_size=self.batch_size, num_workers=3)
+        return NeighborLoader(self.data, num_neighbors=self.sizes,
+                              input_nodes=self.test_idx,
+                                batch_size=self.batch_size, num_workers=3)
 
-    def convert_batch(self, batch_size, n_id, adjs):
-        if self.in_memory:
-            x = self.x[n_id].to(torch.float)
-        else:
-            x = torch.from_numpy(self.x[n_id.numpy()]).to(torch.float)
-        y = self.y[n_id[:batch_size]].to(torch.long)
-        return Batch(x=x, y=y, adjs_t=[adj_t for adj_t, _, _ in adjs])
+    # def convert_batch(self, batch_size, n_id, adjs):
+    #     if self.in_memory:
+    #         x = self.x[n_id].to(torch.float)
+    #     else:
+    #         x = torch.from_numpy(self.x[n_id.numpy()]).to(torch.float)
+    #     y = self.y[n_id[:batch_size]].to(torch.long)
+    #     return Batch(x=x, y=y, adjs_t=[adj_t for adj_t, _, _ in adjs])
 
 
-class GNN(LightningModule):
+class GNN(torch.nn.Module):
     def __init__(self, model: str, in_channels: int, out_channels: int,
                  hidden_channels: int, num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
-        self.save_hyperparameters()
         self.model = model.lower()
         self.dropout = dropout
+        self.num_layers = num_layers
 
-        self.convs = ModuleList()
-        self.norms = ModuleList()
-        self.skips = ModuleList()
+        # self.convs = ModuleList()
+        # self.norms = ModuleList()
+        # self.skips = ModuleList()
 
-        if self.model == 'gat':
-            self.convs.append(
-                GATConv(in_channels, hidden_channels // heads, heads))
-            self.skips.append(Linear(in_channels, hidden_channels))
-            for _ in range(num_layers - 1):
-                self.convs.append(
-                    GATConv(hidden_channels, hidden_channels // heads, heads))
-                self.skips.append(Linear(hidden_channels, hidden_channels))
+        # if self.model == 'gat':
+        #     self.convs.append(
+        #         GATConv(in_channels, hidden_channels // heads, heads))
+        #     self.skips.append(Linear(in_channels, hidden_channels))
+        #     for _ in range(num_layers - 1):
+        #         self.convs.append(
+        #             GATConv(hidden_channels, hidden_channels // heads, heads))
+        #         self.skips.append(Linear(hidden_channels, hidden_channels))
 
-        elif self.model == 'graphsage':
-            self.convs.append(SAGEConv(in_channels, hidden_channels))
-            for _ in range(num_layers - 1):
-                self.convs.append(SAGEConv(hidden_channels, hidden_channels))
+        # elif self.model == 'graphsage':
+        #     self.convs.append(SAGEConv(in_channels, hidden_channels))
+        #     for _ in range(num_layers - 1):
+        #         self.convs.append(SAGEConv(hidden_channels, hidden_channels))
 
-        for _ in range(num_layers):
-            self.norms.append(BatchNorm1d(hidden_channels))
+        # for _ in range(num_layers):
+        #     self.norms.append(BatchNorm1d(hidden_channels))
 
-        self.mlp = Sequential(
-            Linear(hidden_channels, hidden_channels),
-            BatchNorm1d(hidden_channels),
-            ReLU(inplace=True),
-            Dropout(p=self.dropout),
-            Linear(hidden_channels, out_channels),
-        )
+        # self.mlp = Sequential(
+        #     Linear(hidden_channels, hidden_channels),
+        #     BatchNorm1d(hidden_channels),
+        #     ReLU(inplace=True),
+        #     Dropout(p=self.dropout),
+        #     Linear(hidden_channels, out_channels),
+        # )
+        
+        self.conv1 = SAGEConv(in_channels, hidden_channels)
+        self.conv2 = SAGEConv(hidden_channels, hidden_channels)
+        self.lin = Linear(hidden_channels, out_channels)
 
+    def forward(self, x: Tensor, edge_index: Adj) -> Tensor:
+        # for i in range(self.num_layers):
+        #     x = self.convs[i](x, edge_index)
+        #     if self.model == 'gat':
+        #         x = x + self.skips[i](x)
+        #         x = F.elu(self.norms[i](x))
+        #     elif self.model == 'graphsage':
+        #         x = F.relu(self.norms[i](x))
+        #     x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv1(x, edge_index).relu()
+        x = self.conv2(x, edge_index).relu()
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        return x
+        # return self.mlp(x)
+
+class HeteroGNN(LightningModule):
+    def __init__(self, model_name: str, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
+                 hidden_channels: int, num_layers: int, heads: int = 4,
+                 dropout: float = 0.5):
+        super().__init__()
+        self.save_hyperparameters()
+        model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
+        self.model = to_hetero(model, metadata, aggr='sum').to(device)
         self.train_acc = Accuracy()
         self.val_acc = Accuracy()
         self.test_acc = Accuracy()
 
-    def forward(self, x: Tensor, adjs_t: List[SparseTensor]) -> Tensor:
-        for i, adj_t in enumerate(adjs_t):
-            x_target = x[:adj_t.size(0)]
-            x = self.convs[i]((x, x_target), adj_t)
-            if self.model == 'gat':
-                x = x + self.skips[i](x_target)
-                x = F.elu(self.norms[i](x))
-            elif self.model == 'graphsage':
-                x = F.relu(self.norms[i](x))
-            x = F.dropout(x, p=self.dropout, training=self.training)
+    def forward(
+        self,
+        x_dict: Dict[NodeType, Tensor],
+        edge_index_dict: Dict[EdgeType, Tensor],
+    ) -> Dict[NodeType, Tensor]:
+        return self.model(x_dict, edge_index_dict)
 
-        return self.mlp(x)
+    # @torch.no_grad()
+    # def setup(self, stage: Optional[str] = None):  # Initialize parameters.
+    #     data = self.trainer.datamodule
+    #     loader = data.dataloader(torch.arange(1), shuffle=False, num_workers=0)
+    #     batch = next(iter(loader))
+    #     self(batch.x_dict, batch.edge_index_dict)
 
-    def training_step(self, batch, batch_idx: int):
-        y_hat = self(batch.x, batch.adjs_t)
-        train_loss = F.cross_entropy(y_hat, batch.y)
-        self.train_acc(y_hat.softmax(dim=-1), batch.y)
+    def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
+        batch_size = batch['paper'].batch_size
+        y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
+        y = batch['paper'].y[:batch_size]
+        return y_hat, y
+
+    def training_step(self, batch: Batch, batch_idx: int) -> Tensor:
+        y_hat, y = self.common_step(batch)
+        train_loss = F.cross_entropy(y_hat, y)
+        self.train_acc(y_hat.softmax(dim=-1), y)
         self.log('train_acc', self.train_acc, prog_bar=True, on_step=False,
                  on_epoch=True)
         return train_loss
 
-    def validation_step(self, batch, batch_idx: int):
-        y_hat = self(batch.x, batch.adjs_t)
-        self.val_acc(y_hat.softmax(dim=-1), batch.y)
+    def validation_step(self, batch: Batch, batch_idx: int):
+        y_hat, y = self.common_step(batch)
+        self.val_acc(y_hat.softmax(dim=-1), y)
         self.log('val_acc', self.val_acc, on_step=False, on_epoch=True,
                  prog_bar=True, sync_dist=True)
 
-    def test_step(self, batch, batch_idx: int):
-        y_hat = self(batch.x, batch.adjs_t)
-        self.test_acc(y_hat.softmax(dim=-1), batch.y)
+    def test_step(self, batch: Batch, batch_idx: int):
+        y_hat, y = self.common_step(batch)
+        self.test_acc(y_hat.softmax(dim=-1), y)
         self.log('test_acc', self.test_acc, on_step=False, on_epoch=True,
                  prog_bar=True, sync_dist=True)
 
@@ -222,7 +254,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--model', type=str, default='gat',
                         choices=['gat', 'graphsage'])
-    parser.add_argument('--sizes', type=str, default='25-15')
+    parser.add_argument('--sizes', type=str, default='2')
     parser.add_argument('--in-memory', action='store_true')
     parser.add_argument('--device', type=str, default='0')
     parser.add_argument('--evaluate', action='store_true')
@@ -232,9 +264,10 @@ if __name__ == '__main__':
 
     seed_everything(42)
     datamodule = MAG240M(ROOT, args.batch_size, args.sizes, args.in_memory)
+    print(datamodule.metadata())
 
     if not args.evaluate:
-        model = GNN(args.model, datamodule.num_features,
+        model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
                     datamodule.num_classes, args.hidden_channels,
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
@@ -252,7 +285,7 @@ if __name__ == '__main__':
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
 
         trainer = Trainer(accelerator="cpu", resume_from_checkpoint=ckpt)
-        model = GNN.load_from_checkpoint(checkpoint_path=ckpt,
+        model = HeteroGNN.load_from_checkpoint(checkpoint_path=ckpt,
                                          hparams_file=f'{logdir}/hparams.yaml')
 
         datamodule.batch_size = 16
