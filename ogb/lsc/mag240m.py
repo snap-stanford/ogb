@@ -73,6 +73,13 @@ class MAG240MDataset(object):
             path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
             edge_index = torch.from_numpy(np.load(path))
             data[edge_type].edge_index = edge_index
+
+        for f, v in [('train', 'train'), ('valid', 'val'), ('test-dev', 'test')]:
+            idx = self.get_idx_split(f)
+            idx = torch.from_numpy(idx)
+            mask = torch.zeros(data['paper'].num_nodes, dtype=torch.bool)
+            mask[idx] = True
+            data['paper'][f'{v}_mask'] = mask
         return data
 
     @property

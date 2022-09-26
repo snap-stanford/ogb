@@ -30,18 +30,13 @@ import torch_geometric.transforms as T
 from torch_geometric.typing import EdgeType, NodeType
 from typing import Dict, Tuple
 from torch_geometric.data import Batch
+from torch_geometric.data import LightningNodeData
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class MAG240M(LightningDataModule):
-    def __init__(self, data_dir: str, batch_size: int, sizes: List[int],
-                 in_memory: bool = False):
-        super().__init__()
-        self.data_dir = data_dir
-        self.batch_size = batch_size
-        self.sizes = sizes
-        self.in_memory = in_memory
-        self.transform = T.ToUndirected(merge=False)
+class MAG240M(LightningNodeData):
+    def __init__(self, *args, **kwargs):
+        super(MAG240M, self).__init__(*args, **kwargs)
 
     @property
     def num_features(self) -> int:
@@ -51,85 +46,12 @@ class MAG240M(LightningDataModule):
     def num_classes(self) -> int:
         return 153
 
-    def prepare_data(self):
-        dataset = MAG240MDataset(self.data_dir)
-        self.data = dataset.to_pyg_hetero_data()
-        path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
-        if not osp.exists(path):
-            t = time.perf_counter()
-            print('Converting adjacency matrix...', end=' ', flush=True)
-            edge_index = self.data[('paper', 'cites', 'paper')].edge_index
-            # edge_index = torch.from_numpy(edge_index)
-            # adj_t = SparseTensor(
-            #     row=edge_index[0], col=edge_index[1],
-            #     sparse_sizes=(dataset.num_papers, dataset.num_papers),
-            #     is_sorted=True)
-            # torch.save(adj_t.to_symmetric(), path)
-            print(f'Done! [{time.perf_counter() - t:.2f}s]')
-
-    def setup(self, stage: Optional[str] = None):
-        t = time.perf_counter()
-        print('Reading dataset...', end=' ', flush=True)
-        dataset = MAG240MDataset(self.data_dir)
-        self.data = dataset.to_pyg_hetero_data()
-
-        self.train_idx = torch.from_numpy(dataset.get_idx_split('train'))
-        self.train_idx = self.train_idx
-        self.train_idx.share_memory_()
-        self.val_idx = torch.from_numpy(dataset.get_idx_split('valid'))
-        self.val_idx.share_memory_()
-        self.test_idx = torch.from_numpy(dataset.get_idx_split('test-dev'))
-        self.test_idx.share_memory_()
-        print("train_idx", self.train_idx)
-        print("val_idx", self.val_idx)
-        print("test_idx", self.test_idx)
-
-        if self.in_memory:
-            self.x = torch.from_numpy(dataset.all_paper_feat).share_memory_()
-        else:
-            self.x = self.data['paper'].x
-        self.y = self.data['paper'].y
-
-        # path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
-        # self.adj_t = torch.load(path)
-        print(f'Done! [{time.perf_counter() - t:.2f}s]')
-
     def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
         node_types = ['paper']
         edge_types = [('author', 'affiliated_with', 'institution'),
                       ('author', 'writes', 'paper'),
                       ('paper', 'cites', 'paper')]
         return node_types, edge_types        
-
-    def train_dataloader(self):
-        return NeighborLoader(self.data, num_neighbors=self.sizes,
-                              input_nodes=self.train_idx,
-                                batch_size=self.batch_size, shuffle=True,
-                                num_workers=4)
-
-    def val_dataloader(self):
-        return NeighborLoader(self.data, num_neighbors=self.sizes,
-                              input_nodes=self.val_idx,
-                                batch_size=self.batch_size, num_workers=2)
-
-    def test_dataloader(self):  # Test best validation model once again.
-        return NeighborLoader(self.data, num_neighbors=self.sizes,
-                              input_nodes=self.val_idx, 
-                                batch_size=self.batch_size, num_workers=2)
-
-    def hidden_test_dataloader(self):
-        return NeighborLoader(self.data, num_neighbors=self.sizes,
-                              input_nodes=self.test_idx,
-                                batch_size=self.batch_size, num_workers=3)
-
-    # def convert_batch(self, batch_size, n_id, adjs):
-    #     if self.in_memory:
-    #         x = self.x[n_id].to(torch.float)
-    #     else:
-    #         x = torch.from_numpy(self.x[n_id.numpy()]).to(torch.float)
-    #     y = self.y[n_id[:batch_size]].to(torch.long)
-    #     return Batch(x=x, y=y, adjs_t=[adj_t for adj_t, _, _ in adjs])
-
 
 class GNN(torch.nn.Module):
     def __init__(self, model: str, in_channels: int, out_channels: int,
@@ -263,8 +185,10 @@ if __name__ == '__main__':
     print(args)
 
     seed_everything(42)
-    datamodule = MAG240M(ROOT, args.batch_size, args.sizes, args.in_memory)
-    print(datamodule.metadata())
+    dataset = MAG240MDataset(ROOT)
+    data = dataset.to_pyg_hetero_data()
+    datamodule = MAG240M(data, loader='neighbor', num_neighbors=args.sizes, batch_size=args.batch_size, num_workers=2)
+    print(datamodule)
 
     if not args.evaluate:
         model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
