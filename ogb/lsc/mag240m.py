@@ -63,10 +63,20 @@ class MAG240MDataset(object):
         data['paper'].y = torch.from_numpy(np.load(path))
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         data['paper'].year = torch.from_numpy(np.load(path, mmap_mode='r'))
+
         data['author'].num_nodes = self.__meta__['author']
+        path = osp.join(self.dir, 'processed', 'author', 'author.npy')
+        data['author'].x = np.memmap(path, mode='r', shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
         path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
         data['institution'].x = np.memmap(path, mode='r', shape=(data['institution'].num_nodes, self.num_paper_features))
+
+        # data['author'].num_nodes = self.__meta__['author']
+        # data['institution'].num_nodes = self.__meta__['institution']
+        # path = osp.join(self.dir, 'processed', 'author', 'author.npy')
+        # data['author'].x = np.load(path, mmap_mode='r', encoding='bytes', allow_pickle=True)
+        # path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
+        # data['institution'].x = np.load(path, mmap_mode='r', allow_pickle=True)
         
         for edge_type in [('author', 'affiliated_with', 'institution'),
                           ('author', 'writes', 'paper'),
