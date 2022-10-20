@@ -47,7 +47,8 @@ class MAG240M(LightningNodeData):
         return 153
 
     def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
-        node_types = ['paper']
+        node_types = ['paper', 'author', 'institution']
+        # node_types = ['paper']
         edge_types = [('author', 'affiliated_with', 'institution'),
                       ('author', 'writes', 'paper'),
                       ('paper', 'cites', 'paper')]
@@ -94,6 +95,7 @@ class GNN(torch.nn.Module):
         self.conv1 = SAGEConv(in_channels, hidden_channels)
         self.conv2 = SAGEConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
+        # self.relu = ReLU(inplace=True)
 
     def forward(self, x: Tensor, edge_index: Adj) -> Tensor:
         # for i in range(self.num_layers):
@@ -104,9 +106,11 @@ class GNN(torch.nn.Module):
         #     elif self.model == 'graphsage':
         #         x = F.relu(self.norms[i](x))
         #     x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.conv1(x, edge_index).relu()
-        x = self.conv2(x, edge_index).relu()
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv1(x, edge_index)
+        # x = F.relu(x, inplace=True)
+        x = self.conv2(x, edge_index)
+        # x = F.relu(x, inplace=True)
+        # x = F.dropout(x, p=self.dropout, training=self.training)
         return x
         # return self.mlp(x)
 
