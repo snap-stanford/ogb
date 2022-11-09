@@ -49,9 +49,13 @@ class MAG240M(LightningNodeData):
     def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
         node_types = ['paper', 'author', 'institution']
         # node_types = ['paper']
-        edge_types = [('author', 'affiliated_with', 'institution'),
-                      ('author', 'writes', 'paper'),
-                      ('paper', 'cites', 'paper')]
+        edge_types = [
+            ('author', 'affiliated_with', 'institution'),
+            ('institution', 'rev_affiliated_with', 'author'),
+            ('author', 'writes', 'paper'),
+            ('paper', 'rev_writes', 'author'),
+            ('paper', 'cites', 'paper'),
+        ]
         return node_types, edge_types        
 
 class GNN(torch.nn.Module):
@@ -106,11 +110,12 @@ class GNN(torch.nn.Module):
         #     elif self.model == 'graphsage':
         #         x = F.relu(self.norms[i](x))
         #     x = F.dropout(x, p=self.dropout, training=self.training)
+        x = x.to(torch.float)
         x = self.conv1(x, edge_index)
-        # x = F.relu(x, inplace=True)
+        x = F.relu(x, inplace=True)
         x = self.conv2(x, edge_index)
-        # x = F.relu(x, inplace=True)
-        # x = F.dropout(x, p=self.dropout, training=self.training)
+        x = F.relu(x, inplace=True)
+        x = F.dropout(x, p=self.dropout, training=self.training)
         return x
         # return self.mlp(x)
 
@@ -121,7 +126,7 @@ class HeteroGNN(LightningModule):
         super().__init__()
         self.save_hyperparameters()
         model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
-        self.model = to_hetero(model, metadata, aggr='sum').to(device)
+        self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
         self.train_acc = Accuracy()
         self.val_acc = Accuracy()
         self.test_acc = Accuracy()
@@ -142,6 +147,8 @@ class HeteroGNN(LightningModule):
 
     def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
         batch_size = batch['paper'].batch_size
+        print(batch.x_dict)
+        print(batch.edge_index_dict)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size]
         return y_hat, y

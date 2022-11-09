@@ -66,10 +66,12 @@ class MAG240MDataset(object):
 
         data['author'].num_nodes = self.__meta__['author']
         path = osp.join(self.dir, 'processed', 'author', 'author.npy')
-        data['author'].x = np.memmap(path, mode='r', shape=(data['author'].num_nodes, self.num_paper_features))
+        # data['author'].x = np.memmap(path, mode='w+', shape=(data['author'].num_nodes, self.num_paper_features))
+        data['author'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
         path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
-        data['institution'].x = np.memmap(path, mode='r', shape=(data['institution'].num_nodes, self.num_paper_features))
+        # data['institution'].x = np.memmap(path, mode='w+', shape=(data['institution'].num_nodes, self.num_paper_features))
+        data['institution'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['institution'].num_nodes, self.num_paper_features))
 
         # data['author'].num_nodes = self.__meta__['author']
         # data['institution'].num_nodes = self.__meta__['institution']
