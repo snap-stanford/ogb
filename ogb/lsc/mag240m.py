@@ -79,14 +79,15 @@ class MAG240MDataset(object):
         # data['author'].x = np.load(path, mmap_mode='r', encoding='bytes', allow_pickle=True)
         # path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
         # data['institution'].x = np.load(path, mmap_mode='r', allow_pickle=True)
-        
+
+        print("node done")
         for edge_type in [('author', 'affiliated_with', 'institution'),
                           ('author', 'writes', 'paper'),
                           ('paper', 'cites', 'paper')]:
             name = '___'.join(edge_type)
             path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
             edge_index = torch.from_numpy(np.load(path))
-            data[edge_type].edge_index = edge_index
+            data[edge_type].edge_index = edge_index.flip([0])
 
         for f, v in [('train', 'train'), ('valid', 'val'), ('test-dev', 'test')]:
             idx = self.get_idx_split(f)
