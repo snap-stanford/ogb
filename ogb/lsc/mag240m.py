@@ -66,28 +66,19 @@ class MAG240MDataset(object):
 
         data['author'].num_nodes = self.__meta__['author']
         path = osp.join(self.dir, 'processed', 'author', 'author.npy')
-        # data['author'].x = np.memmap(path, mode='w+', shape=(data['author'].num_nodes, self.num_paper_features))
         data['author'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
         path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
-        # data['institution'].x = np.memmap(path, mode='w+', shape=(data['institution'].num_nodes, self.num_paper_features))
         data['institution'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['institution'].num_nodes, self.num_paper_features))
 
-        # data['author'].num_nodes = self.__meta__['author']
-        # data['institution'].num_nodes = self.__meta__['institution']
-        # path = osp.join(self.dir, 'processed', 'author', 'author.npy')
-        # data['author'].x = np.load(path, mmap_mode='r', encoding='bytes', allow_pickle=True)
-        # path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
-        # data['institution'].x = np.load(path, mmap_mode='r', allow_pickle=True)
-
-        print("node done")
         for edge_type in [('author', 'affiliated_with', 'institution'),
                           ('author', 'writes', 'paper'),
                           ('paper', 'cites', 'paper')]:
             name = '___'.join(edge_type)
             path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
             edge_index = torch.from_numpy(np.load(path))
-            data[edge_type].edge_index = edge_index.flip([0])
+            data[edge_type].edge_index = edge_index
+            data[edge_type[2], f'rev_{edge_type[1]}', edge_type[0]].edge_index = edge_index.flip([0])
 
         for f, v in [('train', 'train'), ('valid', 'val'), ('test-dev', 'test')]:
             idx = self.get_idx_split(f)
@@ -152,15 +143,6 @@ class MAG240MDataset(object):
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         return np.load(path)
 
-    # def edge_index(self, id1: str, id2: str,
-    #                id3: Optional[str] = None) -> np.ndarray:
-    #     src = id1
-    #     rel, dst = (id3, id2) if id3 is None else (id2, id3)
-    #     rel = self.__rels__[(src, dst)] if rel is None else rel
-    #     name = f'{src}___{rel}___{dst}'
-    #     path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
-    #     return np.load(path)
-
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
 
@@ -207,7 +189,7 @@ class MAG240MEvaluator:
 
 
 if __name__ == '__main__':
-    dataset = MAG240MDataset('/home/user/yanbing/pyg/ogb/ogb/lsc/dataset')
+    dataset = MAG240MDataset()
     data = dataset.to_pyg_hetero_data()
     print(dataset)
     print(dataset.num_papers)

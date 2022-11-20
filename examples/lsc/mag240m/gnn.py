@@ -48,7 +48,6 @@ class MAG240M(LightningNodeData):
 
     def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
         node_types = ['paper', 'author', 'institution']
-        # node_types = ['paper']
         edge_types = [
             ('author', 'affiliated_with', 'institution'),
             ('institution', 'rev_affiliated_with', 'author'),
@@ -67,57 +66,18 @@ class GNN(torch.nn.Module):
         self.dropout = dropout
         self.num_layers = num_layers
 
-        # self.convs = ModuleList()
-        # self.norms = ModuleList()
-        # self.skips = ModuleList()
-
-        # if self.model == 'gat':
-        #     self.convs.append(
-        #         GATConv(in_channels, hidden_channels // heads, heads))
-        #     self.skips.append(Linear(in_channels, hidden_channels))
-        #     for _ in range(num_layers - 1):
-        #         self.convs.append(
-        #             GATConv(hidden_channels, hidden_channels // heads, heads))
-        #         self.skips.append(Linear(hidden_channels, hidden_channels))
-
-        # elif self.model == 'graphsage':
-        #     self.convs.append(SAGEConv(in_channels, hidden_channels))
-        #     for _ in range(num_layers - 1):
-        #         self.convs.append(SAGEConv(hidden_channels, hidden_channels))
-
-        # for _ in range(num_layers):
-        #     self.norms.append(BatchNorm1d(hidden_channels))
-
-        # self.mlp = Sequential(
-        #     Linear(hidden_channels, hidden_channels),
-        #     BatchNorm1d(hidden_channels),
-        #     ReLU(inplace=True),
-        #     Dropout(p=self.dropout),
-        #     Linear(hidden_channels, out_channels),
-        # )
-        
         self.conv1 = SAGEConv(in_channels, hidden_channels)
         self.conv2 = SAGEConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
         # self.relu = ReLU(inplace=True)
 
     def forward(self, x: Tensor, edge_index: Adj) -> Tensor:
-        # for i in range(self.num_layers):
-        #     x = self.convs[i](x, edge_index)
-        #     if self.model == 'gat':
-        #         x = x + self.skips[i](x)
-        #         x = F.elu(self.norms[i](x))
-        #     elif self.model == 'graphsage':
-        #         x = F.relu(self.norms[i](x))
-        #     x = F.dropout(x, p=self.dropout, training=self.training)
         x = x.to(torch.float)
-        x = self.conv1(x, edge_index)
-        x = F.relu(x, inplace=True)
-        x = self.conv2(x, edge_index)
-        x = F.relu(x, inplace=True)
+        x = self.conv1(x, edge_index).relu()
         x = F.dropout(x, p=self.dropout, training=self.training)
-        return x
-        # return self.mlp(x)
+        x = self.conv2(x, edge_index).relu()
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        return self.lin(x)
 
 class HeteroGNN(LightningModule):
     def __init__(self, model_name: str, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
@@ -138,19 +98,10 @@ class HeteroGNN(LightningModule):
     ) -> Dict[NodeType, Tensor]:
         return self.model(x_dict, edge_index_dict)
 
-    # @torch.no_grad()
-    # def setup(self, stage: Optional[str] = None):  # Initialize parameters.
-    #     data = self.trainer.datamodule
-    #     loader = data.dataloader(torch.arange(1), shuffle=False, num_workers=0)
-    #     batch = next(iter(loader))
-    #     self(batch.x_dict, batch.edge_index_dict)
-
     def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
         batch_size = batch['paper'].batch_size
-        print(batch.x_dict)
-        print(batch.edge_index_dict)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
-        y = batch['paper'].y[:batch_size]
+        y = batch['paper'].y[:batch_size].to(torch.long)
         return y_hat, y
 
     def training_step(self, batch: Batch, batch_idx: int) -> Tensor:
