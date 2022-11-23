@@ -57,7 +57,7 @@ def atom_to_feature_vector(atom):
     """
     atom_feature = [
             safe_index(allowable_features['possible_atomic_num_list'], atom.GetAtomicNum()),
-            allowable_features['possible_chirality_list'].index(str(atom.GetChiralTag())),
+            safe_index(allowable_features['possible_chirality_list'], str(atom.GetChiralTag())),
             safe_index(allowable_features['possible_degree_list'], atom.GetTotalDegree()),
             safe_index(allowable_features['possible_formal_charge_list'], atom.GetFormalCharge()),
             safe_index(allowable_features['possible_numH_list'], atom.GetTotalNumHs()),
