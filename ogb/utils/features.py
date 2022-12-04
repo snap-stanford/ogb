@@ -5,7 +5,8 @@ allowable_features = {
         'CHI_UNSPECIFIED',
         'CHI_TETRAHEDRAL_CW',
         'CHI_TETRAHEDRAL_CCW',
-        'CHI_OTHER'
+        'CHI_OTHER',
+        'misc'
     ],
     'possible_degree_list' : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'misc'],
     'possible_formal_charge_list' : [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 'misc'],
