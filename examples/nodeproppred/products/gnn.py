@@ -5,6 +5,7 @@ import torch.nn.functional as F
 
 import torch_geometric.transforms as T
 from torch_geometric.nn import GCNConv, SAGEConv
+from torch_geometric.profile import rename_profile_file, timeit, torch_profile
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 
@@ -101,6 +102,12 @@ def test(model, data, split_idx, evaluator):
     return train_acc, valid_acc, test_acc
 
 
+@torch.no_grad()
+def inference(model, data):
+    model.eval()
+    model(data.x, data.adj_t)
+
+
 def main():
     parser = argparse.ArgumentParser(description='OGBN-Products (GNN)')
     parser.add_argument('--device', type=int, default=0)
@@ -112,6 +119,8 @@ def main():
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--runs', type=int, default=10)
+    parser.add_argument('--inference', action='store_true')
+    parser.add_argument('--profile', action='store_true')
     args = parser.parse_args()
     print(args)
 
@@ -147,25 +156,50 @@ def main():
     evaluator = Evaluator(name='ogbn-products')
     logger = Logger(args.runs, args)
 
-    for run in range(args.runs):
-        model.reset_parameters()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-        for epoch in range(1, 1 + args.epochs):
-            loss = train(model, data, train_idx, optimizer)
-            result = test(model, data, split_idx, evaluator)
-            logger.add_result(run, result)
+    if not args.inference:
+        for run in range(args.runs):
+            model.reset_parameters()
+            optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+            for epoch in range(1, 1 + args.epochs):
+                if run == args.runs - 1 and epoch == args.epochs:
+                    with timeit():
+                        loss = train(model, data, train_idx, optimizer)
+                else:
+                    loss = train(model, data, train_idx, optimizer)
+                result = test(model, data, split_idx, evaluator)
+                logger.add_result(run, result)
 
-            if epoch % args.log_steps == 0:
-                train_acc, valid_acc, test_acc = result
-                print(f'Run: {run + 1:02d}, '
-                      f'Epoch: {epoch:02d}, '
-                      f'Loss: {loss:.4f}, '
-                      f'Train: {100 * train_acc:.2f}%, '
-                      f'Valid: {100 * valid_acc:.2f}% '
-                      f'Test: {100 * test_acc:.2f}%')
+                if epoch % args.log_steps == 0:
+                    train_acc, valid_acc, test_acc = result
+                    print(f'Run: {run + 1:02d}, '
+                        f'Epoch: {epoch:02d}, '
+                        f'Loss: {loss:.4f}, '
+                        f'Train: {100 * train_acc:.2f}%, '
+                        f'Valid: {100 * valid_acc:.2f}% '
+                        f'Test: {100 * test_acc:.2f}%')
 
-        logger.print_statistics(run)
-    logger.print_statistics()
+            logger.print_statistics(run)
+        logger.print_statistics()
+
+        if args.profile:
+            with torch_profile():
+                train(model, data, train_idx, optimizer)
+            rename_profile_file('ogbn-products',
+                            'sage' if args.use_sage else 'gcn', 'inference')
+    else:
+        for run in range(args.runs):
+            model.reset_parameters()
+            for epoch in range(1, 1 + args.epochs):
+                if run == args.runs - 1 and epoch == args.epochs:
+                    with timeit():
+                        inference(model, data)
+                else:
+                    inference(model, data)
+        if args.profile:
+            with torch_profile():
+                inference(model, data)
+            rename_profile_file('ogbn-products',
+                                'sage' if args.use_sage else 'gcn', 'inference')
 
 
 if __name__ == "__main__":
