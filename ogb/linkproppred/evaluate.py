@@ -246,10 +246,10 @@ class Evaluator:
             # calculate ranks
             y_pred_pos = y_pred_pos.view(-1, 1)
             # optimistic rank: "how many negatives have a larger score than the positive?"
-            # ~> the positive is ranked last among those with equal score
+            # ~> the positive is ranked first among those with equal score
             optimistic_rank = (y_pred_neg > y_pred_pos).sum(dim=1)
             # pessimistic rank: "how many negatives have at least the positive score?"
-            # ~> the positive is ranked first among those with equal score
+            # ~> the positive is ranked last among those with equal score
             pessimistic_rank = (y_pred_neg >= y_pred_pos).sum(dim=1)
             ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
             hits1_list = (ranking_list <= 1).to(torch.float)
