@@ -6,7 +6,7 @@ version,1,1,1,1,1,1,1
 url,http://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip,http://snap.stanford.edu/ogb/data/linkproppred/collab.zip,http://snap.stanford.edu/ogb/data/linkproppred/citation-v2.zip,http://snap.stanford.edu/ogb/data/linkproppred/wikikg-v2.zip,http://snap.stanford.edu/ogb/data/linkproppred/ddi.zip,http://snap.stanford.edu/ogb/data/linkproppred/biokg.zip,http://snap.stanford.edu/ogb/data/linkproppred/vessel.zip
 add_inverse_edge,True,True,False,False,True,False,False
 has_node_attr,True,True,True,False,False,False,True
-has_edge_attr,False,False,False,False,False,False,False
+has_edge_attr,False,False,False,False,False,False,True
 split,throughput,time,time,time,target,random,spatial
 additional node files,,,node_year,,,,
 additional edge files,,"edge_weight,edge_year",,edge_reltype,,edge_reltype,
