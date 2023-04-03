@@ -10,7 +10,7 @@ add_inverse_edge,True,True,False,False,False
 has_node_attr,False,True,True,True,True
 has_edge_attr,True,False,False,False,False
 split,species,sales_ranking,time,time,time
-additional node files,node_species,None,node_year,node_year,node_year
-additional edge files,None,None,None,edge_reltype,None
+additional node files,node_species,,node_year,node_year,node_year
+additional edge files,,,,edge_reltype,
 is hetero,False,False,False,True,False
 binary,False,False,False,False,True

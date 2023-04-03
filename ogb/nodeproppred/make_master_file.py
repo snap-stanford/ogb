@@ -17,7 +17,7 @@ dataset_dict[name]['has_node_attr'] = False
 dataset_dict[name]['has_edge_attr'] = True
 dataset_dict[name]['split'] = 'species'
 dataset_dict[name]['additional node files'] = 'node_species'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = False
 
@@ -32,8 +32,8 @@ dataset_dict[name]['add_inverse_edge'] = True
 dataset_dict[name]['has_node_attr'] = True
 dataset_dict[name]['has_edge_attr'] = False
 dataset_dict[name]['split'] = 'sales_ranking'
-dataset_dict[name]['additional node files'] = 'None'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional node files'] = ''
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = False
 
@@ -48,7 +48,7 @@ dataset_dict[name]['has_node_attr'] = True
 dataset_dict[name]['has_edge_attr'] = False
 dataset_dict[name]['split'] = 'time'
 dataset_dict[name]['additional node files'] = 'node_year'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = False
 
@@ -78,7 +78,7 @@ dataset_dict[name]['has_node_attr'] = True
 dataset_dict[name]['has_edge_attr'] = False
 dataset_dict[name]['split'] = 'time'
 dataset_dict[name]['additional node files'] = 'node_year'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['is hetero'] = False
 dataset_dict[name]['binary'] = True
 

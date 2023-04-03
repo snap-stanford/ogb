@@ -40,8 +40,8 @@ for nme in mol_dataset_list:
 
     dataset_dict[nme]['split'] = 'scaffold'
 
-    dataset_dict[nme]['additional node files'] = 'None'
-    dataset_dict[nme]['additional edge files'] = 'None'
+    dataset_dict[nme]['additional node files'] = ''
+    dataset_dict[nme]['additional edge files'] = ''
     dataset_dict[nme]['binary'] = False
 
 dataset_list.extend(mol_dataset_list)
@@ -62,8 +62,8 @@ dataset_dict[name]['has_node_attr'] = False
 dataset_dict[name]['has_edge_attr'] = True
 dataset_dict[name]['task type'] = 'multiclass classification'
 dataset_dict[name]['num classes'] = 37
-dataset_dict[name]['additional node files'] = 'None'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional node files'] = ''
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['binary'] = False
 
 
@@ -81,7 +81,7 @@ dataset_dict[name]['has_edge_attr'] = False
 dataset_dict[name]['task type'] = 'subtoken prediction'
 dataset_dict[name]['num classes'] = -1
 dataset_dict[name]['additional node files'] = 'node_is_attributed,node_dfs_order,node_depth'
-dataset_dict[name]['additional edge files'] = 'None'
+dataset_dict[name]['additional edge files'] = ''
 dataset_dict[name]['binary'] = False
 
 

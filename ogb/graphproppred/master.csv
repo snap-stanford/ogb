@@ -11,6 +11,6 @@ has_edge_attr,True,True,True,True,True,True,True,True,True,True,True,True,True,T
 task type,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,binary classification,regression,regression,regression,binary classification,multiclass classification,subtoken prediction
 num classes,2,2,2,2,2,2,2,2,2,-1,-1,-1,2,37,-1
 split,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,scaffold,species,project
-additional node files,None,None,None,None,None,None,None,None,None,None,None,None,None,None,"node_is_attributed,node_dfs_order,node_depth"
-additional edge files,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+additional node files,,,,,,,,,,,,,,,"node_is_attributed,node_dfs_order,node_depth"
+additional edge files,,,,,,,,,,,,,,,
 binary,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
