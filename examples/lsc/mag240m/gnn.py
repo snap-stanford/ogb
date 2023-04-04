@@ -256,10 +256,14 @@ if __name__ == '__main__':
         logdir = f'logs/{args.model}/lightning_logs/version_{version}'
         print(f'Evaluating saved model in {logdir}...')
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
-
-        trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
+        if int(pytorch_lightning.__version__.split('.')[0]) < 2:
+          trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
+        else:
+          trainer = Trainer(devices=len(args.device.split(',')), resume_from_checkpoint=ckpt)
         model = GNN.load_from_checkpoint(checkpoint_path=ckpt,
                                          hparams_file=f'{logdir}/hparams.yaml')
+        
+        
 
         datamodule.batch_size = 16
         datamodule.sizes = [160] * len(args.sizes)  # (Almost) no sampling...
