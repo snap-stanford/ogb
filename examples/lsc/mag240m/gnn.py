@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import StepLR
 import pytorch_lightning
 if int(pytorch_lightning.__version__.split('.')[0]) < 2:
   from pytorch_lightning.metrics import Accuracy
-except:
+else:
   # up to date usage
   from torchmetrics import Accuracy
 from pytorch_lightning.callbacks import ModelCheckpoint
