@@ -247,7 +247,6 @@ if __name__ == '__main__':
           trainer = Trainer(devices=len(args.device.split(',')), max_epochs=args.epochs,
                             callbacks=[checkpoint_callback],
                             default_root_dir=f'logs/{args.model}')
-        del pytorch_lightning # only imported full package for version check
         trainer.fit(model, datamodule=datamodule)
 
     if args.evaluate:
