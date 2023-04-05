@@ -261,8 +261,6 @@ if __name__ == '__main__':
           trainer = Trainer(devices=len(args.device.split(',')), resume_from_checkpoint=ckpt)
         model = GNN.load_from_checkpoint(checkpoint_path=ckpt,
                                          hparams_file=f'{logdir}/hparams.yaml')
-        
-        
 
         datamodule.batch_size = 16
         datamodule.sizes = [160] * len(args.sizes)  # (Almost) no sampling...
