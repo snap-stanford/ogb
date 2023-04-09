@@ -2,89 +2,95 @@ import torch
 import torch.nn.functional as F
 from ogb.nodeproppred import PygNodePropPredDataset
 from torch import Tensor
-from torch_geometric.loader import NeighborSampler
+from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import SAGEConv
-
+from tqdm import tqdm
 
 class SAGE(torch.nn.Module):
-
-    def __init__(self,
-                 in_channels,
-                 hidden_channels,
-                 out_channels,
-                 num_layers=2):
-        super(SAGE, self).__init__()
-        self.num_layers = num_layers
+    def __init__(self, in_channels: int, hidden_channels: int,
+                 out_channels: int, num_layers: int = 2):
+        super().__init__()
 
         self.convs = torch.nn.ModuleList()
         self.convs.append(SAGEConv(in_channels, hidden_channels))
-        for _ in range(self.num_layers - 2):
+        for _ in range(num_layers - 2):
             self.convs.append(SAGEConv(hidden_channels, hidden_channels))
         self.convs.append(SAGEConv(hidden_channels, out_channels))
 
-    def forward(self, x: Tensor, adjs: list) -> Tensor:
-        for i, (edge_index, _, size) in enumerate(adjs):
-            x_target = x[:size[1]]  # Target nodes are always placed first.
-            x = self.convs[i]((x, x_target), edge_index)
-            if i != self.num_layers - 1:
-                x = F.relu(x)
-                # x = F.dropout(x, p=0.5, training=self.training)
-        return x.log_softmax(dim=-1)
+    def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
+        for i, conv in enumerate(self.convs):
+            x = conv(x, edge_index)
+            if i < len(self.convs) - 1:
+                x = x.relu_()
+                x = F.dropout(x, p=0.5, training=self.training)
+        return x
 
     @torch.no_grad()
-    def inference(self, x_all, device, subgraph_loader):
-        for i in range(self.num_layers):
-            xs = []
-            for batch_size, n_id, adj in subgraph_loader:
-                edge_index, _, size = adj.to(device)
-                x = x_all[n_id].to(device)
-                x_target = x[:size[1]]
-                x = self.convs[i]((x, x_target), edge_index)
-                if i != self.num_layers - 1:
-                    x = F.relu(x)
-                xs.append(x)
+    def inference(self, x_all: Tensor, device: torch.device,
+                  subgraph_loader: NeighborLoader) -> Tensor:
 
+        pbar = tqdm(total=len(subgraph_loader) * len(self.convs))
+        pbar.set_description('Evaluating')
+
+        # Compute representations of nodes layer by layer, using *all*
+        # available edges. This leads to faster computation in contrast to
+        # immediately computing the final representations of each batch:
+        for i, conv in enumerate(self.convs):
+            xs = []
+            for batch in subgraph_loader:
+                x = x_all[batch.node_id.to(x_all.device)].to(device)
+                x = conv(x, batch.edge_index.to(device))
+                x = x[:batch.batch_size]
+                if i < len(self.convs) - 1:
+                    x = x.relu_()
+                xs.append(x.cpu())
+                pbar.update(1)
             x_all = torch.cat(xs, dim=0)
 
+        pbar.close()
         return x_all
 
 
+
 def main():
-    dataset = PygNodePropPredDataset(name="ogbn-products", root="/data/ogb/")
+    dataset = PygNodePropPredDataset(name='ogbn-papers100M', root="/data/ogb/")
     data = dataset[0]
-    rank = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    torch.cuda.set_device(rank)
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(12345)
-    model = SAGE(data.num_features, 256, dataset.num_classes).to(rank)
-    y = data.y
-    x = data.x
+    model = SAGE(data.num_features, 2, dataset.num_classes).to(device)
     split_idx = dataset.get_idx_split()
     train_idx = split_idx['train']
     print("train_idx", train_idx.shape)
     data.n_id = torch.arange(data.num_nodes)
     print("data.n_id", data.n_id.shape)
-    train_loader = NeighborSampler(
-        data.edge_index,
-        node_idx=train_idx,
-        sizes=[5, 5],
+    train_loader = NeighborLoader(
+        data,
+        input_nodes=train_idx,
+        num_neighbors=[10, 5],
         batch_size=1024,
         shuffle=False,
         num_workers=14,
     )
     print("loader finished")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-    epochtimes = []
     for epoch in range(1, 2):
         model.train()
-        for batch_size, n_id, adjs  in train_loader:
+        for batch in train_loader:
             optimizer.zero_grad()
-            target_node = data.n_id[:batch_size]
-            adjs = [adj.to(rank) for adj in adjs]
-            out = model(x[n_id].to(rank), adjs)
-            loss = F.nll_loss(out, y[target_node].squeeze(1).to(rank))
+            batch = batch.to(device)
+            if hasattr(batch, 'adj_t'):
+                edge_index = batch.adj_t
+            else:
+                edge_index = batch.edge_index
+            out = model(batch.x, edge_index)
+            batch_size = batch.batch_size
+            out = out[:batch_size]
+            target = batch.y[:batch_size]
+            print("out", out.shape)
+            print("target", target.shape)
+            loss = F.cross_entropy(out, target.squeeze(1))
             loss.backward()
             optimizer.step()
-        
     print("train finished")
 
 
