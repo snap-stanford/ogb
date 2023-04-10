@@ -60,9 +60,7 @@ def main():
     model = SAGE(data.num_features, 2, dataset.num_classes).to(device)
     split_idx = dataset.get_idx_split()
     train_idx = split_idx['train']
-    print("train_idx", train_idx.shape)
     data.n_id = torch.arange(data.num_nodes)
-    print("data.n_id", data.n_id.shape)
     train_loader = NeighborLoader(
         data,
         input_nodes=train_idx,
@@ -71,7 +69,6 @@ def main():
         shuffle=False,
         num_workers=14,
     )
-    print("loader finished")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     for epoch in range(1, 2):
         model.train()
@@ -86,9 +83,7 @@ def main():
             batch_size = batch.batch_size
             out = out[:batch_size]
             target = batch.y[:batch_size]
-            print("out", out.shape)
-            print("target", target.shape)
-            loss = F.cross_entropy(out, target.squeeze(1))
+            loss = F.cross_entropy(out, target.long().squeeze(1))
             loss.backward()
             optimizer.step()
     print("train finished")
