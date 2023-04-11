@@ -5,14 +5,12 @@ full_atom_feature_dims = get_atom_feature_dims()
 full_bond_feature_dims = get_bond_feature_dims()
 
 class AtomEncoder(torch.nn.Module):
-
-    def __init__(self, emb_dim):
+    def __init__(self, emb_dim, num_atoms_list):
         super(AtomEncoder, self).__init__()
-        
         self.atom_embedding_list = torch.nn.ModuleList()
 
-        for i, dim in enumerate(full_atom_feature_dims):
-            emb = torch.nn.Embedding(dim, emb_dim)
+        for i, num_atoms in enumerate(num_atoms_list):
+            emb = torch.nn.Embedding(num_atoms, emb_dim)
             torch.nn.init.xavier_uniform_(emb.weight.data)
             self.atom_embedding_list.append(emb)
 
