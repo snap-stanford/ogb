@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from gnn import GNN
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import argparse
 import time
 import numpy as np

@@ -19,7 +19,7 @@ from torch.optim.lr_scheduler import StepLR
 from torch_geometric.data import NeighborSampler
 from torch_geometric.nn import GATConv, SAGEConv
 from torch_sparse import SparseTensor
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from root import ROOT
 

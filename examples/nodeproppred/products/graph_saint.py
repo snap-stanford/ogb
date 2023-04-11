@@ -1,7 +1,7 @@
 import argparse
 
 import torch
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import torch.nn.functional as F
 
 from torch_geometric.data import GraphSAINTRandomWalkSampler, NeighborSampler
