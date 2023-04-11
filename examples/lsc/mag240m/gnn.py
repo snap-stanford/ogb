@@ -25,6 +25,7 @@ from torch_geometric.data import NeighborSampler
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 from root import ROOT
 
+
 WITH_LIGHTNING_V2 = int(pytorch_lightning.__version__.split('.')[0]) < 2
 
 
