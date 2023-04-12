@@ -9,14 +9,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
+import pytorch_lightning
 from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
 from pytorch_lightning.callbacks import ModelCheckpoint
-if int(pytorch_lightning.__version__.split('.')[0]) < 2:
-  from pytorch_lightning.metrics import Accuracy
-else:
-  # up to date usage
-  from torchmetrics import Accuracy
+WITHOUT_LIGHTNING_V2 = int(pytorch_lightning.__version__.split('.')[0]) < 2
+from torchmetrics import Accuracy
 from torch import Tensor
 from torch.nn import BatchNorm1d, Dropout, Linear, ModuleList, ReLU, Sequential
 from torch.optim.lr_scheduler import StepLR
@@ -419,7 +417,7 @@ if __name__ == '__main__':
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode='max',
                                               save_top_k=1)
-        if int(pytorch_lightning.__version__.split('.')[0]) < 2:
+        if WITHOUT_LIGHTNING_V2:
           trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
                             callbacks=[checkpoint_callback],
                             default_root_dir=f'logs/{args.model}')
@@ -435,7 +433,7 @@ if __name__ == '__main__':
         logdir = f'logs/{args.model}/lightning_logs/version_{version}'
         print(f'Evaluating saved model in {logdir}...')
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
-        if int(pytorch_lightning.__version__.split('.')[0]) < 2:
+        if WITHOUT_LIGHTNING_V2:
           trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
         else:
           trainer = Trainer(devices=len(args.device.split(',')), resume_from_checkpoint=ckpt)
