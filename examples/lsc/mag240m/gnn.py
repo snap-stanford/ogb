@@ -237,7 +237,7 @@ if __name__ == '__main__':
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode = 'max', save_top_k=1)
-        if WITH_LIGHTNING_V2:
+        if WITHOUT_LIGHTNING_V2:
           trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
                             callbacks=[checkpoint_callback],
                             default_root_dir=f'logs/{args.model}')
@@ -254,7 +254,7 @@ if __name__ == '__main__':
         logdir = f'logs/{args.model}/lightning_logs/version_{version}'
         print(f'Evaluating saved model in {logdir}...')
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
-        if WITH_LIGHTNING_V2:
+        if WITHOUT_LIGHTNING_V2:
           trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
         else:
           trainer = Trainer(devices=len(args.device.split(',')), resume_from_checkpoint=ckpt)
