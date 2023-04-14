@@ -3,7 +3,7 @@ import os.path as osp
 import os
 import numpy as np
 from ogb.utils.url import decide_download, download_url, extract_zip
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 ### reading raw files from a directory.
 ### for homogeneous graph

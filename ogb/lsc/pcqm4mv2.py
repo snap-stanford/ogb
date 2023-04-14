@@ -9,7 +9,7 @@ from ogb.utils.url import decide_download, download_url, extract_zip
 
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import torch
 
 class PCQM4Mv2Dataset(object):

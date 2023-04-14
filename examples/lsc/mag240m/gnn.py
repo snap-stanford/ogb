@@ -3,7 +3,7 @@ import time
 import glob
 import argparse
 import os.path as osp
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from typing import Optional, List, NamedTuple
 

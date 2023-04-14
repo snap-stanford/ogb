@@ -4,7 +4,7 @@ import os
 import os.path as osp
 from six.moves import urllib
 import errno
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 GBFACTOR = float(1 << 30)
 

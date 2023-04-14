@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torchvision import transforms
 from gnn import GNN
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import argparse
 import time
 import numpy as np

@@ -22,7 +22,7 @@ from dataloader import BidirectionalOneShotIterator
 
 from ogb.linkproppred import LinkPropPredDataset, Evaluator
 from collections import defaultdict
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import time
 from tensorboardX import SummaryWriter
 

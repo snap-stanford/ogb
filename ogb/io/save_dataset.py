@@ -4,7 +4,7 @@ import os
 import os.path as osp
 from datetime import date
 import shutil
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import numpy as np
 from ogb.io.read_graph_raw import read_binary_graph_raw, read_binary_heterograph_raw
 from ogb.utils.torch_util import all_numpy
