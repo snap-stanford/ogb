@@ -2,7 +2,7 @@ import argparse
 
 import torch
 from torch_geometric.nn import Node2Vec
-from torch_geometric.utils import to_undirected, dropout_adj
+from torch_geometric.utils import to_undirected, dropout_edge
 from tqdm import tqdm
 
 from ogb.nodeproppred import PygNodePropPredDataset
@@ -45,17 +45,15 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-papers100M')
+    dataset = PygNodePropPredDataset(name='ogbn-papers100M', root="/data/ogb")
 
     split_idx = dataset.get_idx_split()
 
     data = dataset[0]
 
-    # if args.add_inverse:
-
     print('Making the graph undirected.')
     ### Randomly drop some edges to avoid segmentation fault
-    data.edge_index, _ = dropout_adj(data.edge_index, p = args.dropedge_rate, num_nodes= data.num_nodes)
+    data.edge_index, _ = dropout_edge(data.edge_index, p = args.dropedge_rate)
     data.edge_index = to_undirected(data.edge_index, data.num_nodes)
     filename = 'data_dict.pt'
 
@@ -66,7 +64,7 @@ def main():
                      sparse=True).to(device)
 
     loader = model.loader(batch_size=args.batch_size, shuffle=True,
-                          num_workers=4)
+                          num_workers=14)
     optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=args.lr)
 
     print('Saving data_dict before training...')
