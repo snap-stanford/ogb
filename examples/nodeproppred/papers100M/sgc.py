@@ -1,5 +1,5 @@
 import argparse
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 import torch
 from torch_sparse import SparseTensor

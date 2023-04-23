@@ -4,7 +4,7 @@ import os
 import time
 import argparse
 import os.path as osp
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 import torch
 import numpy as np

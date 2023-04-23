@@ -9,17 +9,19 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
+import pytorch_lightning
 from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.metrics import Accuracy
+WITHOUT_LIGHTNING_V2 = int(pytorch_lightning.__version__.split('.')[0]) < 2
+from torchmetrics import Accuracy
 from torch import Tensor
 from torch.nn import BatchNorm1d, Dropout, Linear, ModuleList, ReLU, Sequential
 from torch.optim.lr_scheduler import StepLR
 from torch_geometric.data import NeighborSampler
 from torch_geometric.nn import GATConv, SAGEConv
 from torch_sparse import SparseTensor
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from root import ROOT
 
@@ -415,9 +417,14 @@ if __name__ == '__main__':
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode='max',
                                               save_top_k=1)
-        trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
-                          callbacks=[checkpoint_callback],
-                          default_root_dir=f'logs/{args.model}')
+        if WITHOUT_LIGHTNING_V2:
+          trainer = Trainer(gpus=args.device, max_epochs=args.epochs,
+                            callbacks=[checkpoint_callback],
+                            default_root_dir=f'logs/{args.model}')
+        else:
+          trainer = Trainer(devices=len(args.device.split(',')), max_epochs=args.epochs,
+                            callbacks=[checkpoint_callback],
+                            default_root_dir=f'logs/{args.model}')
         trainer.fit(model, datamodule=datamodule)
 
     if args.evaluate:
@@ -426,8 +433,10 @@ if __name__ == '__main__':
         logdir = f'logs/{args.model}/lightning_logs/version_{version}'
         print(f'Evaluating saved model in {logdir}...')
         ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
-
-        trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
+        if WITHOUT_LIGHTNING_V2:
+          trainer = Trainer(gpus=args.device, resume_from_checkpoint=ckpt)
+        else:
+          trainer = Trainer(devices=len(args.device.split(',')), resume_from_checkpoint=ckpt)
         model = RGNN.load_from_checkpoint(
             checkpoint_path=ckpt, hparams_file=f'{logdir}/hparams.yaml')
 
