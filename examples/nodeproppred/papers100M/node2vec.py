@@ -2,7 +2,7 @@ import argparse
 
 import torch
 from torch_geometric.nn import Node2Vec
-from torch_geometric.utils import to_undirected, dropout_adj
+from torch_geometric.utils import to_undirected, dropout_edge
 from tqdm.auto import tqdm
 
 from ogb.nodeproppred import PygNodePropPredDataset
