@@ -3,7 +3,7 @@ from ogb.utils.features import (allowable_features, atom_to_feature_vector,
 from rdkit import Chem
 import numpy as np
 
-def smiles2graph(smiles_string):
+def smiles2graph(smiles_string, removeHs=True):
     """
     Converts SMILES string to graph Data object
     :input: SMILES string (str)
@@ -11,6 +11,7 @@ def smiles2graph(smiles_string):
     """
 
     mol = Chem.MolFromSmiles(smiles_string)
+    mol = mol if removeHs else Chem.AddHs(mol)
 
     # atoms
     atom_features_list = []
