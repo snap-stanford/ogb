@@ -7,7 +7,7 @@ import numpy as np
 def ReorderAtoms(mol):
     order = tuple(zip(*sorted([(j, i) for i, j in enumerate(Chem.CanonicalRankAtoms(mol))])))[1]
     mol_renum = Chem.RenumberAtoms(mol, order)
-    return mol_renum
+    return mol_renum, order
 
 def smiles2graph(smiles_string, removeHs=True):
     """
@@ -18,7 +18,7 @@ def smiles2graph(smiles_string, removeHs=True):
 
     mol = Chem.MolFromSmiles(smiles_string)
     mol = mol if removeHs else Chem.AddHs(mol)
-    mol = ReorderAtoms(mol)
+    mol, _ = ReorderAtoms(mol)
 
     # atoms
     atom_features_list = []
