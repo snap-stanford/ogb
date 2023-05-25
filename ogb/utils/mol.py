@@ -4,7 +4,7 @@ from rdkit import Chem
 import numpy as np
 
 
-def ReorderAtoms(mol):
+def CanonicalRankAtoms(mol):
     order = tuple(zip(*sorted([(j, i) for i, j in enumerate(Chem.CanonicalRankAtoms(mol))])))[1]
     mol_renum = Chem.RenumberAtoms(mol, order)
     return mol_renum, order
