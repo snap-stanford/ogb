@@ -71,8 +71,9 @@ class MAG240MDataset(object):
         # path = osp.join(self.dir, 'processed', 'author', 'author.npy')
         # data['author'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
-        path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
-        data['institution'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['institution'].num_nodes, self.num_paper_features))
+        # again no features exist
+        # path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
+        # data['institution'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['institution'].num_nodes, self.num_paper_features))
 
         for edge_type in [('author', 'affiliated_with', 'institution'),
                           ('author', 'writes', 'paper'),
