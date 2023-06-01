@@ -18,7 +18,6 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
                                seed_everything)
 
-from torch_sparse import SparseTensor
 from torch_geometric.nn import SAGEConv, GATConv, to_hetero
 from torch_geometric.data import NeighborSampler
 
@@ -30,7 +29,7 @@ import torch_geometric.transforms as T
 from torch_geometric.typing import EdgeType, NodeType
 from typing import Dict, Tuple
 from torch_geometric.data import Batch
-from torch_geometric.data import LightningNodeData
+from torch_geometric.data.lightning import LightningNodeData
 import pathlib
 from torch.profiler import ProfilerActivity, profile
 
