@@ -58,11 +58,11 @@ class MAG240MDataset(object):
         data = HeteroData()
         path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
         # Current is not in-memory
-        data['paper'].x = torch.from_numpy(np.load(path))
+        data['paper'].x = torch.from_numpy(np.load(path, mmap_mode='r'))
         path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
         data['paper'].y = torch.from_numpy(np.load(path))
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
-        data['paper'].year = torch.from_numpy(np.load(path))
+        data['paper'].year = torch.from_numpy(np.load(path, mmap_mode='r'))
 
         data['author'].num_nodes = self.__meta__['author']
         # there doesnt seem to be any author data in the downloaded dir
