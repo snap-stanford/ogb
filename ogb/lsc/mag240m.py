@@ -65,8 +65,11 @@ class MAG240MDataset(object):
         data['paper'].year = torch.from_numpy(np.load(path, mmap_mode='r'))
 
         data['author'].num_nodes = self.__meta__['author']
-        path = osp.join(self.dir, 'processed', 'author', 'author.npy')
-        data['author'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['author'].num_nodes, self.num_paper_features))
+        # there doesnt seem to be any author data in the downloaded dir
+        # ls /dfs/user/weihuahu/ogb/ogb/lsc/dataset/mag240m_kddcup2021/processed/
+        # author___affiliated_with___institution  author___writes___paper  paper  paper___cites___paper
+        # path = osp.join(self.dir, 'processed', 'author', 'author.npy')
+        # data['author'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
         path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
         data['institution'].x = np.memmap(path, mode='r', dtype="float16", shape=(data['institution'].num_nodes, self.num_paper_features))
