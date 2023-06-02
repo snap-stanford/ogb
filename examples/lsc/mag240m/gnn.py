@@ -87,9 +87,9 @@ class HeteroGNN(LightningModule):
         self.save_hyperparameters()
         model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy()
-        self.test_acc = Accuracy()
+        self.train_acc = Accuracy(task='multiclass', num_classes=out_channels)
+        self.val_acc = Accuracy(task='multiclass', num_classes=out_channels)
+        self.test_acc = Accuracy(task='multiclass', num_classes=out_channels)
 
     def forward(
         self,
