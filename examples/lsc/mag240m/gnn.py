@@ -175,7 +175,6 @@ if __name__ == '__main__':
     seed_everything(42)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
-    num_work = 
 
     datamodule = MAG240M(data, ('paper', data['paper'].train_mask),
                         ('paper', data['paper'].val_mask),
