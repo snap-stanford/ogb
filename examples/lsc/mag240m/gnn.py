@@ -71,7 +71,7 @@ class GNN(torch.nn.Module):
         self.lin = Linear(hidden_channels, out_channels)
 
     def forward(self, x: Tensor, edge_index: Adj) -> Tensor:
-        x = x.to(torch.float)
+        #x = x.to(torch.float)
         x = self.conv1(x, edge_index).relu()
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.conv2(x, edge_index).relu()
