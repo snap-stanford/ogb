@@ -144,6 +144,17 @@ def trace_handler(p):
     timeline_file = profile_dir + 'timeline' + '.json'
     p.export_chrome_trace(timeline_file)
 
+def get_num_workers():
+    num_work = None
+    if hasattr(os, "sched_getaffinity"):
+        try:
+            num_work = len(os.sched_getaffinity(0)) / 2
+        except Exception:
+            pass
+    if num_work is None:
+        num_work = os.cpu_count() / 2
+    return int(num_work)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--hidden_channels', type=int, default=1024)
@@ -164,12 +175,14 @@ if __name__ == '__main__':
     seed_everything(42)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
+    num_work = 
+
     datamodule = MAG240M(data, ('paper', data['paper'].train_mask),
                         ('paper', data['paper'].val_mask),
                         ('paper', data['paper'].test_mask),
                         ('paper', data['paper'].test_mask),
                         loader='neighbor', num_neighbors=args.sizes,
-                        batch_size=args.batch_size, num_workers=2)
+                        batch_size=args.batch_size, num_workers=get_num_workers())
     print(datamodule)
 
     if not args.evaluate:
