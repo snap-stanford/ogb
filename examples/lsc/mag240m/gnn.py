@@ -188,7 +188,7 @@ if __name__ == '__main__':
                     datamodule.num_classes, args.hidden_channels,
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-        checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode = 'max', save_top_k=1)
+        checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
         # if torch.cuda.is_available():
         if False:
             trainer = Trainer(accelerator='gpu', devices=8, max_epochs=args.epochs,
