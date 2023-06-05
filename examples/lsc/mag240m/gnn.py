@@ -106,7 +106,7 @@ class HeteroGNN(LightningModule):
         for node_type in batch.node_types:
             if node_type not in batch.x_dict.keys():
                 paper_x = batch['paper'].x
-                batch[node_type].x = torch.zeros((0, paper_x.size(-1)), paper_x.device)
+                batch[node_type].x = torch.zeros(size=(0, paper_x.size(-1)), device=paper_x.device, dtype=paper_x.dtype)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
         return y_hat, y
