@@ -166,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--model', type=str, default='gat',
                         choices=['gat', 'graphsage'])
-    parser.add_argument('--sizes', type=str, default='2')
+    parser.add_argument('--sizes', type=str, default='128')
     parser.add_argument('--in-memory', action='store_true')
     parser.add_argument('--device', type=str, default='0')
     parser.add_argument('--evaluate', action='store_true')
