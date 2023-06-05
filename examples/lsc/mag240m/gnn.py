@@ -32,7 +32,6 @@ from torch_geometric.data import Batch
 from torch_geometric.data.lightning import LightningNodeData
 import pathlib
 from torch.profiler import ProfilerActivity, profile
-print(ROOT)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class MAG240M(LightningNodeData):
