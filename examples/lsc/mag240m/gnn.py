@@ -174,22 +174,19 @@ if __name__ == '__main__':
     seed_everything(42)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
-    try:
-        num_neighbors = int(args.sizes)
-    except:
-        num_neighbors = [int(i) for i in args.sizes.split(',')]
+
     datamodule = MAG240M(data, ('paper', data['paper'].train_mask),
                         ('paper', data['paper'].val_mask),
                         ('paper', data['paper'].test_mask),
                         ('paper', data['paper'].test_mask),
-                        loader='neighbor', num_neighbors=num_neighbors,
+                        loader='neighbor', num_neighbors=args.sizes,
                         batch_size=args.batch_size, num_workers=get_num_workers())
     print(datamodule)
 
     if not args.evaluate:
         model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
                     datamodule.num_classes, args.hidden_channels,
-                    num_layers=len(num_neighbors) if istype(num_neighbors, list) else 1, dropout=args.dropout)
+                    num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(monitor='val_acc', mode = 'max', save_top_k=1)
         if torch.cuda.is_available():
