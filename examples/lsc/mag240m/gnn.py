@@ -99,6 +99,7 @@ class HeteroGNN(LightningModule):
 
     def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
         batch_size = batch['paper'].batch_size
+        print("batch=", batch)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
         return y_hat, y
