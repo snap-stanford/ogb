@@ -103,6 +103,7 @@ class HeteroGNN(LightningModule):
         print("batch['paper']=", batch['paper'])
         print("batch['author']=", batch['author'])
         print("batch['institution']=", batch['institution'])
+        # w/o this to_hetero model fails
         for node_type in batch.node_types:
             if node_type not in batch.x_dict.keys():
                 paper_x = batch['paper'].x
@@ -199,7 +200,7 @@ if __name__ == '__main__':
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
         # if torch.cuda.is_available():
         if False:
-            trainer = Trainer(accelerator='gpu', devices=8, strategy="ddp", max_epochs=args.epochs,
+            trainer = Trainer(accelerator='gpu', devices=torch.cuda.device_count(), strategy="ddp", max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
