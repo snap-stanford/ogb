@@ -99,14 +99,11 @@ class HeteroGNN(LightningModule):
 
     def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
         batch_size = batch['paper'].batch_size
-        print("batch=", batch)
-        print("batch['paper']=", batch['paper'])
-        print("batch['author']=", batch['author'])
-        print("batch['institution']=", batch['institution'])
         # w/o this to_hetero model fails
         for node_type in batch.node_types:
             if node_type not in batch.x_dict.keys():
                 paper_x = batch['paper'].x
+                # (TODO) replace this w/ embeddings for better learning once its working
                 batch[node_type].x = torch.zeros(size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)), device=paper_x.device, dtype=paper_x.dtype)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
