@@ -192,7 +192,7 @@ if __name__ == '__main__':
 
     if not args.evaluate:
         model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
-                    datamodule.num_classes, args.hidden_channels, n_ids=data.collect('n_id')
+                    datamodule.num_classes, args.hidden_channels, n_ids=data.collect('n_id'),
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
