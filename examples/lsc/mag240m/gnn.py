@@ -204,13 +204,13 @@ if __name__ == '__main__':
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10, precision=32)
+                              limit_val_batches=10, limit_predict_batches=10, precision=32, log_every_n_steps=2)
         else:
             trainer = Trainer(accelerator='cpu', max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10, precision=32)
+                              limit_val_batches=10, limit_predict_batches=10, precision=32, log_every_n_steps=2)
         trainer.fit(model, datamodule=datamodule)
 
     if args.evaluate:
