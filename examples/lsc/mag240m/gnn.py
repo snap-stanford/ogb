@@ -80,7 +80,7 @@ class GNN(torch.nn.Module):
 
 class HeteroGNN(LightningModule):
     def __init__(self, model_name: str, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
-                 hidden_channels: int, n_ids: Dict[NodeType, Tensor] num_layers: int, heads: int = 4,
+                 hidden_channels: int, n_ids: Dict[NodeType, Tensor], num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
         self.save_hyperparameters()
