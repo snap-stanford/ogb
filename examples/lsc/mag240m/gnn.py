@@ -199,17 +199,17 @@ if __name__ == '__main__':
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
         # if torch.cuda.is_available():
         if False:
-            trainer = Trainer(accelerator='gpu', devices=8, max_epochs=args.epochs,
+            trainer = Trainer(accelerator='gpu', devices=8, strategy="ddp", max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10)
+                              limit_val_batches=10, limit_predict_batches=10, precision=32)
         else:
             trainer = Trainer(accelerator='cpu', max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10)
+                              limit_val_batches=10, limit_predict_batches=10, precision=32)
         trainer.fit(model, datamodule=datamodule)
 
     if args.evaluate:
