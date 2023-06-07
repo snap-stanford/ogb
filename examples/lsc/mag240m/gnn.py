@@ -87,7 +87,6 @@ class HeteroGNN(LightningModule):
         model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
         self.embeds = {}
-        print("n_ids.ke")
         for node_type, num_nodes in num_nodes_dict.items():
             if node_type != 'paper':
                 self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
