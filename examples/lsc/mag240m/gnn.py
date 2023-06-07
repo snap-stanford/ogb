@@ -86,10 +86,10 @@ class HeteroGNN(LightningModule):
         self.save_hyperparameters()
         model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
-        self.embeds = {}
-        for node_type, num_nodes in num_nodes_dict.items():
-            if node_type != 'paper':
-                self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
+        # self.embeds = {}
+        # for node_type, num_nodes in num_nodes_dict.items():
+        #     if node_type != 'paper':
+        #         self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
         self.train_acc = Accuracy(task='multiclass', num_classes=out_channels)
         self.val_acc = Accuracy(task='multiclass', num_classes=out_channels)
         self.test_acc = Accuracy(task='multiclass', num_classes=out_channels)
@@ -103,8 +103,15 @@ class HeteroGNN(LightningModule):
 
     def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
         batch_size = batch['paper'].batch_size
-        for node_type, embed in self.embeds.items():
-            batch[node_type].x = embed(batch[node_type].n_id)
+        # for node_type, embed in self.embeds.items():
+        #     batch[node_type].x = embed(batch[node_type].n_id)
+        # w/o this to_hetero model fails
+        for node_type in batch.node_types:
+            if node_type not in batch.x_dict.keys():
+                paper_x = batch['paper'].x
+                # (TODO) replace this w/ embeddings for better learning once its working
+                # (NOTE) embeddings take too much memory
+                batch[node_type].x = torch.zeros(size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)), device=paper_x.device, dtype=paper_x.dtype)
         print("batch.x_dict=", batch.x_dict)
         print("batch.x_dict.keys()=", batch.x_dict.keys())
         print("self.embeds=", self.embeds)
@@ -198,8 +205,7 @@ if __name__ == '__main__':
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
-        # if torch.cuda.is_available():
-        if False:
+        if torch.cuda.is_available():
             trainer = Trainer(accelerator='gpu', devices=torch.cuda.device_count(), strategy="ddp", max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
