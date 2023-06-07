@@ -206,7 +206,8 @@ if __name__ == '__main__':
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
         if torch.cuda.is_available():
-            trainer = Trainer(accelerator='gpu', devices=torch.cuda.device_count(), max_epochs=args.epochs, # strategy="ddp",
+            trainer = Trainer(accelerator='gpu', devices=1,# devices=torch.cuda.device_count(),  strategy="ddp",
+                              max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
                               default_root_dir=f'logs/{args.model}',
                               limit_train_batches=10, limit_test_batches=10,
