@@ -80,16 +80,17 @@ class GNN(torch.nn.Module):
 
 class HeteroGNN(LightningModule):
     def __init__(self, model_name: str, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
-                 hidden_channels: int, n_ids: Dict[NodeType, Tensor], num_layers: int, heads: int = 4,
+                 hidden_channels: int, num_nodes_dict: Dict[NodeType, int], num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
         self.save_hyperparameters()
         model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
         self.embeds = {}
-        for node_type in n_ids.keys():
+        print("n_ids.ke")
+        for node_type, num_nodes in num_nodes_dict.keys():
             if node_type != 'paper':
-                self.embeds[node_type] = torch.nn.Embedding(num_embeddings=torch.numel(n_ids[node_type]), embedding_dim=in_channels)
+                self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
         self.train_acc = Accuracy(task='multiclass', num_classes=out_channels)
         self.val_acc = Accuracy(task='multiclass', num_classes=out_channels)
         self.test_acc = Accuracy(task='multiclass', num_classes=out_channels)
@@ -194,7 +195,7 @@ if __name__ == '__main__':
 
     if not args.evaluate:
         model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
-                    datamodule.num_classes, args.hidden_channels, n_ids=data.collect('n_id'),
+                    datamodule.num_classes, args.hidden_channels, num_nodes_dict=data.collect('num_nodes'),
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
