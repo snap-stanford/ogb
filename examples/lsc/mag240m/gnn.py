@@ -107,6 +107,7 @@ class HeteroGNN(LightningModule):
             batch[node_type].x = embed(batch[node_type].n_id)
         print("batch.x_dict=", batch.x_dict)
         print("batch.x_dict.keys()=", batch.x_dict.keys())
+        print("self.embeds=", self.embeds)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
         return y_hat, y
