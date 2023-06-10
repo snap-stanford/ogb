@@ -2,7 +2,7 @@ import argparse
 
 import torch
 import torch.nn.functional as F
-from torch_scatter import scatter
+from torch_geometric.utils import scatter
 
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 

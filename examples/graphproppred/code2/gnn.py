@@ -6,8 +6,6 @@ from torch_geometric.nn.inits import uniform
 
 from conv import GNN_node, GNN_node_Virtualnode
 
-from torch_scatter import scatter_mean
-
 class GNN(torch.nn.Module):
 
     def __init__(self, num_vocab, max_seq_len, node_encoder, num_layer = 5, emb_dim = 300, 
