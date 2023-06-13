@@ -114,8 +114,6 @@ class HeteroGNN(LightningModule):
                 batch[node_type].x = torch.zeros(size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)), device=paper_x.device, dtype=paper_x.dtype)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
-        print("(y<0).any()=", (y<0).any())
-        print("(y_hat<0).any()=", (y_hat<0).any())
         return y_hat, y
 
     def training_step(self, batch: Batch, batch_idx: int) -> Tensor:
@@ -204,8 +202,7 @@ if __name__ == '__main__':
                     num_layers=len(args.sizes), dropout=args.dropout)
         print(f'#Params {sum([p.numel() for p in model.parameters()])}')
         checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
-        # if torch.cuda.is_available():
-        if False:
+        if torch.cuda.is_available():
             trainer = Trainer(accelerator='gpu', devices=1, # devices=torch.cuda.device_count(),  strategy="ddp",
                               max_epochs=args.epochs,
                               callbacks=[checkpoint_callback],
