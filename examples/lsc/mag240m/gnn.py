@@ -114,12 +114,8 @@ class HeteroGNN(LightningModule):
                 batch[node_type].x = torch.zeros(size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)), device=paper_x.device, dtype=paper_x.dtype)
         y_hat = self(batch.x_dict, batch.edge_index_dict)['paper'][:batch_size]
         y = batch['paper'].y[:batch_size].to(torch.long)
-        print("y.isnan().any()=", y.isnan().any())
-        print("y_hat.isnan().any()=", y_hat.isnan().any())
-        print("y=", y)
-        print("y_hat=", y_hat)
-        print("y.isnan()=", y.isnan().any())
-        print("y_hat.isnan()=", y_hat.isnan().any())
+        print("(y<0).any()=", (y<0).any())
+        print("(y_hat<0).any()=", (y_hat<0).any())
         return y_hat, y
 
     def training_step(self, batch: Batch, batch_idx: int) -> Tensor:
