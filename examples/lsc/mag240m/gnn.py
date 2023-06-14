@@ -186,7 +186,7 @@ def run(
     if n_devices > 0:
         model.to(rank)
     if rank == 0:
-        print(f"#Params in GNN: {sum([p.numel() for p in model.parameters()])}")
+        print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6}M")
 
     train_idx = data["paper"].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
