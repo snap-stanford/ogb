@@ -196,14 +196,16 @@ def run(
     test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
 
     kwargs = dict(
-        batch_size=batch_size, num_workers=get_num_workers(max(n_devices, 1)), persistent_workers=True
+        batch_size=batch_size,
+        num_workers=get_num_workers(max(n_devices, 1)),
+        persistent_workers=True,
+        shuffle=True,
+        drop_last=True,
     )
     train_loader = NeighborLoader(
         data,
         input_nodes=("paper", train_idx),
         num_neighbors=sizes,
-        shuffle=True,
-        drop_last=True,
         **kwargs,
     )
 
@@ -212,14 +214,12 @@ def run(
             data,
             input_nodes=("paper", eval_idx),
             num_neighbors=sizes,
-            shuffle=True,
             **kwargs,
         )
         test_loader = NeighborLoader(
             data,
             input_nodes=("paper", test_idx),
             num_neighbors=sizes,
-            shuffle=True,
             **kwargs,
         )
     if n_devices > 1:
