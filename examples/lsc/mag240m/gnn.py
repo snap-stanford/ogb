@@ -174,7 +174,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
             optimizer.step()
             iter_time = time.time() - since
             time_sum += iter_time
-            if i % log_every_n_steps == 0:
+            if rank == 0 and i % log_every_n_steps == 0:
                 print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}')
         if n_devices > 1:
             dist.barrier()
