@@ -192,7 +192,7 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
                     if n_devices > 0:
                         batch = batch.to(rank, 'x', 'y', 'edge_index')
                     acc_sum += model.validation_step(batch)
-                print("Validation Accuracy:", acc_sum/eval_steps)
+                print(f'Validation Accuracy: {acc_sum/eval_steps * 100.0:.4f}%', )
     if n_devices > 1:
         dist.barrier()
     if rank == 0:
@@ -205,7 +205,7 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
                 if n_devices > 0:
                     batch = batch.to(rank, 'x', 'y', 'edge_index')
                 acc_sum += model.validation_step(batch)
-            print("Test Accuracy:", acc_sum/eval_steps)
+            print(f'Test Accuracy: {acc_sum/eval_steps * 100.0:.4f}%', )
     if n_devices > 1:
         dist.destroy_process_group()
 
