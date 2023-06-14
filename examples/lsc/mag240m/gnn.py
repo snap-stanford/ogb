@@ -125,7 +125,8 @@ class HeteroGNN(torch.nn.Module):
 
 
 def run(rank, n_devices, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
-    print("Setting up...")
+    if rank == 0:
+        print("Setting up...")
     since_setup = time.time()
     seed_everything(12345)
     if n_devices > 1:
@@ -139,7 +140,8 @@ def run(rank, n_devices, num_epochs=1, num_steps_per_epoch=100, log_every_n_step
                     num_layers=len(sizes), dropout=dropout)
     if n_devices > 0:
         model.to(rank)
-    print(f'#Params {sum([p.numel() for p in model.parameters()])}')
+    if rank == 0:
+        print(f'#Params {sum([p.numel() for p in model.parameters()])}')
     
     train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
@@ -168,7 +170,7 @@ def run(rank, n_devices, num_epochs=1, num_steps_per_epoch=100, log_every_n_step
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
-            if epoch == 0 and i == 0:
+            if rank == 0 and epoch == 0 and i == 0:
                 print(f"Time to finish setup: {time.time() - since_setup:.4f}")
                 print("Training beginning...")
             since = time.time()
