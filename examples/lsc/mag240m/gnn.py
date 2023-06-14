@@ -80,7 +80,7 @@ class HeteroGNN(torch.nn.Module):
                  dropout: float = 0.5):
         super().__init__()
         model = HomoGNN(in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
-        self.model = to_hetero(model, metadata, aggr='sum', debug=True)
+        self.model = to_hetero(model, metadata, aggr='sum') #debug=True)
         # self.embeds = {}
         # for node_type, num_nodes in num_nodes_dict.items():
         #     if node_type != 'paper':
