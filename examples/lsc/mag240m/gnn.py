@@ -137,7 +137,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
     if n_devices > 0:
         model.to(rank)
     print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-
+    print("Setting up...")
     # Split training indices into `world_size` many chunks:
     train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
     train_idx = train_idx.split(train_idx.size(0) // world_size)[rank]
@@ -157,7 +157,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
     if n_devices > 1:
         model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
+    print("Training beginning...")
     for epoch in range(1, num_epochs+1):
         model.train()
         for i, batch in enumerate(train_loader):
@@ -173,7 +173,6 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
             optimizer.step()
         if n_devices > 1:
             dist.barrier()
-
         if rank == 0:
             print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
             model.eval()
@@ -187,7 +186,6 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
                     acc_sum += model.validation_step(batch)
                 print("Validation Accuracy:", acc_sum/eval_steps)
     if rank == 0:
-        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
         model.eval()
         acc_sum = 0
         with torch.no_grad():
