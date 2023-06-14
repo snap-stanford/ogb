@@ -12,7 +12,8 @@ from torch import Tensor
 import torch.nn.functional as F
 from torch.nn import ModuleList, Sequential, Linear, BatchNorm1d, ReLU, Dropout
 from torch.optim.lr_scheduler import StepLR
-
+import torch.distributed as dist
+import torch.multiprocessing as mp
 from torchmetrics import Accuracy
 from torch_geometric.nn import SAGEConv, GATConv, to_hetero
 from torch_geometric.data import NeighborSampler
@@ -191,6 +192,8 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
                         batch = batch.to(rank, 'x', 'y', 'edge_index')
                     acc_sum += model.validation_step(batch)
                 print("Validation Accuracy:", acc_sum/eval_steps)
+    if n_devices > 1:
+        dist.barrier()
     if rank == 0:
         model.eval()
         acc_sum = 0
@@ -202,12 +205,8 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
                     batch = batch.to(rank, 'x', 'y', 'edge_index')
                 acc_sum += model.validation_step(batch)
             print("Test Accuracy:", acc_sum/eval_steps)
-
-            
-
-        dist.barrier()
-
-    dist.destroy_process_group()
+    if n_devices > 1:
+        dist.destroy_process_group()
 
 
 def trace_handler(p):
