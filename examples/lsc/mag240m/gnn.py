@@ -320,7 +320,7 @@ if __name__ == "__main__":
     if not args.debug:
         import warnings
 
-        warnings.filterwarnings("ignore")
+        warnings.simplefilter("ignore")
     if not torch.cuda.is_available():
         print("No GPUs available, running with CPU")
         args.n_devices = 0
