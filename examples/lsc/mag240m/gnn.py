@@ -77,7 +77,6 @@ class HeteroGNN(torch.nn.Module):
                  hidden_channels: int, num_nodes_dict: Dict[NodeType, int], num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
-        self.save_hyperparameters()
         model = HomoGNN(in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True)
         # self.embeds = {}
