@@ -125,10 +125,11 @@ class HeteroGNN(torch.nn.Module):
 
 
 def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
+    world_size = max(n_devices, 1)
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
         os.environ['MASTER_PORT'] = '12355'
-        dist.init_process_group('nccl', rank=rank, world_size=n_devices)
+        dist.init_process_group('nccl', rank=rank, world_size=world_size)
     seed_everything(12345)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
