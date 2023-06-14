@@ -165,14 +165,14 @@ def run(
     num_warmup_iters_for_timing=10,
     debug=False,
 ):
-    if rank == 0:
-        print("Set Up Beginning...")
     since_setup = time.time()
     seed_everything(12345)
+    print("Setting up distibuted...")
     if n_devices > 1:
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12355"
         dist.init_process_group("nccl", rank=rank, world_size=n_devices)
+    print("Setting up GNN...")
     model = HeteroGNN(
         data.metadata(),
         data["paper"].x.size(-1),
@@ -187,7 +187,7 @@ def run(
         model.to(rank)
     if rank == 0:
         print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6}M")
-
+    print('Setting up NeighborLoaders...')
     train_idx = data["paper"].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
         # Split training indices into `n_devices` many chunks:
@@ -222,6 +222,7 @@ def run(
             num_neighbors=sizes,
             **kwargs,
         )
+    print("Setting up DDP and optimizer...")
     if n_devices > 1:
         model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -331,6 +332,7 @@ if __name__ == "__main__":
             "GPUs available",
         )
         args.n_devices = torch.cuda.device_count()
+    print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
     if args.n_devices > 1:
