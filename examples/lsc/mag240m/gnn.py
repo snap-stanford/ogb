@@ -182,8 +182,6 @@ def run(
         dropout=dropout,
         debug=debug,
     )
-    if n_devices > 0:
-        model.to(rank)
     if rank == 0:
         print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6:.1f}M")
     print('Setting up NeighborLoaders...')
@@ -221,7 +219,9 @@ def run(
             num_neighbors=sizes,
             **kwargs,
         )
-    print("Setting up DDP and optimizer...")
+    print("Final setup...")
+    if n_devices > 0:
+        model.to(rank)
     if n_devices > 1:
         model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
