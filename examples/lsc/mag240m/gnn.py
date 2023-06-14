@@ -152,6 +152,7 @@ class HeteroGNN(torch.nn.Module):
 
 def run(
     rank,
+    data,
     n_devices=1,
     num_epochs=1,
     num_steps_per_epoch=100,
@@ -172,12 +173,10 @@ def run(
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12355"
         dist.init_process_group("nccl", rank=rank, world_size=n_devices)
-    dataset = MAG240MDataset(ROOT)
-    data = dataset.to_pyg_hetero_data()
     model = HeteroGNN(
         data.metadata(),
         data["paper"].x.size(-1),
-        dataset.num_classes,
+        data.num_classes,
         hidden_channels,
         num_nodes_dict=data.collect("num_nodes"),
         num_layers=len(sizes),
@@ -332,11 +331,14 @@ if __name__ == "__main__":
             "GPUs available",
         )
         args.n_devices = torch.cuda.device_count()
+    dataset = MAG240MDataset(ROOT)
+    data = dataset.to_pyg_hetero_data()
     if args.n_devices > 1:
         print("Let's use", args.n_devices, "GPUs!")
         mp.spawn(
             run,
             args=(
+                data,
                 args.n_devices,
                 args.epochs,
                 args.num_steps_per_epoch,
@@ -359,6 +361,7 @@ if __name__ == "__main__":
             print("Using CPU")
         run(
             0,
+            data,
             args.n_devices,
             args.epochs,
             args.num_steps_per_epoch,
