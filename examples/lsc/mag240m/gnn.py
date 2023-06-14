@@ -166,7 +166,7 @@ def run(
     debug=False,
 ):
     if rank == 0:
-        print("Setting up...")
+        print("Set Up Beginning...")
     since_setup = time.time()
     seed_everything(12345)
     if n_devices > 1:
@@ -225,7 +225,6 @@ def run(
     if n_devices > 1:
         model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
     for epoch in range(1, num_epochs + 1):
         model.train()
         time_sum = 0
@@ -233,7 +232,8 @@ def run(
             if i >= num_steps_per_epoch:
                 break
             if rank == 0 and epoch == 0 and i == 0:
-                print(f"Time to finish setup: {time.time() - since_setup:.4f}")
+                print("Done Setting Up!")
+                print(f"Setup Time: {time.time() - since_setup:.4f}")
                 print("Training beginning...")
             since = time.time()
             optimizer.zero_grad()
