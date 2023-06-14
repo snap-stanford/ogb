@@ -76,10 +76,10 @@ class HomoGNN(torch.nn.Module):
 class HeteroGNN(torch.nn.Module):
     def __init__(self, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
                  hidden_channels: int, num_nodes_dict: Dict[NodeType, int], num_layers: int, heads: int = 4,
-                 dropout: float = 0.5):
+                 dropout: float = 0.5, debug: bool = False):
         super().__init__()
         model = HomoGNN(in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
-        self.model = to_hetero(model, metadata, aggr='sum') # , debug=True)
+        self.model = to_hetero(model, metadata, aggr='sum', debug=debug)
         # self.embeds = {}
         # for node_type, num_nodes in num_nodes_dict.items():
         #     if node_type != 'paper':
@@ -124,7 +124,7 @@ class HeteroGNN(torch.nn.Module):
         return y_hat
 
 
-def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
+def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10, debug=False):
     if rank == 0:
         print("Setting up...")
     since_setup = time.time()
@@ -137,7 +137,7 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
     data = dataset.to_pyg_hetero_data()
     model = HeteroGNN(data.metadata(), data['paper'].x.size(-1),
                     dataset.num_classes, hidden_channels, num_nodes_dict=data.collect('num_nodes'),
-                    num_layers=len(sizes), dropout=dropout)
+                    num_layers=len(sizes), dropout=dropout, debug=debug)
     if n_devices > 0:
         model.to(rank)
     if rank == 0:
@@ -238,9 +238,13 @@ if __name__ == '__main__':
     parser.add_argument('--num_warmup_iters_for_timing', type=int, default=10)
     parser.add_argument('--sizes', type=str, default='128')
     parser.add_argument('--n_devices', type=int, default=1, help='0 devices for CPU, or 1-8 to use GPUs')
+    parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
     args.sizes = [int(i) for i in args.sizes.split('-')]
     print(args)
+    if not args.debug:
+        import warnings
+        warnings.filterwarnings("ignore")
     if not torch.cuda.is_available():
         print("No GPUs available, running with CPU")
         args.n_devices = 0
@@ -249,10 +253,10 @@ if __name__ == '__main__':
         args.n_devices = torch.cuda.device_count()    
     if args.n_devices > 1:
         print('Let\'s use', args.n_devices, 'GPUs!')
-        mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing), nprocs=args.n_devices, join=True)
+        mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing, args.debug), nprocs=args.n_devices, join=True)
     else:
         if args.n_devices == 1:
             print('Using a single GPU')
         else:
             print("Using CPU")
-        run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing)
+        run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing, args.debug)
