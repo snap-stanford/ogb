@@ -250,12 +250,17 @@ if __name__ == '__main__':
     args.sizes = [int(i) for i in args.sizes.split('-')]
     print(args)
     if not torch.cuda.is_available():
+        print("No GPUs available, running with CPU")
         args.n_devices = 0
     if args.n_devices > torch.cuda.device_count():
         print(args.n_devices, "GPUs requested but only", torch.cuda.device_count(), "GPUs available")
-        args.n_devices = torch.cuda.device_count()
-    print('Let\'s use', args.n_devices, 'GPUs!')
+        args.n_devices = torch.cuda.device_count()    
     if args.n_devices > 1:
+        print('Let\'s use', args.n_devices, 'GPUs!')
         mp.spawn(run, args=(args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing), nprocs=args.n_devices, join=True)
     else:
+        if args.n_devices == 1:
+            print('Using a single GPU')
+        else:
+            print("Print using CPU")
         run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing)
