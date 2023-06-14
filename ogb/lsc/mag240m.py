@@ -63,7 +63,7 @@ class MAG240MDataset(object):
         data['paper'].y = torch.from_numpy(np.load(path))
         # torch metrics doesn't like -1
         data['paper'].y[torch.argwhere(data['paper'].y == -1)] = self.num_classes
-        data.num_classes = dataset.num_classes
+        data.num_classes = self.num_classes
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
         data['paper'].year = torch.from_numpy(np.load(path, mmap_mode='r'))
 
