@@ -244,6 +244,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.sizes = [int(i) for i in args.sizes.split('-')]
     print(args)
+    if not torch.cuda.is_available():
+        args.n_devices = 0
     world_size = args.n_devices
     print('Let\'s use', world_size, 'GPUs!')
     if args.n_devices > 1:

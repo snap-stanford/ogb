@@ -5,9 +5,8 @@
 
 ## Installation requirements
 ```
-ogb>=1.3.0
-torch>=1.7.0
-pytorch-lightning>=1.2.0
+ogb>=1.3.4
+torch>=2.0.0
 torch-geometric==master (pip install git+https://github.com/rusty1s/pytorch_geometric.git)
 ```
 
@@ -74,62 +73,19 @@ For correcting and smoothing graph-agnostic predictions, run:
 python correct_and_smooth.py
 ```
 
-### GraphSAGE (with Neighbor Sampling) [4]
-
-For training the `GraphSAGE` model, run:
-
-```bash
-python gnn.py --device=0 --model=graphsage
-```
-
-For evaluating the `GraphSAGE` model on best validation checkpoint, run:
-
-```bash
-python gnn.py --device=0 --model=graphsage --evaluate
-```
-
-### GAT: Graph Attention Networks (with Neighbor Sampling) [5]
-
-For training the `GAT` model, run:
-
-```bash
-python gnn.py --device=0 --model=gat
-```
-
-For evaluating the `GAT` model on best validation checkpoint, run:
-
-```bash
-python gnn.py --device=0 --model=gat --evaluate
-```
-
 ### Relational-GraphSAGE (with Neighbor Sampling) [6]
 
 A customized GraphSAGE model that takes the different relation types of the heterogeneous graph into account.
 For training the `Relational-GraphSAGE` model, run:
 
 ```bash
-python rgnn.py --device=0 --model=rgraphsage
+python gnn.py
 ```
 
 For evaluating the `Relational-GraphSAGE` model on best validation checkpoint, run:
 
 ```bash
-python rgnn.py --device=0 --model=rgraphsage --evaluate
-```
-
-### Relational-GAT (with Neighbor Sampling) [6]
-
-A customized GAT model that takes the different relation types of the heterogeneous graph into account.
-For training the `Relational-GAT` model, run:
-
-```bash
-python rgnn.py --device=0 --model=rgat
-```
-
-For evaluating the `Relational-GAT` model on best validation checkpoint, run:
-
-```bash
-python rgnn.py --device=0 --model=rgat --evaluate
+python gnn.py --evaluate
 ```
 
 ## Performance
