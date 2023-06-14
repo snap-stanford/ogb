@@ -28,6 +28,7 @@ from torch_geometric.data import Batch
 from torch_geometric.data.lightning import LightningNodeData
 import pathlib
 from torch.profiler import ProfilerActivity, profile
+import time
 
 class MAG240M(LightningNodeData):
     def __init__(self, *args, **kwargs):
@@ -123,7 +124,7 @@ class HeteroGNN(torch.nn.Module):
         return y_hat
 
 
-def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=10, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
+def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
         os.environ['MASTER_PORT'] = '12355'
@@ -163,14 +164,15 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
+            time.time()
             optimizer.zero_grad()
             if n_devices > 0:
                 batch = batch.to(rank, 'x', 'y', 'edge_index')
             loss = model.training_step(batch)
-            if i % log_every_n_steps == 0:
-                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}')
             loss.backward()
             optimizer.step()
+            if i % log_every_n_steps == 0:
+                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, iter time: {time.time() - since:.4f}')
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
@@ -233,7 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--num_steps_per_epoch', type=int, default=100)
-    parser.add_argument('--log_every_n_steps', type=int, default=10)
+    parser.add_argument('--log_every_n_steps', type=int, default=1)
     parser.add_argument('--eval_steps', type=int, default=100)
     parser.add_argument('--model', type=str, default='gat',
                         choices=['gat', 'graphsage'])
