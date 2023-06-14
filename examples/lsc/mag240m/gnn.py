@@ -29,6 +29,8 @@ from torch_geometric.data import Batch
 from torch_geometric.data.lightning import LightningNodeData
 import pathlib
 import time
+from torch.nn.parallel import DistributedDataParallel
+
 
 class MAG240M(LightningNodeData):
     def __init__(self, *args, **kwargs):
