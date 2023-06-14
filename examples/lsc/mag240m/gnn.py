@@ -28,7 +28,6 @@ from typing import Dict, Tuple
 from torch_geometric.data import Batch
 from torch_geometric.data.lightning import LightningNodeData
 import pathlib
-from torch.profiler import ProfilerActivity, profile
 import time
 
 class MAG240M(LightningNodeData):
@@ -214,18 +213,6 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
     if n_devices > 1:
         dist.destroy_process_group()
 
-
-def trace_handler(p):
-    if torch.cuda.is_available():
-        profile_sort = 'self_cuda_time_total'
-    else:
-        profile_sort = 'self_cpu_time_total'
-    output = p.key_averages().table(sort_by=profile_sort)
-    print(output)
-    profile_dir = str(pathlib.Path.cwd()) + '/'
-    timeline_file = profile_dir + 'timeline' + '.json'
-    p.export_chrome_trace(timeline_file)
-
 def get_num_workers():
     num_work = None
     if hasattr(os, "sched_getaffinity"):
@@ -248,9 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval_steps', type=int, default=100)
     parser.add_argument('--num_warmup_iters_for_timing', type=int, default=10)
     parser.add_argument('--sizes', type=str, default='128')
-    parser.add_argument('--in-memory', action='store_true')
     parser.add_argument('--n_devices', type=int, default=1, help='0 devices for CPU, or 1-8 to use GPUs')
-    parser.add_argument('--profile', action='store_true')
     args = parser.parse_args()
     args.sizes = [int(i) for i in args.sizes.split('-')]
     print(args)
