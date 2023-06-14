@@ -252,5 +252,5 @@ if __name__ == '__main__':
         if args.n_devices == 1:
             print('Using a single GPU')
         else:
-            print("Print using CPU")
+            print("Using CPU")
         run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing)
