@@ -125,7 +125,7 @@ class HeteroGNN(torch.nn.Module):
         return y_hat
 
 
-def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
+def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
     world_size = max(n_devices, 1)
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
@@ -175,13 +175,14 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
             loss.backward()
             optimizer.step()
             iter_time = time.time() - since
-            time_sum += iter_time
+            if i > num_warmup_iters_for_timing:
+                time_sum += iter_time
             if rank == 0 and i % log_every_n_steps == 0:
                 print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}')
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
-            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/num_steps_per_epoch:.4f}')
+            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/(num_steps_per_epoch - num_warmup_iters_for_timing):.4f}')
             model.eval()
             acc_sum = 0
             with torch.no_grad():
@@ -240,8 +241,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_steps_per_epoch', type=int, default=100)
     parser.add_argument('--log_every_n_steps', type=int, default=1)
     parser.add_argument('--eval_steps', type=int, default=100)
-    parser.add_argument('--model', type=str, default='gat',
-                        choices=['gat', 'graphsage'])
+    parser.add_argument('--num_warmup_iters_for_timing', type=int, default=10)
     parser.add_argument('--sizes', type=str, default='128')
     parser.add_argument('--in-memory', action='store_true')
     parser.add_argument('--n_devices', type=int, default=1, help='0 devices for CPU, or 1-8 to use GPUs')
@@ -256,6 +256,6 @@ if __name__ == '__main__':
         args.n_devices = torch.cuda.device_count()
     print('Let\'s use', args.n_devices, 'GPUs!')
     if args.n_devices > 1:
-        mp.spawn(run, args=(args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps), nprocs=args.n_devices, join=True)
+        mp.spawn(run, args=(args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing), nprocs=args.n_devices, join=True)
     else:
-        run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
+        run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing)
