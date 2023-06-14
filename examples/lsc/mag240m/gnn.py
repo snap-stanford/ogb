@@ -124,9 +124,7 @@ class HeteroGNN(torch.nn.Module):
         return y_hat
 
 
-def run(rank, world_size, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
-    print((rank, world_size, num_epochs, num_steps_per_epoch, log_every_n_steps, batch_size, sizes, hidden_channels, dropout, eval_steps, num_warmup_iters_for_timing))
-    n_devices = world_size
+def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
     if rank == 0:
         print("Setting up...")
     since_setup = time.time()
@@ -251,7 +249,7 @@ if __name__ == '__main__':
         args.n_devices = torch.cuda.device_count()    
     if args.n_devices > 1:
         print('Let\'s use', args.n_devices, 'GPUs!')
-        mp.spawn(run, args=(args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing), nprocs=args.n_devices, join=True)
+        mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps, args.num_warmup_iters_for_timing), nprocs=args.n_devices, join=True)
     else:
         if args.n_devices == 1:
             print('Using a single GPU')
