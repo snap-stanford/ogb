@@ -126,11 +126,13 @@ class HeteroGNN(torch.nn.Module):
 
 
 def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
+    print("Setting up...")
+    since_setup = time.time()
+    seed_everything(12345)
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
         os.environ['MASTER_PORT'] = '12355'
         dist.init_process_group('nccl', rank=rank, world_size=n_devices)
-    seed_everything(12345)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
     model = HeteroGNN(data.metadata(), data['paper'].x.size(-1),
@@ -139,7 +141,7 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
     if n_devices > 0:
         model.to(rank)
     print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-    print("Setting up...")
+    
     train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
         # Split training indices into `n_devices` many chunks:
@@ -160,13 +162,16 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
     if n_devices > 1:
         model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    print("Training beginning...")
+    
     for epoch in range(1, num_epochs+1):
         model.train()
         time_sum = 0
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
+            if epoch == 0 and i == 0:
+                print(f"Time to finish setup: {time.time() - since_setup:.4f}")
+                print("Training beginning...")
             since = time.time()
             optimizer.zero_grad()
             if n_devices > 0:
@@ -178,11 +183,11 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
             if i > num_warmup_iters_for_timing:
                 time_sum += iter_time
             if rank == 0 and i % log_every_n_steps == 0:
-                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}')
+                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}s')
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
-            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/(num_steps_per_epoch - num_warmup_iters_for_timing):.4f}')
+            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/(num_steps_per_epoch - num_warmup_iters_for_timing):.4f}s')
             model.eval()
             acc_sum = 0
             with torch.no_grad():
