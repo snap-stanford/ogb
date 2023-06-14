@@ -164,7 +164,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
-            time.time()
+            since = time.time()
             optimizer.zero_grad()
             if n_devices > 0:
                 batch = batch.to(rank, 'x', 'y', 'edge_index')
