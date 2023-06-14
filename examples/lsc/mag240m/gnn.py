@@ -124,11 +124,11 @@ class HeteroGNN(torch.nn.Module):
         return y_hat
 
 
-def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
+def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
         os.environ['MASTER_PORT'] = '12355'
-        dist.init_process_group('nccl', rank=rank, world_size=world_size)
+        dist.init_process_group('nccl', rank=rank, world_size=n_devices)
     seed_everything(12345)
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
@@ -251,9 +251,11 @@ if __name__ == '__main__':
     print(args)
     if not torch.cuda.is_available():
         args.n_devices = 0
-    world_size = args.n_devices
-    print('Let\'s use', world_size, 'GPUs!')
+    if args.n_devices > torch.cuda.device_count():
+        print(args.n_devices, "GPUs requested but only", torch.cuda.device_count(), "GPUs available")
+        args.n_devices = torch.cuda.device_count()
+    print('Let\'s use', args.n_devices, 'GPUs!')
     if args.n_devices > 1:
-        mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps), nprocs=args.n_devices, join=True)
+        mp.spawn(run, args=(args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps), nprocs=args.n_devices, join=True)
     else:
-        run(0, 1, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
+        run(0, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
