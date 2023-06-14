@@ -14,14 +14,10 @@ from torch.nn import ModuleList, Sequential, Linear, BatchNorm1d, ReLU, Dropout
 from torch.optim.lr_scheduler import StepLR
 
 from torchmetrics import Accuracy
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning import (LightningDataModule, LightningModule, Trainer,
-                               seed_everything)
-
 from torch_geometric.nn import SAGEConv, GATConv, to_hetero
 from torch_geometric.data import NeighborSampler
-
-from ogb.lsc import MAG240MDataset, MAG240MEvaluator
+from torch_geometric import seed_everything
+from ogb.lsc import MAG240MDataset
 from root import ROOT
 from torch_geometric.loader.neighbor_loader import NeighborLoader
 from torch_geometric.typing import Adj
@@ -32,7 +28,6 @@ from torch_geometric.data import Batch
 from torch_geometric.data.lightning import LightningNodeData
 import pathlib
 from torch.profiler import ProfilerActivity, profile
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class MAG240M(LightningNodeData):
     def __init__(self, *args, **kwargs):
@@ -57,12 +52,11 @@ class MAG240M(LightningNodeData):
         ]
         return node_types, edge_types        
 
-class GNN(torch.nn.Module):
-    def __init__(self, model: str, in_channels: int, out_channels: int,
+class HomoGNN(torch.nn.Module):
+    def __init__(self, in_channels: int, out_channels: int,
                  hidden_channels: int, num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
-        self.model = model.lower()
         self.dropout = dropout
         self.num_layers = num_layers
 
@@ -78,13 +72,13 @@ class GNN(torch.nn.Module):
         x = F.dropout(x, p=self.dropout, training=self.training)
         return self.lin(x)
 
-class HeteroGNN(LightningModule):
-    def __init__(self, model_name: str, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
+class HeteroGNN(torch.nn.Module):
+    def __init__(self, metadata: Tuple[List[NodeType], List[EdgeType]], in_channels: int, out_channels: int,
                  hidden_channels: int, num_nodes_dict: Dict[NodeType, int], num_layers: int, heads: int = 4,
                  dropout: float = 0.5):
         super().__init__()
         self.save_hyperparameters()
-        model = GNN(model_name, in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
+        model = HomoGNN(in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
         self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
         # self.embeds = {}
         # for node_type, num_nodes in num_nodes_dict.items():
@@ -92,7 +86,6 @@ class HeteroGNN(LightningModule):
         #         self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
         self.train_acc = Accuracy(task='multiclass', num_classes=out_channels)
         self.val_acc = Accuracy(task='multiclass', num_classes=out_channels)
-        self.test_acc = Accuracy(task='multiclass', num_classes=out_channels)
 
     def forward(
         self,
@@ -116,34 +109,102 @@ class HeteroGNN(LightningModule):
         y = batch['paper'].y[:batch_size].to(torch.long)
         return y_hat, y
 
-    def training_step(self, batch: Batch, batch_idx: int) -> Tensor:
+    def training_step(self, batch: Batch) -> Tensor:
         y_hat, y = self.common_step(batch)
         train_loss = F.cross_entropy(y_hat, y)
         self.train_acc(y_hat.softmax(dim=-1), y)
-        self.log('train_acc', self.train_acc, prog_bar=True, on_step=False,
-                 on_epoch=True)
         return train_loss
 
-    def validation_step(self, batch: Batch, batch_idx: int):
+    def validation_step(self, batch: Batch):
         y_hat, y = self.common_step(batch)
-        self.val_acc(y_hat.softmax(dim=-1), y)
-        self.log('val_acc', self.val_acc, on_step=False, on_epoch=True,
-                 prog_bar=True, sync_dist=True)
+        return self.val_acc(y_hat.softmax(dim=-1), y)
 
-    def test_step(self, batch: Batch, batch_idx: int):
-        y_hat, y = self.common_step(batch)
-        self.test_acc(y_hat.softmax(dim=-1), y)
-        self.log('test_acc', self.test_acc, on_step=False, on_epoch=True,
-                 prog_bar=True, sync_dist=True)
-
-    def predict_step(self, batch: Batch, batch_idx: int):
+    def predict_step(self, batch: Batch):
         y_hat, y = self.common_step(batch)
         return y_hat
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.001)
-        scheduler = StepLR(optimizer, step_size=25, gamma=0.25)
-        return [optimizer], [scheduler]
+
+def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=10, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
+    if n_devices==0:
+        device = torch.device('cpu')
+    if n_devices == 1:
+        device = torch.device('cuda')
+    if n_devices > 1:
+        os.environ['MASTER_ADDR'] = 'localhost'
+        os.environ['MASTER_PORT'] = '12355'
+        dist.init_process_group('nccl', rank=rank, world_size=world_size)
+    seed_everything(12345)
+    dataset = MAG240MDataset(ROOT)
+    data = dataset.to_pyg_hetero_data()
+    model = HeteroGNN(data.metadata(), data['paper'].x.size(-1),
+                    dataset.num_classes, hidden_channels, num_nodes_dict=data.collect('num_nodes'),
+                    num_layers=len(sizes), dropout=dropout)
+    print(f'#Params {sum([p.numel() for p in model.parameters()])}')
+    data = dataset[0]
+
+    # Split training indices into `world_size` many chunks:
+    train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
+    train_idx = train_idx.split(train_idx.size(0) // world_size)[rank]
+    eval_idx = data['paper'].val_mask.nonzero(as_tuple=False).view(-1)
+    test_idx = data['paper'].test_mask.nonzero(as_tuple=False).view(-1)
+
+    kwargs = dict(batch_size=batch_size, num_workers=get_num_workers(), persistent_workers=True)
+    train_loader = NeighborLoader(data, input_nodes=('paper', train_idx),
+                                  num_neighbors=sizes, shuffle=True,
+                                  drop_last=True, **kwargs)
+
+    if rank == 0:
+        eval_loader = NeighborLoader(data, input_nodes=('paper', eval_idx), num_neighbors=sizes,
+                                         shuffle=True, **kwargs)
+        test_loader = NeighborLoader(data, input_nodes=('paper', test_idx), num_neighbors=sizes,
+                                         shuffle=True, **kwargs)
+    if n_devices > 1:
+        model = DistributedDataParallel(model, device_ids=[rank])
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    for epoch in range(1, num_epochs+1):
+        model.train()
+        for i, batch in enumerate(train_loader):
+            if i >= num_steps_per_epoch:
+                break
+            optimizer.zero_grad()
+            if n_devices > 0:
+                data = data.to(rank, 'x', 'y', 'edge_index') 
+            loss = model.training_step(batch)
+            if i % log_every_n_steps == 0:
+                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}')
+            loss.backward()
+            optimizer.step()
+        if n_devices > 1:
+            dist.barrier()
+
+        if rank == 0:  # We evaluate on a single GPU
+            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
+            model.eval()
+            acc_sum = 0
+            with torch.no_grad():
+                for i, batch in enumerate(eval_loader):
+                    if i >= eval_steps:
+                        break
+                    acc_sum += model.validation_step(batch)
+                print("Validation Accuracy:", acc_sum/eval_steps)
+    if rank == 0:  # We test on a single GPU 
+        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
+        model.eval()
+        acc_sum = 0
+        with torch.no_grad():
+            for i, batch in enumerate(test_loader):
+                if i >= eval_steps:
+                    break
+                acc_sum += model.validation_step(batch)
+            print("Test Accuracy:", acc_sum/eval_steps)
+
+            
+
+        dist.barrier()
+
+    dist.destroy_process_group()
+
 
 def trace_handler(p):
     if torch.cuda.is_available():
@@ -173,82 +234,21 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=1024)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--epochs', type=int, default=1)
+    parser.add_argument('--num_steps_per_epoch', type=int, default=100)
+    parser.add_argument('--log_every_n_steps', type=int, default=10)
+    parser.add_argument('--eval_steps', type=int, default=100)
     parser.add_argument('--model', type=str, default='gat',
                         choices=['gat', 'graphsage'])
     parser.add_argument('--sizes', type=str, default='128')
     parser.add_argument('--in-memory', action='store_true')
-    parser.add_argument('--device', type=str, default='0')
-    parser.add_argument('--evaluate', action='store_true')
+    parser.add_argument('--n_devices', type=int, default=1, help='0 devices for CPU, or 1-8 to use GPUs')
     parser.add_argument('--profile', action='store_true')
     args = parser.parse_args()
     args.sizes = [int(i) for i in args.sizes.split('-')]
     print(args)
-
-    seed_everything(42)
-    dataset = MAG240MDataset(ROOT)
-    data = dataset.to_pyg_hetero_data()
-
-    datamodule = MAG240M(data, ('paper', data['paper'].train_mask),
-                        ('paper', data['paper'].val_mask),
-                        ('paper', data['paper'].test_mask),
-                        ('paper', data['paper'].test_mask),
-                        loader='neighbor', num_neighbors=args.sizes,
-                        batch_size=args.batch_size, num_workers=get_num_workers())
-    print(datamodule)
-
-    if not args.evaluate:
-        model = HeteroGNN(args.model, datamodule.metadata(), datamodule.num_features,
-                    datamodule.num_classes, args.hidden_channels, num_nodes_dict=data.collect('num_nodes'),
-                    num_layers=len(args.sizes), dropout=args.dropout)
-        print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-        checkpoint_callback = ModelCheckpoint(dirpath=os.getcwd(), monitor='val_acc', mode = 'max', save_top_k=1)
-        if torch.cuda.is_available():
-            trainer = Trainer(accelerator='gpu', devices=torch.cuda.device_count(),  #strategy="ddp", #devices=1, 
-                              max_epochs=args.epochs,
-                              callbacks=[checkpoint_callback],
-                              default_root_dir=f'logs/{args.model}',
-                              limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10, precision=32, log_every_n_steps=2)
-        else:
-            trainer = Trainer(accelerator='cpu', max_epochs=args.epochs,
-                              callbacks=[checkpoint_callback],
-                              default_root_dir=f'logs/{args.model}',
-                              limit_train_batches=10, limit_test_batches=10,
-                              limit_val_batches=10, limit_predict_batches=10, precision=32, log_every_n_steps=2)
-        trainer.fit(model, datamodule=datamodule)
-
-    if args.evaluate:
-        dirs = glob.glob(f'logs/{args.model}/lightning_logs/*')
-        version = max([int(x.split(os.sep)[-1].split('_')[-1]) for x in dirs])
-        logdir = f'logs/{args.model}/lightning_logs/version_{version}'
-        print(f'Evaluating saved model in {logdir}...')
-        ckpt = glob.glob(f'{logdir}/checkpoints/*')[0]
-
-        trainer = Trainer(accelerator="cpu", resume_from_checkpoint=ckpt)
-        model = HeteroGNN.load_from_checkpoint(checkpoint_path=ckpt,
-                                         hparams_file=f'{logdir}/hparams.yaml')
-
-        datamodule.batch_size = 16
-        datamodule.sizes = [160] * len(args.sizes)  # (Almost) no sampling...
-
-        trainer.predict(model=model, datamodule=datamodule)
-        if args.profile:
-            with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                            on_trace_ready=trace_handler) as p:
-                trainer.predict(model=model, datamodule=datamodule)
-                p.step()
-
-        # evaluator = MAG240MEvaluator()
-        # loader = datamodule.hidden_test_dataloader()
-
-        # model.eval()
-        # device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
-        # model.to(device)
-        # y_preds = []
-        # for batch in tqdm(loader):
-        #     batch = batch.to(device)
-        #     with torch.no_grad():
-        #         out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
-        #         y_preds.append(out)
-        # res = {'y_pred': torch.cat(y_preds, dim=0)}
-        # evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+    world_size = args.n_devices
+    print('Let\'s use', world_size, 'GPUs!')
+    if args.n_devices > 1:
+        mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps), nprocs=args.n_devices, join=True)
+    else:
+        run(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
