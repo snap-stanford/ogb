@@ -125,6 +125,7 @@ class HeteroGNN(torch.nn.Module):
 
 
 def run(rank, world_size, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=1, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100, num_warmup_iters_for_timing=10):
+    print((rank, world_size, num_epochs, num_steps_per_epoch, log_every_n_steps, batch_size, sizes, hidden_channels, dropout, eval_steps, num_warmup_iters_for_timing))
     n_devices = world_size
     if rank == 0:
         print("Setting up...")
