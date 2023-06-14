@@ -161,6 +161,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
     print("Training beginning...")
     for epoch in range(1, num_epochs+1):
         model.train()
+        time_sum = 0
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
@@ -171,12 +172,14 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
             loss = model.training_step(batch)
             loss.backward()
             optimizer.step()
+            iter_time = time.time() - since
+            time_sum += iter_time
             if i % log_every_n_steps == 0:
-                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, iter time: {time.time() - since:.4f}')
+                print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}')
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
-            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
+            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/num_steps_per_epoch:.4f}')
             model.eval()
             acc_sum = 0
             with torch.no_grad():
