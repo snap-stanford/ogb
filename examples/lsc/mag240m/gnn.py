@@ -165,9 +165,8 @@ def run(
     num_warmup_iters_for_timing=10,
     debug=False,
 ):
-    since_setup = time.time()
     seed_everything(12345)
-    print("Setting up distibuted...")
+    print("Setting up distributed...")
     if n_devices > 1:
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12355"
@@ -233,8 +232,6 @@ def run(
             if i >= num_steps_per_epoch:
                 break
             if rank == 0 and epoch == 0 and i == 0:
-                print("Done Setting Up!")
-                print(f"Setup Time: {time.time() - since_setup:.4f}")
                 print("Training beginning...")
             since = time.time()
             optimizer.zero_grad()
