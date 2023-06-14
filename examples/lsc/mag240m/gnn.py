@@ -79,7 +79,7 @@ class HeteroGNN(torch.nn.Module):
         super().__init__()
         self.save_hyperparameters()
         model = HomoGNN(in_channels, out_channels, hidden_channels, num_layers, heads=heads, dropout=dropout)
-        self.model = to_hetero(model, metadata, aggr='sum', debug=True).to(device)
+        self.model = to_hetero(model, metadata, aggr='sum', debug=True)
         # self.embeds = {}
         # for node_type, num_nodes in num_nodes_dict.items():
         #     if node_type != 'paper':
@@ -125,10 +125,6 @@ class HeteroGNN(torch.nn.Module):
 
 
 def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, log_every_n_steps=10, batch_size=1024, sizes=[128], hidden_channels=1024, dropout=.5, eval_steps=100):
-    if n_devices==0:
-        device = torch.device('cpu')
-    if n_devices == 1:
-        device = torch.device('cuda')
     if n_devices > 1:
         os.environ['MASTER_ADDR'] = 'localhost'
         os.environ['MASTER_PORT'] = '12355'
@@ -139,8 +135,9 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
     model = HeteroGNN(data.metadata(), data['paper'].x.size(-1),
                     dataset.num_classes, hidden_channels, num_nodes_dict=data.collect('num_nodes'),
                     num_layers=len(sizes), dropout=dropout)
+    if n_devices > 0:
+        model.to(rank)
     print(f'#Params {sum([p.numel() for p in model.parameters()])}')
-    data = dataset[0]
 
     # Split training indices into `world_size` many chunks:
     train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
@@ -169,7 +166,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
                 break
             optimizer.zero_grad()
             if n_devices > 0:
-                data = data.to(rank, 'x', 'y', 'edge_index') 
+                batch = batch.to(rank, 'x', 'y', 'edge_index')
             loss = model.training_step(batch)
             if i % log_every_n_steps == 0:
                 print(f'Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}')
@@ -178,7 +175,7 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
         if n_devices > 1:
             dist.barrier()
 
-        if rank == 0:  # We evaluate on a single GPU
+        if rank == 0:
             print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
             model.eval()
             acc_sum = 0
@@ -186,9 +183,11 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
                 for i, batch in enumerate(eval_loader):
                     if i >= eval_steps:
                         break
+                    if n_devices > 0:
+                        batch = batch.to(rank, 'x', 'y', 'edge_index')
                     acc_sum += model.validation_step(batch)
                 print("Validation Accuracy:", acc_sum/eval_steps)
-    if rank == 0:  # We test on a single GPU 
+    if rank == 0:
         print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
         model.eval()
         acc_sum = 0
@@ -196,6 +195,8 @@ def run(rank, world_size, n_devices=0, num_epochs=1, num_steps_per_epoch=100, lo
             for i, batch in enumerate(test_loader):
                 if i >= eval_steps:
                     break
+                if n_devices > 0:
+                    batch = batch.to(rank, 'x', 'y', 'edge_index')
                 acc_sum += model.validation_step(batch)
             print("Test Accuracy:", acc_sum/eval_steps)
 
@@ -251,4 +252,4 @@ if __name__ == '__main__':
     if args.n_devices > 1:
         mp.spawn(run, args=(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps), nprocs=args.n_devices, join=True)
     else:
-        run(args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
+        run(0, 1, args.n_devices, args.epochs, args.num_steps_per_epoch, args.log_every_n_steps, args.batch_size, args.sizes, args.hidden_channels, args.dropout, args.eval_steps)
