@@ -196,7 +196,7 @@ def run(
     test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
 
     kwargs = dict(
-        batch_size=batch_size, num_workers=get_num_workers(), persistent_workers=True
+        batch_size=batch_size, num_workers=get_num_workers(max(n_devices, 1)), persistent_workers=True
     )
     train_loader = NeighborLoader(
         data,
@@ -286,15 +286,15 @@ def run(
         dist.destroy_process_group()
 
 
-def get_num_workers():
+def get_num_workers(world_size):
     num_work = None
     if hasattr(os, "sched_getaffinity"):
         try:
-            num_work = len(os.sched_getaffinity(0)) / 2
+            num_work = len(os.sched_getaffinity(0)) / (2 * world_size)
         except Exception:
             pass
     if num_work is None:
-        num_work = os.cpu_count() / 2
+        num_work = os.cpu_count() / (2 * world_size)
     return int(num_work)
 
 
