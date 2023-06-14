@@ -140,9 +140,9 @@ def run(rank, n_devices=1, num_epochs=1, num_steps_per_epoch=100, log_every_n_st
         model.to(rank)
     print(f'#Params {sum([p.numel() for p in model.parameters()])}')
     print("Setting up...")
-    # Split training indices into `world_size` many chunks:
     train_idx = data['paper'].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
+        # Split training indices into `n_devices` many chunks:
         train_idx = train_idx.split(train_idx.size(0) // n_devices)[rank]
     eval_idx = data['paper'].val_mask.nonzero(as_tuple=False).view(-1)
     test_idx = data['paper'].test_mask.nonzero(as_tuple=False).view(-1)
