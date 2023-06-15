@@ -106,8 +106,7 @@ class HeteroGNN(torch.nn.Module):
         # for node_type, num_nodes in num_nodes_dict.items():
         #     if node_type != 'paper':
         #         self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
-        self.train_acc = Accuracy(task="multiclass", num_classes=out_channels)
-        self.val_acc = Accuracy(task="multiclass", num_classes=out_channels)
+        self.acc = Accuracy(task="multiclass", num_classes=out_channels)
 
     def forward(
         self,
@@ -116,7 +115,7 @@ class HeteroGNN(torch.nn.Module):
     ) -> Dict[NodeType, Tensor]:
         return self.model(x_dict, edge_index_dict)
 
-    def common_step(self, batch: Batch) -> Tuple[Tensor, Tensor]:
+    def common_step(self, batch: Batch, ddp_module=None) -> Tuple[Tensor, Tensor]:
         batch_size = batch["paper"].batch_size
         # for node_type, embed in self.embeds.items():
         #     batch[node_type].x = embed(batch[node_type].n_id)
@@ -131,22 +130,25 @@ class HeteroGNN(torch.nn.Module):
                     device=paper_x.device,
                     dtype=paper_x.dtype,
                 )
-        y_hat = self(batch.x_dict, batch.edge_index_dict)["paper"][:batch_size]
+        if ddp_module is None:
+            y_hat = self(batch.x_dict, batch.edge_index_dict)["paper"][:batch_size]
+        else:
+            y_hat = ddp_module(batch.x_dict, batch.edge_index_dict)["paper"][:batch_size]
         y = batch["paper"].y[:batch_size].to(torch.long)
         return y_hat, y
 
-    def training_step(self, batch: Batch) -> Tensor:
-        y_hat, y = self.common_step(batch)
+    def training_step(self, batch: Batch, ddp_module=None) -> Tensor:
+        y_hat, y = self.common_step(batch, ddp_module)
         train_loss = F.cross_entropy(y_hat, y)
-        self.train_acc(y_hat.softmax(dim=-1), y)
-        return train_loss
+        self.acc(y_hat.softmax(dim=-1), y)
+        return train_loss, train_acc
 
     def validation_step(self, batch: Batch):
         y_hat, y = self.common_step(batch)
         return self.val_acc(y_hat.softmax(dim=-1), y)
 
     def predict_step(self, batch: Batch):
-        y_hat, y = self.common_step(batch)
+        y_hat, y = self.common_step(batch, ddp_module)
         return y_hat
 
 
@@ -226,11 +228,13 @@ def run(
     if n_devices > 0:
         model.to(rank)
     if n_devices > 1:
-        model = DistributedDataParallel(model, device_ids=[rank])
+        ddp  = DistributedDataParallel(model, device_ids=[rank])
+    else:
+        ddp = None
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     for epoch in range(1, num_epochs + 1):
         model.train()
-        time_sum = 0
+        time_sum, sum_acc = 0, 0
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
@@ -240,7 +244,8 @@ def run(
             optimizer.zero_grad()
             if n_devices > 0:
                 batch = batch.to(rank, "x", "y", "edge_index")
-            loss = model.training_step(batch)
+            loss, train_acc = model.training_step(batch, ddp)
+            sum_acc += train_acc
             loss.backward()
             optimizer.step()
             iter_time = time.time() - since
@@ -248,13 +253,13 @@ def run(
                 time_sum += iter_time
             if rank == 0 and i % log_every_n_steps == 0:
                 print(
-                    f"Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Step Time: {iter_time:.4f}s"
+                    f"Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Train Acc: {sum_acc / (i+1) * 100.0:.2f}%, Step Time: {iter_time:.4f}s"
                 )
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
             print(
-                f"Epoch: {epoch:02d}, Loss: {loss:.4f}, Average Step Time: {time_sum/(num_steps_per_epoch - num_warmup_iters_for_timing):.4f}s"
+                f"Epoch: {epoch:02d}, Loss: {loss:.4f}, Train Acc:{sum_acc / num_steps_per_epoch * 100.0:.2f}%, Average Step Time: {time_sum/(num_steps_per_epoch - num_warmup_iters_for_timing):.4f}s"
             )
             model.eval()
             acc_sum = 0
