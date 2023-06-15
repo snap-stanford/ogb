@@ -140,7 +140,7 @@ class HeteroGNN(torch.nn.Module):
     def training_step(self, batch: Batch, ddp_module=None) -> Tensor:
         y_hat, y = self.common_step(batch, ddp_module)
         train_loss = F.cross_entropy(y_hat, y)
-        self.acc(y_hat.softmax(dim=-1), y)
+        train_acc = self.acc(y_hat.softmax(dim=-1), y)
         return train_loss, train_acc
 
     def validation_step(self, batch: Batch):
@@ -229,9 +229,10 @@ def run(
         model.to(rank)
     if n_devices > 1:
         ddp  = DistributedDataParallel(model, device_ids=[rank])
+        optimizer = torch.optim.Adam(ddp.parameters(), lr=0.001)
     else:
         ddp = None
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     for epoch in range(1, num_epochs + 1):
         model.train()
         time_sum, sum_acc = 0, 0
