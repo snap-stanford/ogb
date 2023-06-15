@@ -145,7 +145,7 @@ class HeteroGNN(torch.nn.Module):
 
     def validation_step(self, batch: Batch):
         y_hat, y = self.common_step(batch)
-        return self.val_acc(y_hat.softmax(dim=-1), y)
+        return self.acc(y_hat.softmax(dim=-1), y)
 
     def predict_step(self, batch: Batch):
         y_hat, y = self.common_step(batch, ddp_module)
