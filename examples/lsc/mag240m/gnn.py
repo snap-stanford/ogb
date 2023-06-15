@@ -166,12 +166,14 @@ def run(
     debug=False,
 ):
     seed_everything(12345)
-    print("Setting up distributed...")
+    if rank == 0:
+        print("Setting up distributed...")
     if n_devices > 1:
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12355"
         dist.init_process_group("nccl", rank=rank, world_size=n_devices)
-    print("Setting up GNN...")
+    if rank == 0:
+        print("Setting up GNN...")
     model = HeteroGNN(
         data.metadata(),
         data["paper"].x.size(-1),
@@ -184,7 +186,7 @@ def run(
     )
     if rank == 0:
         print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6:.1f}M")
-    print('Setting up NeighborLoaders...')
+        print('Setting up NeighborLoaders...')
     train_idx = data["paper"].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
         # Split training indices into `n_devices` many chunks:
@@ -219,7 +221,8 @@ def run(
             num_neighbors=sizes,
             **kwargs,
         )
-    print("Final setup...")
+    if rank == 0:
+        print("Final setup...")
     if n_devices > 0:
         model.to(rank)
     if n_devices > 1:
