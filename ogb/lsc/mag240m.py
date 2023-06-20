@@ -181,13 +181,13 @@ class MAG240MEvaluator:
         y_pred = input_dict["y_pred"]
 
         if mode == "test-whole":
-            assert y_pred.shape == (146818,)
+            assert y_pred.shape == (146818,), "y_pred.size() = " + str(y_pred.size())
             filename = osp.join(dir_path, "y_pred_mag240m")
         elif mode == "test-dev":
-            assert y_pred.shape == (88092,)
+            assert y_pred.shape == (88092,), "y_pred.size() = " + str(y_pred.size())
             filename = osp.join(dir_path, "y_pred_mag240m_test-dev")
         elif mode == "test-challenge":
-            assert y_pred.shape == (58726,)
+            assert y_pred.shape == (58726,), "y_pred.size() = " + str(y_pred.size())
             filename = osp.join(dir_path, "y_pred_mag240m_test-challenge")
 
         makedirs(dir_path)
