@@ -406,7 +406,7 @@ if __name__ == "__main__":
         y_preds = []
         print("Evaluating...")
         for batch in tqdm(test_loader):
-            batch = batch.to(rank, "x", "y", "edge_index")
+            batch = batch.to(device, "x", "y", "edge_index")
             with torch.no_grad():
                 y_pred = model.predict_step(batch).argmax(dim=-1).cpu()
                 y_preds.append(y_pred)
