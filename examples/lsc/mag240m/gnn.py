@@ -102,10 +102,10 @@ class HeteroGNN(torch.nn.Module):
             dropout=dropout,
         )
         self.model = to_hetero(model, metadata, aggr="sum", debug=debug)
-        # self.embeds = {}
-        # for node_type, num_nodes in num_nodes_dict.items():
-        #     if node_type != 'paper':
-        #         self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
+        self.embeds = {}
+        for node_type, num_nodes in num_nodes_dict.items():
+            if node_type != 'paper':
+                self.embeds[node_type] = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=in_channels)
         self.acc = Accuracy(task="multiclass", num_classes=out_channels)
 
     def forward(
@@ -117,19 +117,19 @@ class HeteroGNN(torch.nn.Module):
 
     def common_step(self, batch: Batch, ddp_module=None) -> Tuple[Tensor, Tensor]:
         batch_size = batch["paper"].batch_size
-        # for node_type, embed in self.embeds.items():
-        #     batch[node_type].x = embed(batch[node_type].n_id)
-        # w/o this to_hetero model fails
-        for node_type in batch.node_types:
-            if node_type not in batch.x_dict.keys():
-                paper_x = batch["paper"].x
-                # (TODO) replace this w/ embeddings for better learning once its working
-                # (NOTE) embeddings take too much memory
-                batch[node_type].x = torch.zeros(
-                    size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)),
-                    device=paper_x.device,
-                    dtype=paper_x.dtype,
-                )
+        for node_type, embed in self.embeds.items():
+            batch[node_type].x = embed(batch[node_type].n_id)
+        # # w/o this to_hetero model fails
+        # for node_type in batch.node_types:
+        #     if node_type not in batch.x_dict.keys():
+        #         paper_x = batch["paper"].x
+        #         # (TODO) replace this w/ embeddings for better learning once its working
+        #         # (NOTE) embeddings take too much memory
+        #         batch[node_type].x = torch.zeros(
+        #             size=(torch.numel(batch[node_type].n_id), paper_x.size(-1)),
+        #             device=paper_x.device,
+        #             dtype=paper_x.dtype,
+        #         )
         if ddp_module is None:
             y_hat = self(batch.x_dict, batch.edge_index_dict)["paper"][:batch_size]
         else:
