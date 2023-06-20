@@ -392,7 +392,6 @@ if __name__ == "__main__":
             num_workers=get_num_workers(1),
             persistent_workers=True,
             shuffle=True,
-            drop_last=True,
         )
         test_loader = NeighborLoader(
             data,
