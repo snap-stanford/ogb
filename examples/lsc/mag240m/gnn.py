@@ -320,6 +320,7 @@ if __name__ == "__main__":
         "--n_devices", type=int, default=1, help="0 devices for CPU, or 1-8 to use GPUs"
     )
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument('--evaluate', action='store_true')
     args = parser.parse_args()
     args.sizes = [int(i) for i in args.sizes.split("-")]
     print(args)
@@ -340,12 +341,36 @@ if __name__ == "__main__":
         args.n_devices = torch.cuda.device_count()
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
-    data = dataset.to_pyg_hetero_data()
-    if args.n_devices > 1:
-        print("Let's use", args.n_devices, "GPUs!")
-        mp.spawn(
-            run,
-            args=(
+    if not args.evaluate:
+        data = dataset.to_pyg_hetero_data()
+        if args.n_devices > 1:
+            print("Let's use", args.n_devices, "GPUs!")
+            mp.spawn(
+                run,
+                args=(
+                    data,
+                    args.n_devices,
+                    args.epochs,
+                    args.num_steps_per_epoch,
+                    args.log_every_n_steps,
+                    args.batch_size,
+                    args.sizes,
+                    args.hidden_channels,
+                    args.dropout,
+                    args.eval_steps,
+                    args.num_warmup_iters_for_timing,
+                    args.debug,
+                ),
+                nprocs=args.n_devices,
+                join=True,
+            )
+        else:
+            if args.n_devices == 1:
+                print("Using a single GPU")
+            else:
+                print("Using CPU")
+            run(
+                0,
                 data,
                 args.n_devices,
                 args.epochs,
@@ -358,27 +383,25 @@ if __name__ == "__main__":
                 args.eval_steps,
                 args.num_warmup_iters_for_timing,
                 args.debug,
-            ),
-            nprocs=args.n_devices,
-            join=True,
-        )
-    else:
-        if args.n_devices == 1:
-            print("Using a single GPU")
-        else:
-            print("Using CPU")
-        run(
-            0,
-            data,
-            args.n_devices,
-            args.epochs,
-            args.num_steps_per_epoch,
-            args.log_every_n_steps,
-            args.batch_size,
-            args.sizes,
-            args.hidden_channels,
-            args.dropout,
-            args.eval_steps,
-            args.num_warmup_iters_for_timing,
-            args.debug,
-        )
+            )
+    else: # eval
+        model = torch.load(trained_gnn.pt)
+        dataset.batch_size = 16
+        dataset.sizes = [160] * len(args.sizes)
+        evaluator = MAG240MEvaluator()
+        loader = dataset.hidden_test_dataloader()
+        model.eval()
+        device = f'cuda:{args.device}' if (torch.cuda.is_available() and n_devices > 0) else 'cpu'
+        model.to(device)
+        y_preds = []
+        print("Evaluating...")
+        for batch in tqdm(loader):
+            batch = batch.to(device)
+            with torch.no_grad():
+                out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
+                y_preds.append(out)
+        res = {'y_pred': torch.cat(y_preds, dim=0)}
+        evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+
+
+
