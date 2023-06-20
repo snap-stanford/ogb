@@ -385,7 +385,7 @@ if __name__ == "__main__":
                 args.debug,
             )
     else: # eval
-        model = torch.load(trained_gnn.pt)
+        model = torch.load('trained_gnn.pt')
         dataset.batch_size = 16
         dataset.sizes = [160] * len(args.sizes)
         evaluator = MAG240MEvaluator()
