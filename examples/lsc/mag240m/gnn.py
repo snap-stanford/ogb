@@ -25,7 +25,7 @@ from torch_geometric.typing import Adj, EdgeType, NodeType
 from torchmetrics import Accuracy
 from tqdm import tqdm
 
-from ogb.lsc import MAG240MDataset
+from ogb.lsc import MAG240MDataset, MAG240MEvaluator
 
 
 class MAG240M(LightningNodeData):
