@@ -386,7 +386,6 @@ if __name__ == "__main__":
     else: # eval
         model = torch.load('trained_gnn.pt')
         evaluator = MAG240MEvaluator()
-        loader = dataset.hidden_test_dataloader()
         test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
         kwargs = dict(
             batch_size=16,
