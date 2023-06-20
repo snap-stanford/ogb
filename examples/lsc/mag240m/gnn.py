@@ -389,7 +389,7 @@ if __name__ == "__main__":
         test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
         kwargs = dict(
             batch_size=16,
-            num_workers=get_num_workers(max(n_devices, 1)),
+            num_workers=get_num_workers(1),
             persistent_workers=True,
             shuffle=True,
             drop_last=True,
