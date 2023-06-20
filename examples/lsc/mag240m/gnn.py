@@ -147,7 +147,7 @@ class HeteroGNN(torch.nn.Module):
         return self.acc(y_hat.softmax(dim=-1), y)
 
     def predict_step(self, batch: Batch):
-        y_hat, y = self.common_step(batch, ddp_module)
+        y_hat, y = self.common_step(batch)
         return y_hat
 
 
@@ -193,7 +193,6 @@ def run(
         # Split training indices into `n_devices` many chunks:
         train_idx = train_idx.split(train_idx.size(0) // n_devices)[rank]
     eval_idx = data["paper"].val_mask.nonzero(as_tuple=False).view(-1)
-    test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
 
     kwargs = dict(
         batch_size=batch_size,
@@ -218,7 +217,7 @@ def run(
         )
         test_loader = NeighborLoader(
             data,
-            input_nodes=("paper", test_idx),
+            input_nodes=("paper", eval_idx),
             num_neighbors=sizes,
             **kwargs,
         )
@@ -341,8 +340,8 @@ if __name__ == "__main__":
         args.n_devices = torch.cuda.device_count()
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
+    data = dataset.to_pyg_hetero_data()
     if not args.evaluate:
-        data = dataset.to_pyg_hetero_data()
         if args.n_devices > 1:
             print("Let's use", args.n_devices, "GPUs!")
             mp.spawn(
@@ -386,22 +385,35 @@ if __name__ == "__main__":
             )
     else: # eval
         model = torch.load('trained_gnn.pt')
-        dataset.batch_size = 16
-        dataset.sizes = [160] * len(args.sizes)
         evaluator = MAG240MEvaluator()
         loader = dataset.hidden_test_dataloader()
+        test_idx = data["paper"].test_mask.nonzero(as_tuple=False).view(-1)
+        kwargs = dict(
+            batch_size=16,
+            num_workers=get_num_workers(max(n_devices, 1)),
+            persistent_workers=True,
+            shuffle=True,
+            drop_last=True,
+        )
+        test_loader = NeighborLoader(
+            data,
+            input_nodes=("paper", test_idx),
+            num_neighbors=[160] * len(args.sizes),
+            **kwargs,
+        )
         model.eval()
         device = f'cuda:{args.device}' if (torch.cuda.is_available() and n_devices > 0) else 'cpu'
         model.to(device)
         y_preds = []
         print("Evaluating...")
-        for batch in tqdm(loader):
-            batch = batch.to(device)
+        for batch in tqdm(test_loader):
+            batch = batch.to(rank, "x", "y", "edge_index")
             with torch.no_grad():
-                out = model(batch.x, batch.adjs_t).argmax(dim=-1).cpu()
-                y_preds.append(out)
+                y_pred = model.predict_step(batch).argmax(dim=-1).cpu()
+                y_preds.append(y_pred)
         res = {'y_pred': torch.cat(y_preds, dim=0)}
         evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+        print("Done!")
 
 
 
