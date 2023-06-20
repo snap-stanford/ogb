@@ -290,6 +290,7 @@ def run(
             )
     if n_devices > 1:
         dist.destroy_process_group()
+    torch.save(model, 'trained_gnn.pt')
 
 
 def get_num_workers(world_size):
