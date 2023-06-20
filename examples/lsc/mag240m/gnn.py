@@ -167,10 +167,10 @@ def run(
     num_warmup_iters_for_timing=10,
     debug=False,
 ):
-    seed_everything(12345)
-    if rank == 0:
-        print("Setting up distributed...")
+    seed_everything(12345) 
     if n_devices > 1:
+        if rank == 0:
+            print("Setting up distributed...")
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "12355"
         dist.init_process_group("nccl", rank=rank, world_size=n_devices)
