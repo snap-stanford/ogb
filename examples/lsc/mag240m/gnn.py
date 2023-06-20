@@ -411,7 +411,7 @@ if __name__ == "__main__":
                 y_pred = model.predict_step(batch).argmax(dim=-1).cpu()
                 y_preds.append(y_pred)
         res = {'y_pred': torch.cat(y_preds, dim=0)}
-        evaluator.save_test_submission(res, f'results/{args.model}', mode = 'test-dev')
+        evaluator.save_test_submission(res, f'results/', mode = 'test-dev')
         print("Done!")
 
 
