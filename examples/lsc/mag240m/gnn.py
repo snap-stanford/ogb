@@ -401,7 +401,7 @@ if __name__ == "__main__":
             **kwargs,
         )
         model.eval()
-        device = f'cuda:{args.device}' if (torch.cuda.is_available() and n_devices > 0) else 'cpu'
+        device = 'cuda' if (torch.cuda.is_available() and args.n_devices > 0) else 'cpu'
         model.to(device)
         y_preds = []
         print("Evaluating...")
