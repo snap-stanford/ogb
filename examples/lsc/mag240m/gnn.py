@@ -225,15 +225,20 @@ def run(
         print("Final setup...")
     if n_devices > 0:
         model.to(rank)
+    if rank == 0:
+        print("about to make optimizer")
     if n_devices > 1:
         ddp  = DistributedDataParallel(model, device_ids=[rank])
         optimizer = torch.optim.Adam(ddp.parameters(), lr=0.001)
     else:
         ddp = None
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
     for epoch in range(1, num_epochs + 1):
         model.train()
         time_sum, sum_acc = 0, 0
+        if rank == 0:
+            print("right before for loop over train loader...")
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
