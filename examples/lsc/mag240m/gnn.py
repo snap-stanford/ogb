@@ -346,7 +346,7 @@ if __name__ == "__main__":
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
-    data = data.subgraph({n_type:data[n_type].n_id[torch.randperm(data[n_type].num_nodes)[data[:n_type].num_nodes/2]] for n_type in data.node_types})
+    data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[data[:n_type].num_nodes/10] for n_type in data.node_types})
     if not args.evaluate:
         if args.n_devices > 1:
             print("Let's use", args.n_devices, "GPUs!")
