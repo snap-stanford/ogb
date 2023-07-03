@@ -319,6 +319,8 @@ if __name__ == "__main__":
     parser.add_argument("--log_every_n_steps", type=int, default=1)
     parser.add_argument("--eval_steps", type=int, default=100)
     parser.add_argument("--num_warmup_iters_for_timing", type=int, default=10)
+    parser.add_argument("--subgraph", type=float, default=1, 
+        help='decimal from (0,1] representing the portion of nodes to use in subgraph')
     parser.add_argument("--sizes", type=str, default="128")
     parser.add_argument(
         "--n_devices", type=int, default=1, help="0 devices for CPU, or 1-8 to use GPUs"
@@ -346,8 +348,9 @@ if __name__ == "__main__":
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
-    # print("Making a subgraph of the data to save and reduce hardware requirements")
-    # data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[:int(data[n_type].num_nodes/1000)] for n_type in data.node_types})
+    if args.subgraph < 1.0:
+        print("Making a subgraph of the data to save and reduce hardware requirements...")
+        data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[:int(data[n_type].num_nodes*args.subgraph)] for n_type in data.node_types})
     if not args.evaluate:
         if args.n_devices > 1:
             print("Let's use", args.n_devices, "GPUs!")
