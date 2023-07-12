@@ -315,10 +315,10 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=1024)
     parser.add_argument("--dropout", type=float, default=0.5)
     parser.add_argument("--epochs", type=int, default=1)
-    parser.add_argument("--num_steps_per_epoch", type=int, default=100)
+    parser.add_argument("--num_steps_per_epoch", type=int, default=500)
     parser.add_argument("--log_every_n_steps", type=int, default=1)
     parser.add_argument("--eval_steps", type=int, default=100)
-    parser.add_argument("--num_warmup_iters_for_timing", type=int, default=10)
+    parser.add_argument("--num_warmup_iters_for_timing", type=int, default=100)
     parser.add_argument("--subgraph", type=float, default=1, 
         help='decimal from (0,1] representing the portion of nodes to use in subgraph')
     parser.add_argument("--sizes", type=str, default="128")
