@@ -314,6 +314,7 @@ def estimate_hetero_data_size(data):
     for n_type in data.node_types:
         for attr_name, n_attr in data.get_node_store(n_type).items():
             if isinstance(n_attr, torch.Tensor) and attr_name != 'x':
+                # ignore paper features since their read from disk w/ np memmap
                 out_bytes += n_attr.numel() * 64
     for e_type in data.edge_types:
         try:
