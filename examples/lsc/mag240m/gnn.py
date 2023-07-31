@@ -201,12 +201,6 @@ def run(
     )
     if rank == 0:
         print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6:.1f}M")
-        psutil_out = psutil.virtual_memory()
-        avail_bytes = psutil_out.available
-        print("PSUTIL output:", psutil_out)
-        if n_devices * estimate_hetero_data_size(data) * 1.1 >= avail_bytes:
-            print("Not enough RAM, exiting...")
-            quit()
         print('Setting up NeighborLoaders...')
     train_idx = data["paper"].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
@@ -368,6 +362,14 @@ if __name__ == "__main__":
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
+    psutil_out = psutil.virtual_memory()
+    avail_bytes = psutil_out.available
+    print("PSUTIL output:", psutil_out)
+    estim_size = estimate_hetero_data_size(data)
+    if args.n_devices * estim_size * 1.1 >= avail_bytes:
+        print("Not enough RAM, exiting...")
+        print("HeteroData Size Approx =", estim_size)
+        quit()
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
         data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[:int(data[n_type].num_nodes*args.subgraph)] for n_type in data.node_types})
