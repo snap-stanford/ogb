@@ -153,9 +153,14 @@ class HeteroGNN(torch.nn.Module):
 def estimate_hetero_data_size(data):
     out_bytes = 0
     for n_type in data.node_types:
-        out_bytes += data[n_type].x.numel() * 64
+        for n_attr in data.get_node_store(n_type).values():
+            if istype(n_attr, torch.Tensor)
+                out_bytes += n_attr.numel() * 64
     for e_type in data.edge_types:
-        out_bytes += data[e_type].edge_index.numel() * 64
+        try:
+            out_bytes += data[e_type].edge_index.numel() * 64
+        except:
+            continue
     return out_bytes
 
 
