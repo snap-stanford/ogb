@@ -150,20 +150,6 @@ class HeteroGNN(torch.nn.Module):
         y_hat, y = self.common_step(batch)
         return y_hat
 
-def estimate_hetero_data_size(data):
-    out_bytes = 0
-    for n_type in data.node_types:
-        for n_attr in data.get_node_store(n_type).values():
-            if isinstance(n_attr, torch.Tensor):
-                out_bytes += n_attr.numel() * 64
-    for e_type in data.edge_types:
-        try:
-            out_bytes += data[e_type].edge_index.numel() * 64
-        except:
-            continue
-    return out_bytes
-
-
 
 def run(
     rank,
@@ -323,6 +309,20 @@ def get_num_workers(world_size):
     return int(num_work)
 
 
+def estimate_hetero_data_size(data):
+    out_bytes = 0
+    for n_type in data.node_types:
+        for n_attr in data.get_node_store(n_type).values():
+            if isinstance(n_attr, torch.Tensor):
+                out_bytes += n_attr.numel() * 64
+    for e_type in data.edge_types:
+        try:
+            out_bytes += data[e_type].edge_index.numel() * 64
+        except:
+            continue
+    return out_bytes
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--hidden_channels", type=int, default=1024)
@@ -362,14 +362,15 @@ if __name__ == "__main__":
     print("Loading Data...")
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
+    print("Data =", data)
     psutil_out = psutil.virtual_memory()
     avail_bytes = psutil_out.available
     print("PSUTIL output:", psutil_out)
     estim_size = estimate_hetero_data_size(data)
     if args.n_devices * estim_size * 1.1 >= avail_bytes:
         print("Not enough RAM, exiting...")
-        print("HeteroData Size Approx =", estim_size / (1024 ** 3), "GB")
-        print("Approx RAM Avail =", avail_bytes / (1024 ** 3), "GB")
+        print("HeteroData Size Approx =", round(estim_size / (1024 ** 3), 1), "GB")
+        print("Approx RAM Avail =", round(avail_bytes / (1024 ** 3), 1), "GB")
         quit()
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
