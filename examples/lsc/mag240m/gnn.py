@@ -369,8 +369,6 @@ if __name__ == "__main__":
     estim_size = estimate_hetero_data_size(data)
     if args.n_devices * estim_size * 1.1 >= avail_bytes:
         print("Not enough RAM, exiting...")
-        print("HeteroData Size Approx =", round(estim_size / (1024 ** 3), 1), "GB")
-        print("Approx RAM Avail =", round(avail_bytes / (1024 ** 3), 1), "GB")
         quit()
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
