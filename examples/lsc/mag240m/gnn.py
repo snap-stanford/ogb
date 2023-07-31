@@ -26,7 +26,7 @@ from torchmetrics import Accuracy
 from tqdm import tqdm
 
 from ogb.lsc import MAG240MDataset, MAG240MEvaluator
-
+import psutil
 
 class MAG240M(LightningNodeData):
     def __init__(self, *args, **kwargs):
