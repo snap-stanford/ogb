@@ -154,7 +154,7 @@ def estimate_hetero_data_size(data):
     out_bytes = 0
     for n_type in data.node_types:
         for n_attr in data.get_node_store(n_type).values():
-            if istype(n_attr, torch.Tensor)
+            if istype(n_attr, torch.Tensor):
                 out_bytes += n_attr.numel() * 64
     for e_type in data.edge_types:
         try:
