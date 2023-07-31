@@ -204,7 +204,7 @@ def run(
         psutil_out = psutil.virtual_memory()
         avail_bytes = psutil_out.available
         print("PSUTIL output:", psutil_out)
-        if n_devices * estimate_hetero_data_size(data) * 1.1 >= available:
+        if n_devices * estimate_hetero_data_size(data) * 1.1 >= available_bytes:
             print("Not enough RAM, exiting...")
             quit()
         print('Setting up NeighborLoaders...')
