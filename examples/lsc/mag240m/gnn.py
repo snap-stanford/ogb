@@ -150,6 +150,15 @@ class HeteroGNN(torch.nn.Module):
         y_hat, y = self.common_step(batch)
         return y_hat
 
+def estimate_hetero_data_size(data):
+    out_bytes = 0
+    for n_type in data.node_types:
+        out_bytes += data[n_type].x.numel() * 64
+    for e_type in data.edge_types:
+        out_bytes += data[e_type].edge_index.numel() * 64
+    return out_bytes
+
+
 
 def run(
     rank,
@@ -187,6 +196,12 @@ def run(
     )
     if rank == 0:
         print(f"# GNN Params: {sum([p.numel() for p in model.parameters()])/10**6:.1f}M")
+        psutil_out = psutil.virtual_memory()
+        avail_bytes = psutil_out.available
+        print("PSUTIL output:", psutil_out)
+        if n_devices * estimate_hetero_data_size(data) * 1.1 >= available:
+            print("Not enough RAM, exiting...")
+            quit()
         print('Setting up NeighborLoaders...')
     train_idx = data["paper"].train_mask.nonzero(as_tuple=False).view(-1)
     if n_devices > 1:
