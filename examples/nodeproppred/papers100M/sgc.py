@@ -1,10 +1,10 @@
 import argparse
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 import torch
 import torch.nn.functional as F
 from torch_sparse import SparseTensor
-from torch_geometric.utils import to_undirected, dropout_adj
+from torch_geometric.utils import to_undirected, dropout_edge
 
 from ogb.nodeproppred import PygNodePropPredDataset
 
@@ -26,7 +26,7 @@ def main():
 
     print('Making the graph undirected.')
     ### Randomly drop some edges to save computation
-    data.edge_index, _ = dropout_adj(data.edge_index, p = args.dropedge_rate, num_nodes= data.num_nodes)
+    data.edge_index, _ = dropout_edge(data.edge_index, p = args.dropedge_rate)
     data.edge_index = to_undirected(data.edge_index, data.num_nodes)
 
     print(data)

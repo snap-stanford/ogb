@@ -112,7 +112,7 @@ dataset_dict[name]['url'] = 'http://snap.stanford.edu/ogb/data/linkproppred/'+da
 ## For undirected grarph, we only store one directional information. This flag allows us to add inverse edge at pre-processing time
 dataset_dict[name]['add_inverse_edge'] = False 
 dataset_dict[name]['has_node_attr'] = True
-dataset_dict[name]['has_edge_attr'] = False
+dataset_dict[name]['has_edge_attr'] = True
 dataset_dict[name]['split'] = 'spatial'
 dataset_dict[name]['additional node files'] = 'None'
 dataset_dict[name]['additional edge files'] = 'None'

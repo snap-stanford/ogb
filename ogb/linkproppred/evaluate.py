@@ -14,7 +14,7 @@ class Evaluator:
     def __init__(self, name):
         self.name = name
 
-        meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col = 0)
+        meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col=0, keep_default_na=False)
         if not self.name in meta_info:
             print(self.name)
             error_mssg = 'Invalid dataset name {}.\n'.format(self.name)
@@ -245,12 +245,12 @@ class Evaluator:
         if type_info == 'torch':
             # calculate ranks
             y_pred_pos = y_pred_pos.view(-1, 1)
-            # optimistic rank: "how many negatives have at least the positive score?"
+            # optimistic rank: "how many negatives have a larger score than the positive?"
             # ~> the positive is ranked first among those with equal score
-            optimistic_rank = (y_pred_neg >= y_pred_pos).sum(dim=1)
-            # pessimistic rank: "how many negatives have a larger score than the positive?"
+            optimistic_rank = (y_pred_neg > y_pred_pos).sum(dim=1)
+            # pessimistic rank: "how many negatives have at least the positive score?"
             # ~> the positive is ranked last among those with equal score
-            pessimistic_rank = (y_pred_neg > y_pred_pos).sum(dim=1)
+            pessimistic_rank = (y_pred_neg >= y_pred_pos).sum(dim=1)
             ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
             hits1_list = (ranking_list <= 1).to(torch.float)
             hits3_list = (ranking_list <= 3).to(torch.float)

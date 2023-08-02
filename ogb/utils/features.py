@@ -5,7 +5,8 @@ allowable_features = {
         'CHI_UNSPECIFIED',
         'CHI_TETRAHEDRAL_CW',
         'CHI_TETRAHEDRAL_CCW',
-        'CHI_OTHER'
+        'CHI_OTHER',
+        'misc'
     ],
     'possible_degree_list' : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'misc'],
     'possible_formal_charge_list' : [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 'misc'],
@@ -57,7 +58,7 @@ def atom_to_feature_vector(atom):
     """
     atom_feature = [
             safe_index(allowable_features['possible_atomic_num_list'], atom.GetAtomicNum()),
-            allowable_features['possible_chirality_list'].index(str(atom.GetChiralTag())),
+            safe_index(allowable_features['possible_chirality_list'], str(atom.GetChiralTag())),
             safe_index(allowable_features['possible_degree_list'], atom.GetTotalDegree()),
             safe_index(allowable_features['possible_formal_charge_list'], atom.GetFormalCharge()),
             safe_index(allowable_features['possible_numH_list'], atom.GetTotalNumHs()),

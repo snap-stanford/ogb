@@ -14,7 +14,7 @@ class Evaluator:
     def __init__(self, name):
         self.name = name
 
-        meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col = 0)
+        meta_info = pd.read_csv(os.path.join(os.path.dirname(__file__), 'master.csv'), index_col=0, keep_default_na=False)
         if not self.name in meta_info:
             print(self.name)
             error_mssg = 'Invalid dataset name {}.\n'.format(self.name)
@@ -215,7 +215,7 @@ class Evaluator:
         for i in range(y_true.shape[1]):
             # ignore nan values
             is_labeled = y_true[:,i] == y_true[:,i]
-            rmse_list.append(np.sqrt(((y_true[is_labeled] - y_pred[is_labeled])**2).mean()))
+            rmse_list.append(np.sqrt(((y_true[is_labeled,i] - y_pred[is_labeled,i])**2).mean()))
 
         return {'rmse': sum(rmse_list)/len(rmse_list)}
 

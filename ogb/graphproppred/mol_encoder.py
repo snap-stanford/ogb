@@ -1,15 +1,17 @@
 import torch
 from ogb.utils.features import get_atom_feature_dims, get_bond_feature_dims 
 
-full_atom_feature_dims = get_atom_feature_dims()
-full_bond_feature_dims = get_bond_feature_dims()
-
 class AtomEncoder(torch.nn.Module):
-
-    def __init__(self, emb_dim):
+    def __init__(self, emb_dim, optional_full_atom_features_dims=None):
         super(AtomEncoder, self).__init__()
-        
+
+
         self.atom_embedding_list = torch.nn.ModuleList()
+
+        if optional_full_atom_features_dims is not None:
+            full_atom_feature_dims = optional_full_atom_features_dims
+        else:
+            full_atom_feature_dims = get_atom_feature_dims()
 
         for i, dim in enumerate(full_atom_feature_dims):
             emb = torch.nn.Embedding(dim, emb_dim)
@@ -25,10 +27,11 @@ class AtomEncoder(torch.nn.Module):
 
 
 class BondEncoder(torch.nn.Module):
-    
     def __init__(self, emb_dim):
         super(BondEncoder, self).__init__()
-        
+
+        full_bond_feature_dims = get_bond_feature_dims()
+
         self.bond_embedding_list = torch.nn.ModuleList()
 
         for i, dim in enumerate(full_bond_feature_dims):

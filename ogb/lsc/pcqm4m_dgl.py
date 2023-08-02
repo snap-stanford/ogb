@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from dgl.data.utils import load_graphs, save_graphs, Subset
 import dgl
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import torch
 
 class DglPCQM4MDataset(object):

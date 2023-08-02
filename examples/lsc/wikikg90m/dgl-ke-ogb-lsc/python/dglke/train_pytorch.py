@@ -44,7 +44,7 @@ from .dataloader import get_dataset
 import pdb
 from collections import defaultdict
 from ogb.lsc import WikiKG90MDataset, WikiKG90MEvaluator
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import pickle
 from math import ceil
 
