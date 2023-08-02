@@ -396,8 +396,8 @@ if __name__ == "__main__":
                     join=True,
                 )
             except ProcessExitedException as e:
-                print(e)
-                print("Exception may be caused by a lack of RAM")
+                print("torch.multiprocessing.spawn.ProcessExitedException:", e)
+                print("Exceptions/SIGBUS/Errors may be caused by a lack of RAM")
 
         else:
             if args.n_devices == 1:
