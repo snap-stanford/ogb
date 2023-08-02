@@ -368,8 +368,9 @@ if __name__ == "__main__":
     avail_bytes = psutil_out.available
     print("PSUTIL output:", psutil_out)
     estim_size = estimate_hetero_data_size(data)
-    if args.n_devices * estim_size * 1.1 >= avail_bytes:
+    if args.n_devices > 1 and args.n_devices * estim_size * 1.1 >= avail_bytes:
         print("Not enough RAM, exiting...")
+        print("Comment out these lines if you would like to run anyways, likely to trigger a crash")
         quit()
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
