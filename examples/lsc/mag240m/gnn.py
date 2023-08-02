@@ -374,6 +374,7 @@ if __name__ == "__main__":
     if not args.evaluate:
         if args.n_devices > 1:
             print("Let's use", args.n_devices, "GPUs!")
+            from torch.multiprocessing.spawn import ProcessExitedException
             try:
                 mp.spawn(
                     run,
@@ -394,7 +395,7 @@ if __name__ == "__main__":
                     nprocs=args.n_devices,
                     join=True,
                 )
-            except torch.multiprocessing.spawn.ProcessExitedException as e:
+            except ProcessExitedException as e:
                 print(e)
                 print("Exception may be caused by a lack of RAM")
 
