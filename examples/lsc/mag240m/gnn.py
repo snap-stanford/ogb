@@ -366,33 +366,38 @@ if __name__ == "__main__":
     print("Data =", data)
     psutil_out = psutil.virtual_memory()
     print("PSUTIL output:", psutil_out)
-    if args.n_devices > 1 and ((args.n_devices + 1) * 256 * (1024 ** 3))  >= psutil_out.total:
-        print("Warning: Possibly not enough RAM to scale to MultiGPU, may cause crash/errors")
+    # if args.n_devices > 1 and ((args.n_devices + 1) * 256 * (1024 ** 3))  >= psutil_out.total:
+    #     print("Warning: Possibly not enough RAM to scale to MultiGPU, may cause crash/errors")
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
         data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[:int(data[n_type].num_nodes*args.subgraph)] for n_type in data.node_types})
     if not args.evaluate:
         if args.n_devices > 1:
             print("Let's use", args.n_devices, "GPUs!")
-            mp.spawn(
-                run,
-                args=(
-                    data,
-                    args.n_devices,
-                    args.epochs,
-                    args.num_steps_per_epoch,
-                    args.log_every_n_steps,
-                    args.batch_size,
-                    args.sizes,
-                    args.hidden_channels,
-                    args.dropout,
-                    args.eval_steps,
-                    args.num_warmup_iters_for_timing,
-                    args.debug,
-                ),
-                nprocs=args.n_devices,
-                join=True,
-            )
+            try:
+                mp.spawn(
+                    run,
+                    args=(
+                        data,
+                        args.n_devices,
+                        args.epochs,
+                        args.num_steps_per_epoch,
+                        args.log_every_n_steps,
+                        args.batch_size,
+                        args.sizes,
+                        args.hidden_channels,
+                        args.dropout,
+                        args.eval_steps,
+                        args.num_warmup_iters_for_timing,
+                        args.debug,
+                    ),
+                    nprocs=args.n_devices,
+                    join=True,
+                )
+            except torch.multiprocessing.spawn.ProcessExitedException as e:
+                print(e)
+                print("Exception may be caused by a lack of RAM")
+
         else:
             if args.n_devices == 1:
                 print("Using a single GPU")
