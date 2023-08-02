@@ -366,7 +366,7 @@ if __name__ == "__main__":
     print("Data =", data)
     psutil_out = psutil.virtual_memory()
     print("PSUTIL output:", psutil_out)
-    if args.n_devices > 1 and ((args.n_devices) * 256 * 1024 ** 3)  >= psutil_out.total:
+    if args.n_devices > 1 and ((args.n_devices + 1) * 256 * (1024 ** 3))  >= psutil_out.total:
         print("Warning: Possibly not enough RAM to scale to MultiGPU, may cause crash/errors")
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
