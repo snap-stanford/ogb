@@ -366,7 +366,7 @@ if __name__ == "__main__":
     print("Data =", data)
     psutil_out = psutil.virtual_memory()
     print("PSUTIL output:", psutil_out)
-    if args.n_devices > 1 and ((args.n_devices - 1) * psutil_out.percent)  >= 100:
+    if args.n_devices > 1 and ((args.n_devices - 1) * 256 * 1024 ** 3)  >= psutil_out.available:
         print("Not enough RAM, exiting...")
         print("Comment out these lines if you would like to run anyways, likely to trigger a crash")
         quit()
