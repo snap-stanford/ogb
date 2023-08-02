@@ -364,10 +364,7 @@ if __name__ == "__main__":
     dataset = MAG240MDataset(ROOT)
     data = dataset.to_pyg_hetero_data()
     print("Data =", data)
-    psutil_out = psutil.virtual_memory()
-    print("PSUTIL output:", psutil_out)
-    # if args.n_devices > 1 and ((args.n_devices + 1) * 256 * (1024 ** 3))  >= psutil_out.total:
-    #     print("Warning: Possibly not enough RAM to scale to MultiGPU, may cause crash/errors")
+
     if args.subgraph < 1.0:
         print("Making a subgraph of the data to save and reduce hardware requirements...")
         data = data.subgraph({n_type:torch.randperm(data[n_type].num_nodes)[:int(data[n_type].num_nodes*args.subgraph)] for n_type in data.node_types})
