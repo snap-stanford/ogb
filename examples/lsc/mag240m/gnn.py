@@ -366,8 +366,7 @@ if __name__ == "__main__":
     print("Data =", data)
     psutil_out = psutil.virtual_memory()
     print("PSUTIL output:", psutil_out)
-    estim_size = estimate_hetero_data_size(data)
-    if args.n_devices > 1 and ((args.n_devices - 1) * estim_size + psutil_out.used)  >= .8 * psutil_out.available:
+    if args.n_devices > 1 and ((args.n_devices - 1) * get_num_workers(args.n_devices) * psutil_out.used)  >= .8 * psutil_out.available:
         print("Not enough RAM, exiting...")
         print("Comment out these lines if you would like to run anyways, likely to trigger a crash")
         quit()
