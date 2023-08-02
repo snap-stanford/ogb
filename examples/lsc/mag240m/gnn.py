@@ -365,10 +365,9 @@ if __name__ == "__main__":
     data = dataset.to_pyg_hetero_data()
     print("Data =", data)
     psutil_out = psutil.virtual_memory()
-    avail_bytes = psutil_out.available
     print("PSUTIL output:", psutil_out)
     estim_size = estimate_hetero_data_size(data)
-    if args.n_devices > 1 and (args.n_devices - 1) * estim_size >= avail_bytes:
+    if args.n_devices > 1 and (args.n_devices - 1) * psutil_out.used >= psutil_out.available:
         print("Not enough RAM, exiting...")
         print("Comment out these lines if you would like to run anyways, likely to trigger a crash")
         quit()
