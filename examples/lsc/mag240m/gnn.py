@@ -257,13 +257,13 @@ def run(
                 time_sum += iter_time
             if rank == 0 and i % log_every_n_steps == 0:
                 print(
-                    f"Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Train Acc: {sum_acc / (i+1) * 100.0:.2f}%, Step Time: {iter_time:.4f}s"
+                    f"Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, Train Acc: {sum_acc / (i) * 100.0:.2f}%, Step Time: {iter_time:.4f}s"
                 )
         if n_devices > 1:
             dist.barrier()
         if rank == 0:
             print(
-                f"Epoch: {epoch:02d}, Loss: {loss:.4f}, Train Acc:{sum_acc / num_steps_per_epoch * 100.0:.2f}%, Average Step Time: {time_sum/(i - num_warmup_iters_for_timing):.4f}s"
+                f"Epoch: {epoch:02d}, Loss: {loss:.4f}, Train Acc:{sum_acc / i * 100.0:.2f}%, Average Step Time: {time_sum/(i - num_warmup_iters_for_timing):.4f}s"
             )
             model.eval()
             acc_sum = 0
@@ -275,7 +275,7 @@ def run(
                         batch = batch.to(rank, "x", "y", "edge_index")
                     acc_sum += model.validation_step(batch)
                 print(
-                    f"Validation Accuracy: {acc_sum/eval_steps * 100.0:.4f}%",
+                    f"Validation Accuracy: {acc_sum/(i) * 100.0:.4f}%",
                 )
     if n_devices > 1:
         dist.barrier()
@@ -290,7 +290,7 @@ def run(
                     batch = batch.to(rank, "x", "y", "edge_index")
                 acc_sum += model.validation_step(batch)
             print(
-                f"Test Accuracy: {acc_sum/eval_steps * 100.0:.4f}%",
+                f"Test Accuracy: {acc_sum/(i) * 100.0:.4f}%",
             )
     if n_devices > 1:
         dist.destroy_process_group()
