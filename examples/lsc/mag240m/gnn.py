@@ -23,30 +23,6 @@ from torch_geometric.nn import SAGEConv, to_hetero
 from torch_geometric.typing import Adj, EdgeType, NodeType
 
 
-class MAG240M(LightningNodeData):
-    def __init__(self, *args, **kwargs):
-        super(MAG240M, self).__init__(*args, **kwargs)
-
-    @property
-    def num_features(self) -> int:
-        return 768
-
-    @property
-    def num_classes(self) -> int:
-        return 153
-
-    def metadata(self) -> Tuple[List[NodeType], List[EdgeType]]:
-        node_types = ["paper", "author", "institution"]
-        edge_types = [
-            ("author", "affiliated_with", "institution"),
-            ("institution", "rev_affiliated_with", "author"),
-            ("author", "writes", "paper"),
-            ("paper", "rev_writes", "author"),
-            ("paper", "cites", "paper"),
-        ]
-        return node_types, edge_types
-
-
 class HomoGNN(torch.nn.Module):
     def __init__(
         self,
@@ -235,11 +211,11 @@ def run(
         time_sum, sum_acc = 0, 0
         if rank == 0:
             print("right before for loop over train loader...")
+        if rank == 0 and epoch == 0:
+            print("Training beginning...")
         for i, batch in enumerate(train_loader):
             if i >= num_steps_per_epoch:
                 break
-            if rank == 0 and epoch == 0 and i == 0:
-                print("Training beginning...")
             since = time.time()
             optimizer.zero_grad()
             if n_devices > 0:
@@ -249,7 +225,7 @@ def run(
             loss.backward()
             optimizer.step()
             iter_time = time.time() - since
-            if i > num_warmup_iters_for_timing:
+            if i > num_warmup_iters_for_timing - 1:
                 time_sum += iter_time
             if rank == 0 and i % log_every_n_steps == 0:
                 print(f"Epoch: {epoch:02d}, Step: {i:d}, Loss: {loss:.4f}, \
@@ -271,7 +247,7 @@ def run(
                     if n_devices > 0:
                         batch = batch.to(rank, "x", "y", "edge_index")
                     acc_sum += model.validation_step(batch)
-                print(f"Validation Accuracy: {acc_sum/(i) * 100.0:.4f}%", )
+                print(f"Validation Accuracy: {acc_sum/(i + 1) * 100.0:.4f}%")
     if n_devices > 1:
         dist.barrier()
     if rank == 0:
@@ -284,7 +260,7 @@ def run(
                 if n_devices > 0:
                     batch = batch.to(rank, "x", "y", "edge_index")
                 acc_sum += model.validation_step(batch)
-            print(f"Test Accuracy: {acc_sum/(i) * 100.0:.4f}%", )
+            print(f"Test Accuracy: {acc_sum/(i + 1) * 100.0:.4f}%", )
     if n_devices > 1:
         dist.destroy_process_group()
     torch.save(model, 'trained_gnn.pt')
