@@ -307,7 +307,7 @@ if __name__ == "__main__":
         "--subgraph", type=float, default=1,
         help='decimal from (0,1] representing the \
         portion of nodes to use in subgraph')
-    parser.add_argument("--sizes", type=str, default="128")
+    parser.add_argument("--sizes", type=str, default="25-15")
     parser.add_argument("--n_devices", type=int, default=1,
                         help="0 devices for CPU, or 1-8 to use GPUs")
     parser.add_argument("--debug", action="store_true")
