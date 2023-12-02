@@ -53,6 +53,44 @@ class MAG240MDataset(object):
                 print('Stop download.')
                 exit(-1)
 
+    def to_pyg_hetero_data(self):
+        from torch_geometric.data import HeteroData
+
+        data = HeteroData()
+
+        path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
+        data['paper'].x = torch.from_numpy(np.load(path))
+
+        path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
+        data['paper'].y = torch.from_numpy(np.load(path))
+        data.num_classes = self.num_classes
+
+        path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
+        data['paper'].year = torch.from_numpy(np.load(path))
+
+        data['author'].num_nodes = self.__meta__['author']
+        data['institution'].num_nodes = self.__meta__['institution']
+
+        for edge_type in [
+            ('author', 'affiliated_with', 'institution'),
+            ('author', 'writes', 'paper'),
+            ('paper', 'cites', 'paper'),
+        ]:
+            name = '___'.join(edge_type)
+            path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
+            edge_index = torch.from_numpy(np.load(path))
+            data[edge_type].edge_index = edge_index
+            data[edge_type[-1], f'rev_{edge_type[1]}', edge_type[0]].edge_index = edge_index.flip([0])
+
+        for f, v in [('train', 'train'), ('valid', 'val'), ('test-dev', 'test')]:
+            idx = self.get_idx_split(f)
+            idx = torch.from_numpy(idx)
+            mask = torch.zeros(data['paper'].num_nodes, dtype=torch.bool)
+            mask[idx] = True
+            data['paper'][f'{v}_mask'] = mask
+
+        return data
+
     @property
     def num_papers(self) -> int:
         return self.__meta__['paper']
@@ -132,8 +170,8 @@ class MAG240MEvaluator:
         if not isinstance(y_true, torch.Tensor):
             y_true = torch.from_numpy(y_true)
 
-        assert (y_true.numel() == y_pred.numel())
-        assert (y_true.dim() == y_pred.dim() == 1)
+        assert y_true.numel() == y_pred.numel()
+        assert y_true.dim() == y_pred.dim() == 1
 
         return {'acc': int((y_true == y_pred).sum()) / y_true.numel()}
 
@@ -154,7 +192,7 @@ class MAG240MEvaluator:
             filename = osp.join(dir_path, 'y_pred_mag240m_test-challenge')
 
         makedirs(dir_path)
-        
+
         if isinstance(y_pred, torch.Tensor):
             y_pred = y_pred.cpu().numpy()
 
@@ -164,6 +202,7 @@ class MAG240MEvaluator:
 
 if __name__ == '__main__':
     dataset = MAG240MDataset()
+    data = dataset.to_pyg_hetero_data()
     print(dataset)
     print(dataset.num_papers)
     print(dataset.num_authors)
@@ -179,29 +218,32 @@ if __name__ == '__main__':
 
     evaluator = MAG240MEvaluator()
     evaluator.save_test_submission(
-        input_dict = {
-        'y_pred': np.random.randint(100, size = split_dict['test-dev'].shape), 
+        input_dict={
+            'y_pred': np.random.randint(100, size=split_dict['test-dev'].shape),
         },
-        dir_path = 'results',
-        mode = 'test-dev'
+        dir_path='results',
+        mode='test-dev',
     )
 
     evaluator.save_test_submission(
-        input_dict = {
-        'y_pred': np.random.randint(100, size = split_dict['test-challenge'].shape), 
+        input_dict={
+            'y_pred': np.random.randint(100, size=split_dict['test-challenge'].shape),
         },
-        dir_path = 'results',
-        mode = 'test-challenge'
+        dir_path='results',
+        mode='test-challenge',
     )
 
     exit(-1)
 
-    print(dataset.paper_feat.shape)
-    print(dataset.paper_year.shape)
-    print(dataset.paper_year[:100])
-    print(dataset.edge_index('author', 'paper').shape)
-    print(dataset.edge_index('author', 'writes', 'paper').shape)
-    print(dataset.edge_index('author', 'writes', 'paper')[:, :10])
+    print(data['paper'].x.shape)
+    print(data['paper'].year.shape)
+    print(data['paper'].year[:100])
+    print(data[(('author', 'writes', 'paper'))].edge_index.shape)
+    print(data[('author', 'affiliated_with', 'institution')].edge_index.shape)
+    print(data[('paper', 'cites', 'paper')].edge_index.shape)
+    print(data[('author', 'writes', 'paper')].edge_index[:, :10])
+    print(data[('author', 'affiliated_with', 'institution')].edge_index[:, :10])
+    print(data[('paper', 'cites', 'paper')].edge_index[:, :10])
     print('-----------------')
 
     train_idx = dataset.get_idx_split('train')
@@ -209,9 +251,9 @@ if __name__ == '__main__':
     test_idx = dataset.get_idx_split('test-whole')
     print(len(train_idx) + len(val_idx) + len(test_idx))
 
-    print(dataset.paper_label[train_idx][:10])
-    print(dataset.paper_label[val_idx][:10])
-    print(dataset.paper_label[test_idx][:10])
-    print(dataset.paper_year[train_idx][:10])
-    print(dataset.paper_year[val_idx][:10])
-    print(dataset.paper_year[test_idx][:10])
+    print(data['paper'].y[train_idx][:10])
+    print(data['paper'].y[val_idx][:10])
+    print(data['paper'].y[test_idx][:10])
+    print(data['paper'].year[train_idx][:10])
+    print(data['paper'].year[val_idx][:10])
+    print(data['paper'].year[test_idx][:10])
