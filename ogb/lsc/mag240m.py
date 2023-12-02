@@ -31,9 +31,8 @@ class MAG240MDataset(object):
         self.root = root
         self.dir = osp.join(root, 'mag240m_kddcup2021')
 
-        if osp.isdir(self.dir) and (
-            not osp.exists(osp.join(self.dir, f'RELEASE_v{self.version}.txt'))
-        ):
+        if osp.isdir(self.dir) and (not osp.exists(
+                osp.join(self.dir, f'RELEASE_v{self.version}.txt'))):
             print('MAG240M dataset has been updated.')
             if input('Will you update the dataset now? (y/N)\n') == 'y':
                 shutil.rmtree(osp.join(self.dir))
@@ -192,13 +191,13 @@ class MAG240MEvaluator:
         y_pred = input_dict['y_pred']
 
         if mode == 'test-whole':
-            assert y_pred.shape == (146818,), 'y_pred.size() = ' + str(y_pred.size())
+            assert y_pred.shape == (146818, )
             filename = osp.join(dir_path, 'y_pred_mag240m')
         elif mode == 'test-dev':
-            assert y_pred.shape == (88092,), 'y_pred.size() = ' + str(y_pred.size())
+            assert y_pred.shape == (88092, )
             filename = osp.join(dir_path, 'y_pred_mag240m_test-dev')
         elif mode == 'test-challenge':
-            assert y_pred.shape == (58726,), 'y_pred.size() = ' + str(y_pred.size())
+            assert y_pred.shape == (58726, )
             filename = osp.join(dir_path, 'y_pred_mag240m_test-challenge')
 
         makedirs(dir_path)
