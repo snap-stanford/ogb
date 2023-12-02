@@ -57,27 +57,19 @@ class MAG240MDataset(object):
         from torch_geometric.data import HeteroData
 
         data = HeteroData()
+
         path = osp.join(self.dir, 'processed', 'paper', 'node_feat.npy')
-        # Current is not in-memory
-        data['paper'].x = torch.from_numpy(np.load(path, mmap_mode='r'))
+        data['paper'].x = torch.from_numpy(np.load(path))
+
         path = osp.join(self.dir, 'processed', 'paper', 'node_label.npy')
         data['paper'].y = torch.from_numpy(np.load(path))
-        # torch metrics doesn't like -1
-        data['paper'].y[torch.argwhere(data['paper'].y == -1)] = self.num_classes
         data.num_classes = self.num_classes
+
         path = osp.join(self.dir, 'processed', 'paper', 'node_year.npy')
-        data['paper'].year = torch.from_numpy(np.load(path, mmap_mode='r'))
+        data['paper'].year = torch.from_numpy(np.load(path))
 
         data['author'].num_nodes = self.__meta__['author']
-        # there doesnt seem to be any author data in the downloaded dir
-        # ls /dfs/user/weihuahu/ogb/ogb/lsc/dataset/mag240m_kddcup2021/processed/
-        # author___affiliated_with___institution  author___writes___paper  paper  paper___cites___paper
-        # path = osp.join(self.dir, 'processed', 'author', 'author.npy')
-        # data['author'].x = np.memmap(path, mode='r', dtype='float16', shape=(data['author'].num_nodes, self.num_paper_features))
         data['institution'].num_nodes = self.__meta__['institution']
-        # again no features exist
-        # path = osp.join(self.dir, 'processed', 'institution', 'inst.npy')
-        # data['institution'].x = np.memmap(path, mode='r', dtype='float16', shape=(data['institution'].num_nodes, self.num_paper_features))
 
         for edge_type in [
             ('author', 'affiliated_with', 'institution'),
@@ -88,9 +80,7 @@ class MAG240MDataset(object):
             path = osp.join(self.dir, 'processed', name, 'edge_index.npy')
             edge_index = torch.from_numpy(np.load(path))
             data[edge_type].edge_index = edge_index
-            data[
-                edge_type[2], f'rev_{edge_type[1]}', edge_type[0]
-            ].edge_index = edge_index.flip([0])
+            data[edge_type[-1], f'rev_{edge_type[1]}', edge_type[0]].edge_index = edge_index.flip([0])
 
         for f, v in [('train', 'train'), ('valid', 'val'), ('test-dev', 'test')]:
             idx = self.get_idx_split(f)
@@ -98,6 +88,7 @@ class MAG240MDataset(object):
             mask = torch.zeros(data['paper'].num_nodes, dtype=torch.bool)
             mask[idx] = True
             data['paper'][f'{v}_mask'] = mask
+
         return data
 
     @property
