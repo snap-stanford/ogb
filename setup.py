@@ -34,7 +34,8 @@ setup(name='ogb',
         'pandas>=0.24.0',
         'six>=1.12.0',
         'urllib3>=1.24.0',
-        'outdated>=0.2.0'
+        'outdated>=0.2.0',
+        'joblib>=1.3.2'
       ],
       license='MIT',
       packages=find_packages(exclude=['dataset', 'examples', 'docs']),
