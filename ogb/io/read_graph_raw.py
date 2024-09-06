@@ -31,8 +31,8 @@ def read_csv_graph_raw(raw_dir, add_inverse_edge = False, additional_node_files 
     # loading necessary files
     try:
         edge = pd.read_csv(osp.join(raw_dir, 'edge.csv.gz'), compression='gzip', header = None).values.T.astype(np.int64) # (2, num_edge) numpy array
-        num_node_list = pd.read_csv(osp.join(raw_dir, 'num-node-list.csv.gz'), compression='gzip', header = None).astype(np.int64)[0].tolist() # (num_graph, ) python list
-        num_edge_list = pd.read_csv(osp.join(raw_dir, 'num-edge-list.csv.gz'), compression='gzip', header = None).astype(np.int64)[0].tolist() # (num_edge, ) python list
+        num_node_list = pd.read_csv(osp.join(raw_dir, 'num-node-list.csv.gz'), compression='gzip', header = None).astype(np.int64).iloc[:, 0].tolist() # (num_graph, ) python list
+        num_edge_list = pd.read_csv(osp.join(raw_dir, 'num-edge-list.csv.gz'), compression='gzip', header = None).astype(np.int64).iloc[:, 0].tolist() # (num_edge, ) python list
 
     except FileNotFoundError:
         raise RuntimeError('No necessary file')
