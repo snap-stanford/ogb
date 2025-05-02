@@ -138,7 +138,7 @@ class DglGraphPropPredDataset(object):
 
                 ### load preprocessed files
                 self.graphs, _ = load_graphs(pre_processed_file_path)
-                self.labels = torch.load(target_sequence_file_path)
+                self.labels = torch.load(target_sequence_file_path, weights_only=True)
 
             else:
                 if self.binary:
