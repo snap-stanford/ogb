@@ -136,11 +136,11 @@ class DglLinkPropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=True)
 
-        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'train.pt')))
-        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'valid.pt')))
-        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'test.pt')))
+        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'train.pt'), weights_only=True))
+        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'valid.pt'), weights_only=True))
+        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'test.pt'), weights_only=True))
 
         return {'train': train, 'valid': valid, 'test': test}
 
