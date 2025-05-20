@@ -264,8 +264,8 @@ class Evaluator:
 
         else:
             y_pred_pos = y_pred_pos.reshape(-1, 1)
-            optimistic_rank = (y_pred_neg >= y_pred_pos).sum(dim=1)
-            pessimistic_rank = (y_pred_neg > y_pred_pos).sum(dim=1)
+            optimistic_rank = (y_pred_neg >= y_pred_pos).sum(axis=1)
+            pessimistic_rank = (y_pred_neg > y_pred_pos).sum(axis=1)
             ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
             hits1_list = (ranking_list <= 1).astype(np.float32)
             hits3_list = (ranking_list <= 3).astype(np.float32)
@@ -310,28 +310,26 @@ if __name__ == '__main__':
     result = evaluator.eval(input_dict)
     print(result)
 
-    # torch.manual_seed(0)
-    # np.random.seed(0)
-    # evaluator = Evaluator(name = 'ogbl-wikikg2')
-    # print(evaluator.expected_input_format)
-    # print(evaluator.expected_output_format)
-    # # y_true = np.random.randint(2, size = (100,))
-    # y_pred_pos = torch.tensor(np.random.randn(1000,))
-    # y_pred_neg = torch.tensor(np.random.randn(1000,100))
-    # input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
-    # result = evaluator.eval(input_dict)
-    # print(result['hits@1_list'].mean())
-    # print(result['hits@3_list'].mean())
-    # print(result['hits@10_list'].mean())
-    # print(result['mrr_list'].mean())
+    ### mrr and hits case
+    torch.manual_seed(0)
+    np.random.seed(0)
+    evaluator = Evaluator(name = 'ogbl-wikikg2')
+    print(evaluator.expected_input_format)
+    print(evaluator.expected_output_format)
+    y_pred_pos = torch.tensor(np.random.randn(1000,))
+    y_pred_neg = torch.tensor(np.random.randn(1000,100))
+    input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
+    result = evaluator.eval(input_dict)
+    print(result['hits@1_list'].mean())
+    print(result['hits@3_list'].mean())
+    print(result['hits@10_list'].mean())
+    print(result['mrr_list'].mean())
 
-    # y_pred_pos = y_pred_pos.numpy()
-    # y_pred_neg = y_pred_neg.numpy()
-    # input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
-    # result = evaluator.eval(input_dict)
-    # print(result['hits@1_list'].mean())
-    # print(result['hits@3_list'].mean())
-    # print(result['hits@10_list'].mean())
-    # print(result['mrr_list'].mean())
-
-
+    y_pred_pos = y_pred_pos.numpy()
+    y_pred_neg = y_pred_neg.numpy()
+    input_dict = {'y_pred_pos': y_pred_pos, 'y_pred_neg': y_pred_neg}
+    result = evaluator.eval(input_dict)
+    print(result['hits@1_list'].mean())
+    print(result['hits@3_list'].mean())
+    print(result['hits@10_list'].mean())
+    print(result['mrr_list'].mean())
