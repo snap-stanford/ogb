@@ -65,7 +65,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
         super(PygGraphPropPredDataset, self).__init__(self.root, transform, pre_transform)
 
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     def get_idx_split(self, split_type = None):
         if split_type is None:
@@ -75,7 +75,7 @@ class PygGraphPropPredDataset(InMemoryDataset):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
         train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
         valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]
