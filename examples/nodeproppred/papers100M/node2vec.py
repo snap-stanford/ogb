@@ -45,7 +45,7 @@ def main():
     device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
     device = torch.device(device)
 
-    dataset = PygNodePropPredDataset(name='ogbn-papers100M')
+    dataset = PygNodePropPredDataset(name='ogbn-papers100M', root="/data/ogb")
 
     split_idx = dataset.get_idx_split()
 
@@ -64,7 +64,7 @@ def main():
                      sparse=True).to(device)
 
     loader = model.loader(batch_size=args.batch_size, shuffle=True,
-                          num_workers=4)
+                          num_workers=14)
     optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=args.lr)
 
     print('Saving data_dict before training...')
