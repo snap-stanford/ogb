@@ -67,7 +67,7 @@ class NodePropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            loaded_dict = torch.load(pre_processed_file_path)
+            loaded_dict = torch.load(pre_processed_file_path, weights_only=False)
             self.graph, self.labels = loaded_dict['graph'], loaded_dict['labels']
 
         else:
@@ -147,7 +147,7 @@ class NodePropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
             
         if self.is_hetero:
             train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)
