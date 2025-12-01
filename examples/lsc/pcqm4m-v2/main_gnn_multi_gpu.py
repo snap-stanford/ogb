@@ -173,7 +173,7 @@ def run(rank, dataset, args):
 
     checkpoint_path = os.path.join(args.checkpoint_dir, 'checkpoint.pt')
     if os.path.isfile(checkpoint_path):
-        checkpoint = torch.load(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path, weights_only=False)
 
         current_epoch = checkpoint['epoch'] + 1
         model.load_state_dict(checkpoint['model_state_dict'])

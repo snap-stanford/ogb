@@ -62,7 +62,7 @@ class PygLinkPropPredDataset(InMemoryDataset):
         self.binary = self.meta_info['binary'] == 'True'
 
         super(PygLinkPropPredDataset, self).__init__(self.root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     def get_edge_split(self, split_type = None):
         if split_type is None:
@@ -72,11 +72,11 @@ class PygLinkPropPredDataset(InMemoryDataset):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
-        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'train.pt')))
-        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'valid.pt')))
-        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'test.pt')))
+        train = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'train.pt'), weights_only=False))
+        valid = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'valid.pt'), weights_only=False))
+        test = replace_numpy_with_torchtensor(torch.load(osp.join(path, 'test.pt'), weights_only=False))
 
         return {'train': train, 'valid': valid, 'test': test}
 

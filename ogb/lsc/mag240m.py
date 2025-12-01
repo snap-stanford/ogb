@@ -38,8 +38,8 @@ class MAG240MDataset(object):
                 shutil.rmtree(osp.join(self.dir))
 
         self.download()
-        self.__meta__ = torch.load(osp.join(self.dir, 'meta.pt'))
-        self.__split__ = torch.load(osp.join(self.dir, 'split_dict.pt'))
+        self.__meta__ = torch.load(osp.join(self.dir, 'meta.pt'), weights_only=False)
+        self.__split__ = torch.load(osp.join(self.dir, 'split_dict.pt'), weights_only=False)
 
         split_test(self.__split__)
 

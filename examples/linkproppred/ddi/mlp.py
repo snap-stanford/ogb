@@ -158,7 +158,7 @@ def main():
     idx = idx[:split_edge['valid']['edge'].size(0)]
     split_edge['eval_train'] = {'edge': split_edge['train']['edge'][idx]}
 
-    x = torch.load('embedding.pt', map_location='cpu').to(device)
+    x = torch.load('embedding.pt', map_location='cpu', weights_only=False).to(device)
 
     predictor = LinkPredictor(x.size(-1), args.hidden_channels, 1,
                               args.num_layers, args.dropout).to(device)

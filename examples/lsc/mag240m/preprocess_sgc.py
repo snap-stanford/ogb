@@ -25,11 +25,11 @@ if __name__ == '__main__':
     print('Reading adjacency matrix...', end=' ', flush=True)
     path = f'{dataset.dir}/paper_to_paper_symmetric_gcn.pt'
     if osp.exists(path):
-        adj_t = torch.load(path)
+        adj_t = torch.load(path, weights_only=False)
     else:
         path_sym = f'{dataset.dir}/paper_to_paper_symmetric.pt'
         if osp.exists(path_sym):
-            adj_t = torch.load(path_sym)
+            adj_t = torch.load(path_sym, weights_only=False)
         else:
             edge_index = dataset.edge_index('paper', 'cites', 'paper')
             edge_index = torch.from_numpy(edge_index)

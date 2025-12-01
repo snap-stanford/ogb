@@ -82,7 +82,7 @@ class PCQM4MDataset(object):
 
         if osp.exists(pre_processed_file_path):        
             # if pre-processed file already exists
-            loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            loaded_dict = torch.load(pre_processed_file_path, 'rb', weights_only=False)
             self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
         
         else:
@@ -124,7 +124,7 @@ class PCQM4MDataset(object):
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
     def get_idx_split(self):
-        split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'))
+        split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'), weights_only=False)
         return split_dict
 
     def __getitem__(self, idx):

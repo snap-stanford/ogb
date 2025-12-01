@@ -189,7 +189,7 @@ class DglNodePropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
         if self.is_hetero:
             train_idx_dict, valid_idx_dict, test_idx_dict = read_nodesplitidx_split_hetero(path)

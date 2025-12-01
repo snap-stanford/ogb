@@ -94,7 +94,7 @@ class MAG240M(LightningDataModule):
         self.y = torch.from_numpy(dataset.all_paper_label)
 
         path = f'{dataset.dir}/paper_to_paper_symmetric.pt'
-        self.adj_t = torch.load(path)
+        self.adj_t = torch.load(path, weights_only=False)
         print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     def train_dataloader(self):

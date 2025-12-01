@@ -166,7 +166,7 @@ def main():
 
     # use embeddings
     x = data.x.to(torch.float)
-    embedding = torch.load('embedding.pt', map_location='cpu')
+    embedding = torch.load('embedding.pt', map_location='cpu', weights_only=False)
     x = torch.cat([x, embedding], dim=-1)
     x = x.to(device)
 

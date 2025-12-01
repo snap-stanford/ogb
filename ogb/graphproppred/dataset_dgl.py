@@ -79,7 +79,7 @@ class DglGraphPropPredDataset(object):
 
             if self.task_type == 'subtoken prediction':
                 self.graphs, _ = load_graphs(pre_processed_file_path)
-                self.labels = torch.load(target_sequence_file_path)
+                self.labels = torch.load(target_sequence_file_path, weights_only=False)
 
             else:
                 self.graphs, label_dict = load_graphs(pre_processed_file_path)
@@ -173,7 +173,7 @@ class DglGraphPropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
         train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
         valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]

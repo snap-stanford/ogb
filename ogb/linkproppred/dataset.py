@@ -64,7 +64,7 @@ class LinkPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if osp.exists(pre_processed_file_path):
-            self.graph = torch.load(pre_processed_file_path, 'rb')
+            self.graph = torch.load(pre_processed_file_path, 'rb', weights_only=False)
 
         else:
             ### check download
@@ -133,11 +133,11 @@ class LinkPropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
-        train = torch.load(osp.join(path, 'train.pt'))
-        valid = torch.load(osp.join(path, 'valid.pt'))
-        test = torch.load(osp.join(path, 'test.pt'))
+        train = torch.load(osp.join(path, 'train.pt'), weights_only=False)
+        valid = torch.load(osp.join(path, 'valid.pt'), weights_only=False)
+        test = torch.load(osp.join(path, 'test.pt'), weights_only=False)
 
         return {'train': train, 'valid': valid, 'test': test}
 

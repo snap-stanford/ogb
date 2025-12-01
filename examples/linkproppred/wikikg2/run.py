@@ -251,7 +251,7 @@ def main(args):
     if args.init_checkpoint:
         # Restore model from checkpoint directory
         logging.info('Loading checkpoint %s...' % args.init_checkpoint)
-        checkpoint = torch.load(os.path.join(args.init_checkpoint, 'checkpoint'))
+        checkpoint = torch.load(os.path.join(args.init_checkpoint, 'checkpoint'), weights_only=False)
         init_step = checkpoint['step']
         kge_model.load_state_dict(checkpoint['model_state_dict'])
         if args.do_train:

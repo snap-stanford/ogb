@@ -64,7 +64,7 @@ class GraphPropPredDataset(object):
         pre_processed_file_path = osp.join(processed_dir, 'data_processed')
 
         if os.path.exists(pre_processed_file_path):
-            loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            loaded_dict = torch.load(pre_processed_file_path, 'rb', weights_only=False)
             self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
 
         else:
@@ -133,7 +133,7 @@ class GraphPropPredDataset(object):
 
         # short-cut if split_dict.pt exists
         if os.path.isfile(os.path.join(path, 'split_dict.pt')):
-            return torch.load(os.path.join(path, 'split_dict.pt'))
+            return torch.load(os.path.join(path, 'split_dict.pt'), weights_only=False)
 
         train_idx = pd.read_csv(osp.join(path, 'train.csv.gz'), compression='gzip', header = None).values.T[0]
         valid_idx = pd.read_csv(osp.join(path, 'valid.csv.gz'), compression='gzip', header = None).values.T[0]

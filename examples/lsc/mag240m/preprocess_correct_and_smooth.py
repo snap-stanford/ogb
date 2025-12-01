@@ -133,7 +133,7 @@ if __name__ == '__main__':
                   f'Train: {train_acc:.4f}, Valid: {valid_acc:.4f}, '
                   f'Best: {best_valid_acc:.4f}')
 
-    model.load_state_dict(torch.load('results/cs/model.pt'))
+    model.load_state_dict(torch.load('results/cs/model.pt', weights_only=False))
     model.eval()
 
     pbar = tqdm(total=dataset.num_papers)

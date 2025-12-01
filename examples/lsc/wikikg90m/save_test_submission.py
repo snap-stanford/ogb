@@ -30,8 +30,8 @@ if __name__ == '__main__':
         valid_result_dict = defaultdict(lambda: defaultdict(list))
         test_result_dict = defaultdict(lambda: defaultdict(list))
         for proc in range(num_proc):
-            valid_result_dict_proc = torch.load(os.path.join(path, "valid_{}_{}.pkl".format(proc, step)), map_location=device)
-            test_result_dict_proc = torch.load(os.path.join(path, "test_{}_{}.pkl".format(proc, step)), map_location=device)
+            valid_result_dict_proc = torch.load(os.path.join(path, "valid_{}_{}.pkl".format(proc, step)), map_location=device, weights_only=False)
+            test_result_dict_proc = torch.load(os.path.join(path, "test_{}_{}.pkl".format(proc, step)), map_location=device, weights_only=False)
             for result_dict_proc, result_dict in zip([valid_result_dict_proc, test_result_dict_proc], [valid_result_dict, test_result_dict]):
                 for key in result_dict_proc['h,r->t']:
                     result_dict['h,r->t'][key].append(result_dict_proc['h,r->t'][key].numpy())

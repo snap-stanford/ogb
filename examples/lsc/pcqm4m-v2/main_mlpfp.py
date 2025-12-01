@@ -155,7 +155,7 @@ def main_mlp():
     dataset = PCQM4Mv2Dataset(root='dataset/', only_smiles=True)
     fp_processed_file = preprocess_fp(dataset, args.radius)
 
-    data_dict = torch.load(fp_processed_file)
+    data_dict = torch.load(fp_processed_file, weights_only=False)
     X, Y = data_dict['X'], data_dict['Y']
         
     split_idx = dataset.get_idx_split()

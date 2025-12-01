@@ -96,7 +96,7 @@ def main():
                 dim_size=data.num_nodes, reduce='mean').to('cpu')
 
     if args.use_node_embedding:
-        embedding = torch.load('embedding.pt', map_location='cpu')
+        embedding = torch.load('embedding.pt', map_location='cpu', weights_only=False)
         x = torch.cat([x, embedding], dim=-1)
 
     x = x.to(device)

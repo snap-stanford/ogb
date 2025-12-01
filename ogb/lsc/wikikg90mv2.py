@@ -35,7 +35,7 @@ class WikiKG90Mv2Dataset(object):
                 shutil.rmtree(osp.join(self.folder))
 
         self.download()
-        self.__meta__ = torch.load(osp.join(self.folder, 'meta.pt'))
+        self.__meta__ = torch.load(osp.join(self.folder, 'meta.pt'), weights_only=False)
 
         # training triplet
         path = osp.join(self.processed_dir, 'train_hrt.npy')

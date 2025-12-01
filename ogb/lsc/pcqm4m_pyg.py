@@ -43,7 +43,7 @@ class PygPCQM4MDataset(InMemoryDataset):
 
         super(PygPCQM4MDataset, self).__init__(self.folder, transform, pre_transform)
 
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
 
     @property
     def raw_file_names(self):
@@ -102,7 +102,7 @@ class PygPCQM4MDataset(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0])
 
     def get_idx_split(self):
-        split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt')))
+        split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt'), weights_only=False))
         return split_dict
 
 if __name__ == '__main__':

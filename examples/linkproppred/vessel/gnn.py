@@ -234,7 +234,7 @@ def main():
 
     data.x = data.x.to(torch.float)
     if args.use_node_embedding:
-        data.x = torch.cat([data.x, torch.load('embedding.pt')], dim=-1)
+        data.x = torch.cat([data.x, torch.load('embedding.pt', weights_only=False)], dim=-1)
     data = data.to(device)
 
     split_edge = dataset.get_edge_split()

@@ -93,7 +93,7 @@ def main():
 
     x = data.x_dict['paper']
     if args.use_node_embedding:
-        embedding = torch.load('embedding.pt', map_location='cpu')
+        embedding = torch.load('embedding.pt', map_location='cpu', weights_only=False)
         x = torch.cat([x, embedding], dim=-1)
     x = x.to(device)
 
