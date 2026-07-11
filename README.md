@@ -116,3 +116,7 @@ If you use OGB or [OGB-LSC](https://ogb.stanford.edu/docs/lsc/) datasets in your
   year={2021}
 }
 ```
+
+---
+
+*[Mukller](https://github.com/Mukller)*
