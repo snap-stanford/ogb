@@ -1,7 +1,8 @@
 import os
 import os.path as osp
 import shutil
-from ogb.utils import smiles2graph
+from ogb.utils.pcqm4mv2 import smiles2graph_pcqm4mv2 as smiles2graph
+from ogb.lsc.pcqm4mv2 import _load_dataset_file
 from ogb.utils.torch_util import replace_numpy_with_torchtensor
 from ogb.utils.url import decide_download, download_url, extract_zip
 import pandas as pd
@@ -19,6 +20,8 @@ class PygPCQM4Mv2Dataset(InMemoryDataset):
                 - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
                 - smiles2graph (callable): A callable function that converts a SMILES string into a graph object
                     * The default smiles2graph requires rdkit to be installed
+                    * It preserves the historical graphs of the 39 benchmark
+                      records affected by RDKit 2024.09 valence changes.
         '''
 
         self.original_root = root
@@ -40,7 +43,7 @@ class PygPCQM4Mv2Dataset(InMemoryDataset):
 
         super(PygPCQM4Mv2Dataset, self).__init__(self.folder, transform, pre_transform)
 
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = _load_dataset_file(self.processed_paths[0])
 
     @property
     def raw_file_names(self):
@@ -100,7 +103,7 @@ class PygPCQM4Mv2Dataset(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0])
 
     def get_idx_split(self):
-        split_dict = replace_numpy_with_torchtensor(torch.load(osp.join(self.root, 'split_dict.pt')))
+        split_dict = replace_numpy_with_torchtensor(_load_dataset_file(osp.join(self.root, 'split_dict.pt')))
         return split_dict
 
 if __name__ == '__main__':

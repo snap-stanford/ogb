@@ -21,6 +21,10 @@ def smiles2graph(smiles_string, removeHs=True, reorder_atoms=False):
     if reorder_atoms:
         mol, _ = ReorderCanonicalRankAtoms(mol)
 
+    return _mol2graph(mol)
+
+
+def _mol2graph(mol):
     # atoms
     atom_features_list = []
     for atom in mol.GetAtoms():

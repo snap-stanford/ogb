@@ -1,0 +1,398 @@
+{
+  "generator": "Unmodified ogb.utils.smiles2graph from OGB 61e9784ca76edeaa6e259ba0f836099608ff0586",
+  "rdkit_version": "2024.03.6",
+  "source": "https://github.com/snap-stanford/ogb/issues/510",
+  "archive_md5": "65b742bafca5670be4497499db7d361b",
+  "records": [
+    {
+      "index": 51128,
+      "smiles": "O[Si]123O[Si]3(O1)(O2)O",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "fad54394fada51936e5153abb0feedd32131017d73c8cd5aa0aab0c70ec99648",
+        "removeHs=True,reorder_atoms=True": "baec2e310043a9c4d4a853f83e852c90713093282d690205411c446c7bf1cdea",
+        "removeHs=False,reorder_atoms=False": "422491a20ba7a02a4fd9b3321e49905b40db621530ca4570f33b94e1b82de537",
+        "removeHs=False,reorder_atoms=True": "67b06562d41de7e57615566a987d236c0350c229c06038149979637f7b7bdd88"
+      }
+    },
+    {
+      "index": 142541,
+      "smiles": "C1[SiH2]2[SiH2]1C2",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "5f134bed4103a460f149aca10d0bf6207c310d059dc0583f450b509870c0be9a",
+        "removeHs=True,reorder_atoms=True": "a359b10d56d89edcdf8f5af96dc8d713c829b8c4a58cced8d1de8cd3d70dab7a",
+        "removeHs=False,reorder_atoms=False": "d4a887395dddac0b471a611b9beb51f771254b263afbcd15ae1c5e9e7ff2553d",
+        "removeHs=False,reorder_atoms=True": "696e7c160b6e8ec4f5c175324ab7f45dd2bca5a493f34ad4f5e59ec77b0cab45"
+      }
+    },
+    {
+      "index": 155174,
+      "smiles": "Cl[SiH]12C[SiH2]2C1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "76a390b7c5dec87c2955de3b104dcb8c41206dffe102127f0c29c715c5a6198d",
+        "removeHs=True,reorder_atoms=True": "423d10b7eabd03ca8e9662174e01c5be8ed12e713776e8f198c177a6cee9762c",
+        "removeHs=False,reorder_atoms=False": "05256c73b671e8eb35859780ec95a086e0d316f44bdd1028ba8ed2ea6f848577",
+        "removeHs=False,reorder_atoms=True": "a55f24b060f1b62f6c495145b9795a129aa18a914f9186040eb2983ea5ac61b5"
+      }
+    },
+    {
+      "index": 155175,
+      "smiles": "Cl[SiH]12C[SiH]2(C1)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "4ee0f4401230c4b86b1f48d3ad030d8758e5d3894e4784b69ad0ba2ef811fbe5",
+        "removeHs=True,reorder_atoms=True": "5f4d06fc787a45bb32bbe3bc27fc75023c41f486907920ba62d022fe404f232b",
+        "removeHs=False,reorder_atoms=False": "17ff54f60cbb443e0405787a27fc4d3acc3bfa11799cb790dbb684a06ca123d3",
+        "removeHs=False,reorder_atoms=True": "c75c620edb753af7686ff0152185c6151aedcda18daa6d90a5c071849aab8c8f"
+      }
+    },
+    {
+      "index": 155176,
+      "smiles": "Cl[Si]12(Cl)C[SiH]2(C1)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "adebf1f72f358af321d36bb784785d58a3fd2f1708d862e259adaf193af77558",
+        "removeHs=True,reorder_atoms=True": "e192221da967df7c0526a67fdff61897463a35bc660e113f7ab65f22ac3a4bf7",
+        "removeHs=False,reorder_atoms=False": "67ed642c8346fd6104bc0223cf965f5b0660910063be8caa31f873723aeb8796",
+        "removeHs=False,reorder_atoms=True": "d4d79ba36688903f867083b9736abc2f7ad9a1e997f35dcfc614cc69ee460c89"
+      }
+    },
+    {
+      "index": 155180,
+      "smiles": "c1ccc(cc1)[SiH]12C[SiH]2(C1)c1ccccc1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "52b7b8129004742b443833a6d2f2d7a7c3870f37d01f0582ace91d4f9d308fce",
+        "removeHs=True,reorder_atoms=True": "653eec337d133c833267d9f8d2a0d9e35be28989995e3f5342b6a06105da4503",
+        "removeHs=False,reorder_atoms=False": "51f4bfb199c38cf0f169c802d262223a1fbbe1b5187f618fd157c29f0b18d43d",
+        "removeHs=False,reorder_atoms=True": "fa01618776a8026b5f6340c800710aa38bb7425e9019a2e061f3a0b444d3108c"
+      }
+    },
+    {
+      "index": 155181,
+      "smiles": "Br[SiH]12C[SiH2]2C1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "8477be04327a73c1673cc0f3643df02a7d5e3f9562a49655b82e582e30953e65",
+        "removeHs=True,reorder_atoms=True": "6d6bca1fc10e2cec3843097b1c6c7042c3ebfc4c9ef7b7a9710e1041940a28cd",
+        "removeHs=False,reorder_atoms=False": "2371c1f8ea7726ba55a431346baa5abaeb0af60d7c2fc06a4ca1efbf16be0b1e",
+        "removeHs=False,reorder_atoms=True": "6900f0ef39b942c3795d20f483f744dca96068db39540ec1aba426df5db52465"
+      }
+    },
+    {
+      "index": 193600,
+      "smiles": "C[Si]1234C[Si]564C42[Si]23(C1)[Si]54(C2)(C6)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "c882512cf7f3de7da94b7ba41a4d865dd7026490b1efe1d4fee8c256f09c68d6",
+        "removeHs=True,reorder_atoms=True": "a0273dcfff2875ee0e7c512f395690925b9285317e02b0d05eed4daf8ffb515e",
+        "removeHs=False,reorder_atoms=False": "09650c5da627ab8e102d86adf472c9b105ae3561687f55124ba2f2f714a19d59",
+        "removeHs=False,reorder_atoms=True": "29b0be463aaf2f27d2fee66b6ef12ed113feeb46681388abe4e4e2ff0c1d673b"
+      }
+    },
+    {
+      "index": 411357,
+      "smiles": "CO[Si]12(C)O[Si]2(O1)(C)OC",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "fd97d7c92ba9b860e1b91362471ebf4d5f1c312068ffcc4c575ab32e66fcf5e5",
+        "removeHs=True,reorder_atoms=True": "7a5a5795fa9a176c6af5154a5159b1a22e9d69873f1efbadbdec4007dbab57d6",
+        "removeHs=False,reorder_atoms=False": "36093392534aedfb4089b24c5f18e308ae6593c88f6a2f2899a90a002b3ac2d4",
+        "removeHs=False,reorder_atoms=True": "82afe491344ebe2cfd1a65a406360448f9f64e8ade3262a0408d217fc0d56c81"
+      }
+    },
+    {
+      "index": 505556,
+      "smiles": "CC1(C)[Si]2[Si]1(C2)(C)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "03e7a8bdd833fc0cf16c1a45c7ab5fa801b5852144b153ce2db93e6545c9f51d",
+        "removeHs=True,reorder_atoms=True": "1255c0f43df60966a784c4002b2e903aeeadf304b2cf3f2aae50ce467f16bd83",
+        "removeHs=False,reorder_atoms=False": "ecdbf6900cc79a2f25c71c7a72a982b674634b2b1867cab41279170266e82345",
+        "removeHs=False,reorder_atoms=True": "e1b78938e65cd0a7563a78a1a622e839a03b30747aba5617b60a84c70fbf178d"
+      }
+    },
+    {
+      "index": 1756391,
+      "smiles": "CCO[Si]12(C)C[Si]2(C1)(C)OCC",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "de9de4d54f3960cd44852a7ca89d1a155e9e1e1d8f90de12b9ac4a66822ef789",
+        "removeHs=True,reorder_atoms=True": "fc0bbd0e94928126315b99a112d1c1ed7b538489e68b87c3310368e98384f328",
+        "removeHs=False,reorder_atoms=False": "5c0ebb14959351fd3b02e5ba43b4f399678327e39ebb8a8e59961fe3f2980bfe",
+        "removeHs=False,reorder_atoms=True": "0b12ca249d850a98364e40e9644671049cb7ebc91ec847fbb6c1d2c6e7f9c7c6"
+      }
+    },
+    {
+      "index": 1756392,
+      "smiles": "CC1[Si]2([Si]1(C2)(Cl)Cl)(Cl)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "9d25f81f2c80ee9766fc1984d0a86fa25bded2282b5f23dd801cb77ad62f216d",
+        "removeHs=True,reorder_atoms=True": "bb4f8158a5fd63359a2458e96fbf1ded359bfd78b437f0d28d891fe8a005ffbe",
+        "removeHs=False,reorder_atoms=False": "389028687b14089d773bf5621c9d5cfe1904e221251ac09ed43aa99705829ea0",
+        "removeHs=False,reorder_atoms=True": "2f9643610ba0694d90a32128f982e4cd06542140c13271a5f1d5ca264bc050fd"
+      }
+    },
+    {
+      "index": 2064546,
+      "smiles": "c1ccc(cc1)[Si]12(C[Si]2C1)c1ccccc1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "6f095f3fc3519415d8c607300b99c08da9c6121144989bf8cb20a62bdcf112dd",
+        "removeHs=True,reorder_atoms=True": "39f9956016e459ec35f934077721cb72cf1edeb8ace88a894c90d9bfe507341c",
+        "removeHs=False,reorder_atoms=False": "6fc84faa4f97c9d31f1d3398024140d3546a1d61c77a5b2be73a1b350a8849f0",
+        "removeHs=False,reorder_atoms=True": "a204fc33cd2828f11cbc4c4e54ccd0f0abc5ecaea42cdf9b874d11ff85eceeab"
+      }
+    },
+    {
+      "index": 2100882,
+      "smiles": "CO[Si]1(OC)(OC)N(C)[C](N1C)N(C)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "010d8fb37b7ebb320d903cd06b408ccdbee481364e996f9e94f4995b5e4340c5",
+        "removeHs=True,reorder_atoms=True": "c256f3e17cfb02d5f9af8a79259fbf02786a6a3ae87f96ce114f22dd087c47c9",
+        "removeHs=False,reorder_atoms=False": "b6a1b5b82231a70a5728b76f3d2d6a42e221c9117a23ad7368fb5dd4edcf9c67",
+        "removeHs=False,reorder_atoms=True": "b37d3c80e2adc145eee154f72b657af2abd64686c66a2465caf50f03b72135ae"
+      }
+    },
+    {
+      "index": 2119947,
+      "smiles": "C[Si]123O[Si]3(O1)(O2)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "a67d0771d0cb39f2f2ad9157f0c87cf15b34030daf56fdf39481486a78111d20",
+        "removeHs=True,reorder_atoms=True": "62b70080934db39175ad505ff83bafe9f25428e3c5df9fa67b84238b823d49bf",
+        "removeHs=False,reorder_atoms=False": "c322ef019019c6972f47fb56c8a0f3de4d5bed405d3873fbc2397e84e5f40e58",
+        "removeHs=False,reorder_atoms=True": "d3ec2aa572c5bb7c0011c302c7653dbc538e2f99cc5ff93e76ebf6b8697e968e"
+      }
+    },
+    {
+      "index": 2539039,
+      "smiles": "CN1[C](O[P]1(F)(F)(F)F)c1ccccc1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "27f6d007e2ffd37802ba627ebb3dc014cd0d8745dde27cd761a23ecf4454f98d",
+        "removeHs=True,reorder_atoms=True": "03d41f9acf6d3e3e54acae302420172d6460db6104bc38f04fcd8ba81becbb7e",
+        "removeHs=False,reorder_atoms=False": "4895b6edd95506fde44806b826672a9ef621a549f69b4a76493e21caf349faae",
+        "removeHs=False,reorder_atoms=True": "50084e210884fa799800a77a520ce7059909fdee31a50835cf95e6cdb5a797af"
+      }
+    },
+    {
+      "index": 2620153,
+      "smiles": "[O]N1O[Si]2(O1)([O])ON(O2)[O]",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "3cbf18bfc8125fa5f4d6ce4b1a2122100415799535f3815496bff209341a2888",
+        "removeHs=True,reorder_atoms=True": "275094637ffc4b4f45a22a3d0ffe5529069cbc77bb12a988e0b4e6093af673c9",
+        "removeHs=False,reorder_atoms=False": "3cbf18bfc8125fa5f4d6ce4b1a2122100415799535f3815496bff209341a2888",
+        "removeHs=False,reorder_atoms=True": "275094637ffc4b4f45a22a3d0ffe5529069cbc77bb12a988e0b4e6093af673c9"
+      }
+    },
+    {
+      "index": 2661113,
+      "smiles": "F[Si](F)(F)(F)(F)F",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "759ad69b75abb53564c454237a495a44e6ea60c4bbd237ea0f41ce81c750a953",
+        "removeHs=True,reorder_atoms=True": "81bff2cc24db2aa4df61a9120f692ebd6a5dd4bd4407db5cd3e603c10fd7d35c",
+        "removeHs=False,reorder_atoms=False": "759ad69b75abb53564c454237a495a44e6ea60c4bbd237ea0f41ce81c750a953",
+        "removeHs=False,reorder_atoms=True": "81bff2cc24db2aa4df61a9120f692ebd6a5dd4bd4407db5cd3e603c10fd7d35c"
+      }
+    },
+    {
+      "index": 2690488,
+      "smiles": "Cl[C]1C=CC=C2N1C[Si](O2)(C)(C)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "a72e646c21b9ec8c1b6caa7faa8ba259b0baa1a1a12de8f92ea7eeec17f749ac",
+        "removeHs=True,reorder_atoms=True": "ab5b653d6f299b8604e0b68268252133382aba8f3829b0fee0eebd50d1860dba",
+        "removeHs=False,reorder_atoms=False": "8715b0b343602461df1e6b25c1d22a9652edd4b3d353364754f93ca78329ae48",
+        "removeHs=False,reorder_atoms=True": "79a2a682fda28023a7d46dd57af15f61cc085f348911ac084cbd037cf30e1578"
+      }
+    },
+    {
+      "index": 2690489,
+      "smiles": "C[C]1C=CC=C2N1C[Si](O2)(C)(C)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "6d0ba5cb77c5904f6407e94f4b74cbb07ca54b2e204ef5e9b51e9f7f6142db7e",
+        "removeHs=True,reorder_atoms=True": "7b6633c83d1332db08ccce49e4baf8179c3d7bd67bef0da7738a2c8a9643a1d0",
+        "removeHs=False,reorder_atoms=False": "2c258ecfea0d8afe60aae060355a8726ed93d8dcbc5ea283494ce9cc38c2e095",
+        "removeHs=False,reorder_atoms=True": "ff57a2645952a800883f2383f75a5475bd569148112f955e83fccebf2a897fe8"
+      }
+    },
+    {
+      "index": 2885109,
+      "smiles": "CO[Si]12(C)C[Si]2(C1)(OC)OC",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "d8984f2905721e85728b611fa9dac351460cfd243355e2f7a41894a2a817e601",
+        "removeHs=True,reorder_atoms=True": "14b574211c89e19f41c80707e1951c83a2d379496c8f5cc3a5e06ee8cf39f9b4",
+        "removeHs=False,reorder_atoms=False": "f70ba830abb8a446824101f9e9e13cbf255c480339df67aaca8ecbd13d554d09",
+        "removeHs=False,reorder_atoms=True": "22f7bb1f8b10afe49137a10a39ca5e60104b78b67671dbd3f608bc8c5b5b2398"
+      }
+    },
+    {
+      "index": 2885110,
+      "smiles": "CO[Si]12(OC)C[Si]2(C1)(OC)OC",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "bf5df736dba326fde2041cf98126ae560a3001b350e5bac06021e59e094322b5",
+        "removeHs=True,reorder_atoms=True": "c41a9364ffc4b5822c84883a9c364cc1bb558ffa25e7aaeaff9e33fae2fe6151",
+        "removeHs=False,reorder_atoms=False": "438ed93adfcaa4b0171a300e1c49b7e94fb87d57ddeb5c03d61cf500dadefd50",
+        "removeHs=False,reorder_atoms=True": "114b8a6450a216c411b9063b7fa44864009b97f2c7d87f8edd408128c9735c71"
+      }
+    },
+    {
+      "index": 2980839,
+      "smiles": "F[P](F)(F)(F)(F)F",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "0625d8956b91e54142580f62af194ec935183dc894b794946f3777b33e97738a",
+        "removeHs=True,reorder_atoms=True": "56c89c3a5fbad4624754c4169cb2ff2f23f441fdc889f1707dd1a72eb52ff4a5",
+        "removeHs=False,reorder_atoms=False": "0625d8956b91e54142580f62af194ec935183dc894b794946f3777b33e97738a",
+        "removeHs=False,reorder_atoms=True": "56c89c3a5fbad4624754c4169cb2ff2f23f441fdc889f1707dd1a72eb52ff4a5"
+      }
+    },
+    {
+      "index": 2992920,
+      "smiles": "F[Si]12(F)C[Si]2(C1)(F)F",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "f303610889534b1e53e75443a3c9356a14249d4c67bd24c721d3062c07436db9",
+        "removeHs=True,reorder_atoms=True": "a5609b62d92bb6baa3cc63eff76a1f11104492102120c2bb1491664c7238ae4c",
+        "removeHs=False,reorder_atoms=False": "f2746ed027073ab569d541a8194bea3988ccd04a7854f706e4b81139e289c640",
+        "removeHs=False,reorder_atoms=True": "848ecf9db5ddab9e24aeba0fc4e4a063b22162a3aa3ae83371d99eb50113a666"
+      }
+    },
+    {
+      "index": 3003839,
+      "smiles": "C[Si]1(C)(Cl)OC2=CC=C[CH]N2C1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "fbf2bdccef8191354c372d17b54de8b60dc9a826fc54a2ee85c54f75bda9d5fa",
+        "removeHs=True,reorder_atoms=True": "58d862508e80b1a3aebd8c480de1b8ad056f5b33bcc7748d33631084798aa696",
+        "removeHs=False,reorder_atoms=False": "bf4d0ce16e6f4afeb71026eeac2878776c61c82458db99ae58acb83a02ddc93d",
+        "removeHs=False,reorder_atoms=True": "ac0a725db88a0df036a91223f4dd93de1a192c2423c2fa253474fb8a9fd5238b"
+      }
+    },
+    {
+      "index": 3006497,
+      "smiles": "C[Si]12(C[Si]2(C1)(C)C)c1ccccc1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "7fa83a7cd390de98d6dd06fc4e63c8f44ec6c8023bbd6dd97d93a5235a88ab85",
+        "removeHs=True,reorder_atoms=True": "1b50d9813ddf9b42c12ac45c9ce1ab372492185deed1c8435ba2b7d9ad8fa117",
+        "removeHs=False,reorder_atoms=False": "c0799aab96af21c071fb7590033acd9cfd310a7ca305409f1988f1cd321e43a8",
+        "removeHs=False,reorder_atoms=True": "93888b00a9ad9abcc84a3e92f6cba6eb16a5c85b49bfaf61e02009bcb891b3d2"
+      }
+    },
+    {
+      "index": 3096168,
+      "smiles": "C[Si]12(C)C[Si]2C1",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "e8ffe942aac13eb995efc4d3b4b3d91cdb2cd3d4c9679401902ceaadb2b04d32",
+        "removeHs=True,reorder_atoms=True": "475f67049bac0ae336af26f0eac55e8c0760f98154fa144265733a5cedc57021",
+        "removeHs=False,reorder_atoms=False": "f251a46fd52754623e938d42566a1367626e78ce5de19a0f91a530c9fb911688",
+        "removeHs=False,reorder_atoms=True": "81591e8373553b0e8d0e496dc8cfcc1e94a3d8c630966af42b89f09d83446e9b"
+      }
+    },
+    {
+      "index": 3132431,
+      "smiles": "C[Si]12(C)C[Si]2(C1)(Cl)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "479d7d83bd932d73cb4a6b8f227778b702a921b1995215e52afe8e3da43d31b2",
+        "removeHs=True,reorder_atoms=True": "7682a1a04999578c665d16201ebcb5d455e1949ff478862af95ecbc8976e5742",
+        "removeHs=False,reorder_atoms=False": "fc326b60371ea2683c73b94d54b600a520b1764bc0554e8b4eef986686910d63",
+        "removeHs=False,reorder_atoms=True": "f9d63b4e7f95ccb2653bc85b02d6c8fa226d78c351e9aaba574c427f7afeb7a2"
+      }
+    },
+    {
+      "index": 3132432,
+      "smiles": "C[Si]12(Cl)C[Si]2(C1)(C)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "d33b3d4444f710460565ba40f08577214f1707d8f88eaf6488d6fc23eb8c8345",
+        "removeHs=True,reorder_atoms=True": "45c3ab89ebddef9a7a60f7bbdbd640f1c84e1c51c6666f356a4cc9b6b4f71d3d",
+        "removeHs=False,reorder_atoms=False": "c9f767a2e41ee6bfab2d73449cedf14ed1e2cda617366cbc1e868034b0643bc6",
+        "removeHs=False,reorder_atoms=True": "e278c88654eb0bd73be28be6d7946bfece8d19b82c1227fc400ac80bec172d50"
+      }
+    },
+    {
+      "index": 3143920,
+      "smiles": "Fc1ccc(cc1)[C]1OC[Si](O1)(F)(F)F",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "cc364f2ed9aeaa867bc59972236a4e75a813a4283211e1bcb9dffe9fb9c74167",
+        "removeHs=True,reorder_atoms=True": "9a9c73a2d8f42ca11e796b6e22fb5d2e2f06ee27010db06307807b40e35e653e",
+        "removeHs=False,reorder_atoms=False": "3cf8825bc53c1342863a0fab75f5ee52a0b0c44776418a809e9d769a6feea40f",
+        "removeHs=False,reorder_atoms=True": "746f3d8a0bb1213c9ccc7e0c6018a7dde81d7b527638af616590e7e9546bf07b"
+      }
+    },
+    {
+      "index": 3143921,
+      "smiles": "Cc1ccc(cc1)[C]1OC[Si](O1)(F)(F)F",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "cb0470c26d69955c8a79621d71aad874515fcf33eed7de2ae38cce2382cd8fe9",
+        "removeHs=True,reorder_atoms=True": "cd117c09ed78d87eaf358f7076c90caa9031e025aec2d9fe8bedf81f4c45dd5e",
+        "removeHs=False,reorder_atoms=False": "42d017f7eb40b5bd06eccff16c336279823f2c719265abbd342895af851a20cc",
+        "removeHs=False,reorder_atoms=True": "d28811ed3a5ca429e0cd87b96b072886a8a94f621488bcabd310c53f1c8732a2"
+      }
+    },
+    {
+      "index": 3208535,
+      "smiles": "C=C[Si]12(C)C[Si]2(C1)(C)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "09a484134160fdf7fec98eae719a5b53adc5f539ba3c79b17d6a14ae99b0d922",
+        "removeHs=True,reorder_atoms=True": "d66334291643e7506d20bb7f7c593063a6d6c0ae677bbcd1609fc13b90f8ac5e",
+        "removeHs=False,reorder_atoms=False": "d7240c55632413e0b5422044336e32d410b208c0d49387cfff556fe89cc37ed2",
+        "removeHs=False,reorder_atoms=True": "60608f625b4757fe72b4cc5605cf7613ed522d3d140204d4b945674acba8f340"
+      }
+    },
+    {
+      "index": 3318575,
+      "smiles": "ClC1=CC=C2N([CH]1)C[Si](O2)(C)(C)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "db36b36bd3a335aba1b484ba88150f4d0e09995ad3bd762d9dc03fe2845cae3f",
+        "removeHs=True,reorder_atoms=True": "0a2dbe892cc1d03a7420277bf2f30e6994adf4911e3e4b3ffa5ee99b15ca4a4f",
+        "removeHs=False,reorder_atoms=False": "7ce243263ba2fe6778fa4d3029151b3d926f5fc645a08ad75c31c91bbe5c41ee",
+        "removeHs=False,reorder_atoms=True": "7e93c01e84073e8d35aa25594f367677fc462de0ff2f36add10bf950f2d51913"
+      }
+    },
+    {
+      "index": 3407347,
+      "smiles": "C[Si]12(Cl)C[Si]2(C1)(C)C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "6c9b2aa6f83a58ea02798aeced4f1908ea2436b248c3360c7ded71f3ae7fb55e",
+        "removeHs=True,reorder_atoms=True": "61b2904bc4a29c72c8ea4ccd781696af15d8bf4fe2840acc813091b753c12464",
+        "removeHs=False,reorder_atoms=False": "5745afb01747d1c7aec39d029f2bf8bff2a0ebb9e066716230b90e939b71ef44",
+        "removeHs=False,reorder_atoms=True": "db4cd6828db4982c43bacf4522a083e549076a3c4a82ec0fb1e5259a44124ebb"
+      }
+    },
+    {
+      "index": 3432361,
+      "smiles": "O[Si]1(O)O[Si]23([Si](O1)(O2)(O3)O)O",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "dc8d695077ff69d7f8c1515fa086c6b8432924b0caa55e52239a5fab37aeedd2",
+        "removeHs=True,reorder_atoms=True": "1cfd3c771fb5c0bd548537135d1a0f81dfee62811b4ab28196d84e7b43283ee3",
+        "removeHs=False,reorder_atoms=False": "2c18d57c3966cd3b960bfa223ede06549c39a681edb695c5dd745fd2a5d47855",
+        "removeHs=False,reorder_atoms=True": "ded668937691793f586c411968668ac1d4373a12f112a21d51487a6996eff5af"
+      }
+    },
+    {
+      "index": 3562751,
+      "smiles": "Cl[Si]12(Cl)C[Si]2(C1)(Cl)Cl",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "6a477ef2eda7b863f73e2992eb4fd05305718b334a2f7491ea2fb0a631a6e5f5",
+        "removeHs=True,reorder_atoms=True": "5846ad3ca70dc588588199e14be8d8d5a2a639df9ae84484b2ae1c7097f010e8",
+        "removeHs=False,reorder_atoms=False": "6be3ace2fa8d0f93f9e1d48512742eb882f81ecd9067d21d533666b4b93d857d",
+        "removeHs=False,reorder_atoms=True": "50aa9cd5e9f6901e823131e25ab0c4b5e56899e47dd69b1e7993834b0a329e03"
+      }
+    },
+    {
+      "index": 3648958,
+      "smiles": "C=C[Si]12(C)C[Si]2(C1)(C)C=C",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "4c428882d98c8df0e4722aaaa238a0a72053d20efa38580bbf3c0f3a2b90a884",
+        "removeHs=True,reorder_atoms=True": "33ea40e5ef98a4477b126adbc20393a6640ff5ce5cc540e0cde4309aa047c25e",
+        "removeHs=False,reorder_atoms=False": "271c76e4154d1ec12d98fdc27a8bc3e3a4b295de37795b5a250903aafbd0776c",
+        "removeHs=False,reorder_atoms=True": "91602b8a1ad4e7539882fbf5d615d6653f76872f087a382c236a189f7dbdb45c"
+      }
+    },
+    {
+      "index": 3694349,
+      "smiles": "CO[Si]12(OC)O[Si]2(O1)(OC)OC",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "c1dec74b2b0afd21b813a3c277139241b4f054180683edeb8be4db27d7e88a14",
+        "removeHs=True,reorder_atoms=True": "8cfe64838172260d3fc310996ff58fabacf007e84610ec6a369f65528a464918",
+        "removeHs=False,reorder_atoms=False": "c8d4dadcad5eddf507081b2228eca5c1fdf80959ae99bf4b876e00b5747a6ad6",
+        "removeHs=False,reorder_atoms=True": "8c81ece1b84868676792efa8e68f19434dff6a65e9f9925b59619e290a62c857"
+      }
+    },
+    {
+      "index": 3714998,
+      "smiles": "[O]P123OP45([Si]3(O1)(O2)(O4)O5)[O]",
+      "sha256": {
+        "removeHs=True,reorder_atoms=False": "fc42de25aa796d7cacdcb124672542ae5ba5876e3dded3d32d70a29886687a42",
+        "removeHs=True,reorder_atoms=True": "14b131eb716a9f40ea0fec076dd1a12d62414f70172a75a5ea8b59d04dcb5089",
+        "removeHs=False,reorder_atoms=False": "fc42de25aa796d7cacdcb124672542ae5ba5876e3dded3d32d70a29886687a42",
+        "removeHs=False,reorder_atoms=True": "14b131eb716a9f40ea0fec076dd1a12d62414f70172a75a5ea8b59d04dcb5089"
+      }
+    }
+  ]
+}

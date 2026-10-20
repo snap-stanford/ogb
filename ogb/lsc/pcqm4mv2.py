@@ -3,14 +3,27 @@ from typing import Optional, Union, Dict
 import os
 import os.path as osp
 import shutil
+import inspect
 
-from ogb.utils import smiles2graph
+from ogb.utils.pcqm4mv2 import smiles2graph_pcqm4mv2 as smiles2graph
 from ogb.utils.url import decide_download, download_url, extract_zip
 
 import pandas as pd
 import numpy as np
 from tqdm.auto import tqdm
 import torch
+
+
+def _load_dataset_file(path):
+    """Load trusted PCQM4Mv2 release data or a locally generated cache."""
+    # The release splits contain NumPy arrays; processed caches contain NumPy
+    # arrays or PyG Data objects. These are not weights-only checkpoints.
+    # Older supported PyTorch versions do not expose weights_only.
+    kwargs = {}
+    if 'weights_only' in inspect.signature(torch.load).parameters:
+        kwargs['weights_only'] = False
+    return torch.load(path, **kwargs)
+
 
 class PCQM4Mv2Dataset(object):
     def __init__(self, root = 'dataset', smiles2graph = smiles2graph, only_smiles=False):
@@ -19,6 +32,8 @@ class PCQM4Mv2Dataset(object):
             - root (str): the dataset folder will be located at root/pcqm4m_kddcup2021
             - smiles2graph (callable): A callable function that converts a SMILES string into a graph object
                 * The default smiles2graph requires rdkit to be installed
+                * It preserves the historical graphs of the 39 benchmark
+                  records affected by RDKit 2024.09 valence changes.
             - only_smiles (bool): If this is true, we directly return the SMILES string in our __get_item__, without converting it into a graph.
         '''
 
@@ -79,7 +94,7 @@ class PCQM4Mv2Dataset(object):
 
         if osp.exists(pre_processed_file_path):        
             # if pre-processed file already exists
-            loaded_dict = torch.load(pre_processed_file_path, 'rb')
+            loaded_dict = _load_dataset_file(pre_processed_file_path)
             self.graphs, self.labels = loaded_dict['graphs'], loaded_dict['labels']
         
         else:
@@ -122,7 +137,7 @@ class PCQM4Mv2Dataset(object):
             torch.save({'graphs': self.graphs, 'labels': self.labels}, pre_processed_file_path, pickle_protocol=4)
 
     def get_idx_split(self):
-        split_dict = torch.load(osp.join(self.folder, 'split_dict.pt'))
+        split_dict = _load_dataset_file(osp.join(self.folder, 'split_dict.pt'))
         return split_dict
 
     def __getitem__(self, idx):
